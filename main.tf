@@ -132,7 +132,7 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   instance_class       = "db.t2.micro"
   identifier = "jacobs-rds-server"
   port                 = 3306
-  name                 = "jacob_db"
+  name                 = "jacob_db"   # this is the name of the default database that will be created.
   username             = var.jacobs_rds_user
   password             = var.jacobs_rds_pw
   # parameter_group_name = "default.mysql8.0.25" # try this
