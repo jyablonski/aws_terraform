@@ -117,3 +117,120 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   }
 
 }
+
+#### gateways, route tables, subnets for lambda functionality
+resource "aws_subnet" "jacobs_public_subnet" {
+  vpc_id     = aws_default_vpc.jacobs_vpc_tf.id
+  cidr_block = aws_default_vpc.jacobs_vpc_tf.cidr_block # idk what to put here or how to make it automatically select a valid cidr block
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+resource "aws_subnet" "jacobs_private_subnet" {
+  vpc_id     = aws_default_vpc.jacobs_vpc_tf.id
+  cidr_block = aws_default_vpc.jacobs_vpc_tf.cidr_block # idk what to put here or how to make it automatically select a valid cidr block
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+resource "aws_internet_gateway" "jacobs_gw" {
+  vpc_id = aws_default_vpc.jacobs_vpc_tf.id
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+resource "aws_eip" "jacobs_eip" {
+  vpc = true
+  network_interface = aws_network_interface.jacobs_network_interface.id
+  depends_on                = [aws_internet_gateway.jacobs_gw]
+}
+
+resource "aws_nat_gateway" "jacobs_nat_gw" {
+  allocation_id = aws_eip.jacobs_eip.id
+  subnet_id     = aws_subnet.jacobs_public_subnet.id
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+
+  depends_on = [aws_internet_gateway.jacobs_gw]
+}
+
+resource "aws_route_table" "jacobs_private_route_table" {
+  vpc_id = aws_default_vpc.jacobs_vpc_tf.id
+  nat_gateway_id = aws_nat_gateway.jacobs_nat_gw.id
+
+  route = [
+    {
+      cidr_block = "0.0.0.0/0"
+      gateway_id = aws_nat_gateway.jacobs_nat_gw.id
+    }
+  ]
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+resource "aws_route_table" "jacobs_public_route_table" {
+  vpc_id = aws_default_vpc.jacobs_vpc_tf.id
+  gateway_id = aws_internet_gateway.jacobs_gw.id
+
+  route = [
+    {
+      cidr_block = "0.0.0.0/0"
+      gateway_id = aws_internet_gateway.jacobs_gw.id
+    }
+  ]
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+resource "aws_route_table_association" "jacobs_private_route" {
+  subnet_id      = aws_subnet.jacobs_private_subnet.id
+  route_table_id = aws_route_table.jacobs_private_route_table.id
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+resource "aws_route_table_association" "jacobs_public_route" {
+  subnet_id      = aws_subnet.jacobs_public_subnet.id
+  route_table_id = aws_route_table.jacobs_public_route_table.id
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+resource "aws_network_interface" "jacobs_network_interface" {
+  subnet_id       = aws_subnet.jacobs_public_subnet.id
+  private_ips     = ["10.0.0.50"] # idk what to put here or how to make it automatic 
+
+  attachment {
+    instance     = aws_nat_gateway.jacobs_nat_gw.id
+    device_index = 1
+  }
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
