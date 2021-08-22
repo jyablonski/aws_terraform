@@ -262,6 +262,29 @@ resource "aws_ecr_repository" "jacobs_repo" {
   }
 }
 
+resource "aws_ecr_lifecycle_policy" "jacobs_repo_policy" {
+  repository = aws_ecr_repository.jacobs_repo.name
+
+  policy = <<EOF
+{
+    "rules": [
+        {
+            "rulePriority": 1,
+            "description": "Remove old images",
+            "selection": {
+                "tagStatus": "untagged",
+                "countType": "imageCountMoreThan",
+                "countNumber": 1
+            },
+            "action": {
+                "type": "expire"
+            }
+        }
+    ]
+}
+EOF
+}
+
 ## STOP at this step and upload docker image to this repo.  format below
 # docker tag jacobs-python-docker-2:latest 324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:latest
 # docker push 324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:latest
@@ -286,7 +309,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
   container_definitions = <<TASK_DEFINITION
 [
     {
-        "image": "324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:latest",
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:latest",
         "name": "jacobs_container",
         "environment": [
           {"name": "IP", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
