@@ -321,6 +321,7 @@ resource "aws_cloudwatch_event_rule" "every_15_mins" {
   schedule_expression = "cron(0/15 * * * ? *)"
 }
 
+# uncomment the block below when nba season starts
 # resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
 #   target_id = "jacobs_target_id"
 #   arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
