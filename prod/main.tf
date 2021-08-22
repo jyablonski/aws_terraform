@@ -321,21 +321,45 @@ resource "aws_cloudwatch_event_rule" "every_15_mins" {
   schedule_expression = "cron(0/15 * * * ? *)"
 }
 
-resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
-  target_id = "jacobs_target_id"
-  arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
-  rule = aws_cloudwatch_event_rule.every_15_mins.name
-  role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
+# resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
+#   target_id = "jacobs_target_id"
+#   arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
+#   rule = aws_cloudwatch_event_rule.every_15_mins.name
+#   role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
 
-  ecs_target {
-    launch_type = "FARGATE"
-    network_configuration {
-      subnets = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
-      security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
-      assign_public_ip = true
-    }
-    platform_version = "LATEST"
-    task_count = 1
-    task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
-  }
+#   ecs_target {
+#     launch_type = "FARGATE"
+#     network_configuration {
+#       subnets = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
+#       security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
+#       assign_public_ip = true
+#     }
+#     platform_version = "LATEST"
+#     task_count = 1
+#     task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
+#   }
+# }
+
+resource "aws_iam_group" "jacobs_github_group" {
+  name = "github-ecr-cicd"
+}
+
+resource "aws_iam_user" "jacobs_github_user" {
+  name = "jacobs-github-ci"
+
+}
+
+resource "aws_iam_group_membership" "jacobs_github_group_attach" {
+  name = "tf-testing-group-membership"
+
+  users = [
+    aws_iam_user.jacobs_github_user.name
+  ]
+
+  group = aws_iam_group.jacobs_github_group.name
+}
+
+resource "aws_iam_group_policy_attachment" "jacobs_github_group_policy_attach" {
+  group      = aws_iam_group.jacobs_github_group.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 }
