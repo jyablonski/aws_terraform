@@ -32,3 +32,23 @@ variable "jacobs_email_address" {
     type = string
     sensitive = true
 }
+
+variable "jacobs_reddit_user" {
+    type = string
+    sensitive = true
+}
+
+variable "jacobs_reddit_pw" {
+    type = string
+    sensitive = true
+}
+
+variable "jacobs_reddit_accesskey" {
+    type = string
+    sensitive = true
+}
+
+variable "jacobs_reddit_secretkey" {
+    type = string
+    sensitive = true
+}

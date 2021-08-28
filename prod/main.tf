@@ -317,7 +317,10 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
           {"name": "RDS_USER", "value": "${var.jacobs_rds_user}"},
           {"name": "RDS_PW", "value": "${var.jacobs_rds_pw}"},
           {"name": "RDS_DB", "value": "jacob_db"},
-          {"name": "testing_1", "value": "test1"}
+          {"name": "reddit_user", "value": "${var.jacobs_reddit_user}"},
+          {"name": "reddit_pw", "value": "${var.jacobs_reddit_pw}"},
+          {"name": "reddit_accesskey", "value": "${var.jacobs_reddit_accesskey}"},
+          {"name": "reddit_secretkey", "value": "${var.jacobs_reddit_secretkey}"}
         ],
         "logConfiguration": {
           "logDriver": "awslogs",
