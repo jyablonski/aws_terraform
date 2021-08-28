@@ -1,2 +1,2 @@
 # Terraform Project 
-## Building AWS Infrastructure to Schedule a Daily Python Scripts w/ ECS
+## Building AWS Infrastructure to Schedule Daily Python Scripts w/ ECS
