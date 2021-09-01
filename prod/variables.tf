@@ -43,6 +43,11 @@ variable "jacobs_reddit_pw" {
     sensitive = true
 }
 
+variable "jacobs_pw" {
+    type = string
+    sensitive = true
+}
+
 variable "jacobs_reddit_accesskey" {
     type = string
     sensitive = true
