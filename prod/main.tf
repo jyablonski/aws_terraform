@@ -226,6 +226,11 @@ resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_ses" {
+  role       = aws_iam_role.jacobs_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+}
+
 resource "aws_iam_role" "jacobs_ecs_ecr_role" {
   name = "jacobs_ecs_ecr_role"
   description = "Role created for AWS ECS ECR Access"
