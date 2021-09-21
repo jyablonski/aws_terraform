@@ -175,6 +175,7 @@ resource "aws_route_table_association" "jacobs_public_route_2" {
 
 }
 
+# sw
 resource "aws_db_instance" "jacobs_rds_tf" {
   allocated_storage    = 20
   max_allocated_storage = 21
@@ -349,10 +350,17 @@ TASK_DEFINITION
 }
 
 resource "aws_cloudwatch_event_rule" "every_15_mins" {
-  name = "python_scheduled_task" # change this name
+  name = "python_scheduled_task_test" # change this name
   description = "Run every 15 minutes"
   schedule_expression = "cron(0/15 * * * ? *)"
 }
+
+resource "aws_cloudwatch_event_rule" "etl_rule" {
+  name = "python_scheduled_task_prod" # change this name
+  description = "Run every day at 11AM UTC"
+  schedule_expression = "cron(0 11 * * ? *)"
+}
+
 
 # uncomment the block below when nba season starts
 # resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
