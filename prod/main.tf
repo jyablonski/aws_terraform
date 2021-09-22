@@ -65,8 +65,8 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
 
   ingress {
     description      = "Custom IP Addresses"
-    from_port        = 3306
-    to_port          = 3306
+    from_port        = 5432
+    to_port          = 5432
     protocol         = "tcp"
     cidr_blocks      = var.jacobs_cidr_block
 
@@ -175,15 +175,40 @@ resource "aws_route_table_association" "jacobs_public_route_2" {
 
 }
 
-# sw
+# original mysql server - gbye my sweet prince
+# resource "aws_db_instance" "jacobs_rds_tf" {
+#   allocated_storage    = 20
+#   max_allocated_storage = 21
+#   engine               = "mysql"
+#   engine_version       = "8.0" # try this or 8.0.23
+#   instance_class       = "db.t2.micro"
+#   identifier           = "jacobs-rds-server"
+#   port                 = 3306
+#   name                 = "jacob_db"   # this is the name of the default database that will be created.
+#   username             = var.jacobs_rds_user
+#   password             = var.jacobs_rds_pw
+#   # parameter_group_name = "default.mysql8.0.25" # try this
+#   skip_final_snapshot  = true
+#   publicly_accessible  = true
+#   storage_type         = "gp2" # general purpose ssd
+#   vpc_security_group_ids = [aws_security_group.jacobs_rds_security_group_tf.id]
+#   db_subnet_group_name = aws_db_subnet_group.jacobs_subnet_group.id
+
+#   tags = {
+#     Name        = local.env_name
+#     Environment = local.env_type
+#   }
+
+# }
+
 resource "aws_db_instance" "jacobs_rds_tf" {
   allocated_storage    = 20
   max_allocated_storage = 21
-  engine               = "mysql"
-  engine_version       = "8.0" # try this or 8.0.23
+  engine               = "postgres"
+  engine_version       = "12.7" # newest possible version that's in free tier eligiblity
   instance_class       = "db.t2.micro"
-  identifier = "jacobs-rds-server"
-  port                 = 3306
+  identifier           = "jacobs-rds-server"
+  port                 = 5432
   name                 = "jacob_db"   # this is the name of the default database that will be created.
   username             = var.jacobs_rds_user
   password             = var.jacobs_rds_pw
@@ -319,7 +344,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
         "name": "jacobs_container",
         "environment": [
           {"name": "IP", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
-          {"name": "PORT", "value": "3306"},
+          {"name": "PORT", "value": "5432"},
           {"name": "RDS_USER", "value": "${var.jacobs_rds_user}"},
           {"name": "RDS_PW", "value": "${var.jacobs_rds_pw}"},
           {"name": "RDS_DB", "value": "jacob_db"},
@@ -363,24 +388,24 @@ resource "aws_cloudwatch_event_rule" "etl_rule" {
 
 
 # uncomment the block below when nba season starts
-# resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
-#   target_id = "jacobs_target_id"
-#   arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
-#   rule = aws_cloudwatch_event_rule.every_15_mins.name
-#   role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
+resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
+  target_id = "jacobs_target_id"
+  arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  rule = aws_cloudwatch_event_rule.every_15_mins.name
+  role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
 
-#   ecs_target {
-#     launch_type = "FARGATE"
-#     network_configuration {
-#       subnets = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
-#       security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
-#       assign_public_ip = true
-#     }
-#     platform_version = "LATEST"
-#     task_count = 1
-#     task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
-#   }
-# }
+  ecs_target {
+    launch_type = "FARGATE"
+    network_configuration {
+      subnets = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
+      security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
+      assign_public_ip = true
+    }
+    platform_version = "LATEST"
+    task_count = 1
+    task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
+  }
+}
 
 resource "aws_iam_group" "jacobs_github_group" {
   name = "github-ecr-cicd"
