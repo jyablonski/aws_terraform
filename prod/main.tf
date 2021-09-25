@@ -387,7 +387,7 @@ resource "aws_cloudwatch_event_rule" "etl_rule" {
 }
 
 
-# uncomment the block below when nba season starts
+# # uncomment the block below when nba season starts and change the rule to etl_rule instead of every_15_min
 # resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
 #   target_id = "jacobs_target_id"
 #   arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
