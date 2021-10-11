@@ -1,10 +1,3 @@
-provider "aws" {
-    region = var.region
-    access_key = var.access_key
-    secret_key = var.secret_key
-
-}
-
 locals {
     env_type = "Prod" # cant have an apostrophe in the tag name
     env_name = "Jacobs TF Project"
@@ -387,7 +380,7 @@ resource "aws_cloudwatch_event_rule" "etl_rule" {
 }
 
 
-# # uncomment the block below when nba season starts and change the rule to etl_rule instead of every_15_min
+# # # uncomment the block below when nba season starts and change the rule to etl_rule instead of every_15_min
 # resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
 #   target_id = "jacobs_target_id"
 #   arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
@@ -429,4 +422,15 @@ resource "aws_iam_group_membership" "jacobs_github_group_attach" {
 resource "aws_iam_group_policy_attachment" "jacobs_github_group_policy_attach" {
   group      = aws_iam_group.jacobs_github_group.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+}
+
+##
+resource "aws_iam_user" "jacobs_airflow_user" {
+  name = "jacobs_airflow_role"
+
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_airflow_role_attachment" {
+  role       = aws_iam_user.jacobs_airflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
 }
