@@ -426,11 +426,11 @@ resource "aws_iam_group_policy_attachment" "jacobs_github_group_policy_attach" {
 
 ##
 resource "aws_iam_user" "jacobs_airflow_user" {
-  name = "jacobs_airflow_role"
+  name = "jacobs_airflow_user"
 
 }
 
-resource "aws_iam_role_policy_attachment" "jacobs_airflow_role_attachment" {
-  role       = aws_iam_user.jacobs_airflow_user.name
+resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment" {
+  user       = aws_iam_user.jacobs_airflow_user.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
 }
