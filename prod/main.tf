@@ -367,6 +367,45 @@ TASK_DEFINITION
   requires_compatibilities = ["FARGATE"]
 }
 
+resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
+  family                = "jacobs_task_airflow"
+  container_definitions = <<TASK_DEFINITION
+[
+    {
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:new",
+        "name": "jacobs_container_airflow",
+        "environment": [
+          {"name": "IP", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
+          {"name": "PORT", "value": "5432"},
+          {"name": "RDS_USER", "value": "${var.jacobs_rds_user}"},
+          {"name": "RDS_PW", "value": "${var.jacobs_rds_pw}"},
+          {"name": "RDS_DB", "value": "jacob_db"},
+          {"name": "reddit_user", "value": "${var.jacobs_reddit_user}"},
+          {"name": "reddit_pw", "value": "${var.jacobs_reddit_pw}"},
+          {"name": "reddit_accesskey", "value": "${var.jacobs_reddit_accesskey}"},
+          {"name": "reddit_secretkey", "value": "${var.jacobs_reddit_secretkey}"},
+          {"name": "USER_PW", "value": "${var.jacobs_pw}"},
+          {"name": "USER_EMAIL", "value": "${var.jacobs_email_address}"}
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "jacobs_ecs_logs",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+    } 
+]
+TASK_DEFINITION
+  execution_role_arn = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
+  task_role_arn = aws_iam_role.jacobs_ecs_role.arn
+  cpu = 256
+  memory = 512
+  network_mode = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+}
+
 resource "aws_cloudwatch_event_rule" "every_15_mins" {
   name = "python_scheduled_task_test" # change this name
   description = "Run every 15 minutes"
