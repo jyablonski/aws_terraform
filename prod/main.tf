@@ -473,3 +473,18 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment" {
   user       = aws_iam_user.jacobs_airflow_user.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
 }
+
+resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_execution" {
+  user       = aws_iam_user.jacobs_airflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ses" {
+  user       = aws_iam_user.jacobs_airflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+}
+
+resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ecr" {
+  user       = aws_iam_user.jacobs_airflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+}
