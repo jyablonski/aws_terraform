@@ -420,24 +420,24 @@ resource "aws_cloudwatch_event_rule" "etl_rule" {
 
 
 # # # uncomment the block below when nba season starts and change the rule to etl_rule instead of every_15_min
-# resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
-#   target_id = "jacobs_target_id"
-#   arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
-#   rule = aws_cloudwatch_event_rule.every_15_mins.name
-#   role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
+resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
+  target_id = "jacobs_target_id"
+  arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  rule = aws_cloudwatch_event_rule.etl_rule.name
+  role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
 
-#   ecs_target {
-#     launch_type = "FARGATE"
-#     network_configuration {
-#       subnets = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
-#       security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
-#       assign_public_ip = true
-#     }
-#     platform_version = "LATEST"
-#     task_count = 1
-#     task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
-#   }
-# }
+  ecs_target {
+    launch_type = "FARGATE"
+    network_configuration {
+      subnets = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
+      security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
+      assign_public_ip = true
+    }
+    platform_version = "LATEST"
+    task_count = 1
+    task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
+  }
+}
 
 resource "aws_iam_group" "jacobs_github_group" {
   name = "github-ecr-cicd"
