@@ -488,3 +488,9 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ecr" {
   user       = aws_iam_user.jacobs_airflow_user.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
 }
+
+# use this to create schemas from now on.
+resource "postgresql_schema" "my_practice_schema" {
+  name  = "my_practice_schema"
+  owner = var.pg_user
+}

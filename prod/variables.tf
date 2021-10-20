@@ -57,3 +57,18 @@ variable "jacobs_reddit_secretkey" {
     type = string
     sensitive = true
 }
+
+variable "pg_host" {
+    type = string
+    sensitive = true
+}
+
+variable "pg_user" {
+    type = string
+    sensitive = true
+}
+
+variable "pg_pass" {
+    type = string
+    sensitive = true
+}
