@@ -1,4 +1,4 @@
-version: 1.0.7
+version: 1.0.8
 # Terraform Project 
 ### Prod folder includes all AWS Infrastructure for [NBA Project](https://github.com/jyablonski/NBA-Dashboard)
 
