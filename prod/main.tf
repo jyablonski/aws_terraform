@@ -372,7 +372,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
   container_definitions = <<TASK_DEFINITION
 [
     {
-        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:new",
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_airflow",
         "name": "jacobs_container_airflow",
         "environment": [
           {"name": "IP", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
