@@ -369,8 +369,8 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
     } 
 ]
 TASK_DEFINITION
-  execution_role_arn = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
-  task_role_arn = aws_iam_role.jacobs_ecs_role.arn
+  execution_role_arn = aws_iam_role.jacobs_ecs_role.arn # permissions needed for pulling ecr or writing to cloudwatch logs etc
+  task_role_arn = aws_iam_role.jacobs_ecs_role.arn      # the actual permissions needed for when code runs (s3 access, ses access etc)
   cpu = 256
   memory = 512
   network_mode = "awsvpc"
