@@ -385,7 +385,8 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
           {"name": "reddit_accesskey", "value": "${var.jacobs_reddit_accesskey}"},
           {"name": "reddit_secretkey", "value": "${var.jacobs_reddit_secretkey}"},
           {"name": "USER_PW", "value": "${var.jacobs_pw}"},
-          {"name": "USER_EMAIL", "value": "${var.jacobs_email_address}"}
+          {"name": "USER_EMAIL", "value": "${var.jacobs_email_address}"},
+          {"name": "S3_BUCKET", "value": "${var.jacobs_bucket}"}
         ],
         "logConfiguration": {
           "logDriver": "awslogs",
@@ -472,6 +473,11 @@ resource "aws_iam_user" "jacobs_airflow_user" {
 resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment" {
   user       = aws_iam_user.jacobs_airflow_user.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
+}
+
+resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_s3" {
+  user       = aws_iam_user.jacobs_airflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_execution" {

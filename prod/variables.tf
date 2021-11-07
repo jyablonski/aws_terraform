@@ -72,3 +72,8 @@ variable "pg_pass" {
     type = string
     sensitive = true
 }
+
+variable "jacobs_bucket" {
+    type = string
+    sensitive = true
+}
