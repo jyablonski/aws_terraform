@@ -250,6 +250,11 @@ resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_ses" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_s3" {
+  role       = aws_iam_role.jacobs_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
 resource "aws_iam_role" "jacobs_ecs_ecr_role" {
   name = "jacobs_ecs_ecr_role"
   description = "Role created for AWS ECS ECR Access"
@@ -315,6 +320,11 @@ EOF
 
 resource "aws_cloudwatch_log_group" "aws_ecs_logs" {
   name = "jacobs_ecs_logs"
+
+}
+
+resource "aws_cloudwatch_log_group" "aws_ecs_logs_airflow" {
+  name = "jacobs_ecs_logs_airflow"
 
 }
 
@@ -391,7 +401,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
         "logConfiguration": {
           "logDriver": "awslogs",
           "options": {
-            "awslogs-group": "jacobs_ecs_logs",
+            "awslogs-group": "jacobs_ecs_logs_airflow",
             "awslogs-region": "us-east-1",
             "awslogs-stream-prefix": "ecs"
           }
@@ -473,11 +483,6 @@ resource "aws_iam_user" "jacobs_airflow_user" {
 resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment" {
   user       = aws_iam_user.jacobs_airflow_user.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
-}
-
-resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_s3" {
-  user       = aws_iam_user.jacobs_airflow_user.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_execution" {
