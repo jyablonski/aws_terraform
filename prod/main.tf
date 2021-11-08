@@ -425,8 +425,8 @@ resource "aws_cloudwatch_event_rule" "every_15_mins" {
 
 resource "aws_cloudwatch_event_rule" "etl_rule" {
   name = "python_scheduled_task_prod" # change this name
-  description = "Run every day at 11AM UTC"
-  schedule_expression = "cron(0 11 * * ? *)"
+  description = "Run every day at 12PM UTC"
+  schedule_expression = "cron(0 12 * * ? *)"
 }
 
 
