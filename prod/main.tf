@@ -510,3 +510,17 @@ resource "postgresql_schema" "my_practice_schema" {
   name  = "my_practice_schema"
   owner = var.pg_user
 }
+
+resource "aws_ssm_parameter" "jacobs_ssm_prac_public" {
+  name  = "jacobs_ssm_test"
+  type  = "String"
+  value = "bar"
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_prac_secret" {
+  name        = "jacobs_ssm_pg_user"
+  description = "The parameter description"
+  type        = "SecureString"
+  value       = var.pg_user
+
+}
