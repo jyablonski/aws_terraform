@@ -4,3 +4,4 @@ terraform.state
 terraform.tfvars
 terraform.tfstate.backup
 terraform.tfstate
+myzip

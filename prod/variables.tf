@@ -77,3 +77,8 @@ variable "jacobs_bucket" {
     type = string
     sensitive = true
 }
+
+variable "lambda_function_name" {
+    type = string
+    sensitive = true
+}

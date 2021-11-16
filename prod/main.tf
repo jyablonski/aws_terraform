@@ -524,3 +524,119 @@ resource "aws_ssm_parameter" "jacobs_ssm_prac_secret" {
   value       = var.pg_user
 
 }
+
+## Lambda Event-Driven Workflow zz
+resource "aws_s3_bucket" "jyablonski_lambda_bucket" {
+  bucket = "jyablonski-lambda-bucket"
+  acl    = "private"
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
+# these aws resources assume these roles, so the assume_role_policy is saying WHICH aws service can assume this role
+# so ecs, ecr, in this case lambda
+resource "aws_iam_role" "jacobs_lambda_s3_role" {
+  name = "jacobs_lambda_s3_role"
+  description = "Role created for AWS Lambda S3 File Detection"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment1" {
+  role       = aws_iam_role.jacobs_lambda_s3_role.name
+  policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaBasicExecutionRole-6777176a-f601-4ad8-864d-53578dfceb07"
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment2" {
+  role       = aws_iam_role.jacobs_lambda_s3_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment3" {
+  role       = aws_iam_role.jacobs_lambda_s3_role.name
+  policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaS3ExecutionRole-2f559d56-d564-4348-abc7-3afe33f407c6"
+}
+
+data "archive_file" "default" {
+  type        = "zip"
+  source_dir  = "${path.module}/files/"
+  output_path = "${path.module}/myzip/python.zip"
+}
+
+# This is to optionally manage the CloudWatch Log Group for the Lambda Function.
+# If skipping this resource configuration, also add "logs:CreateLogGroup" to the IAM policy below.
+resource "aws_cloudwatch_log_group" "jacobs_lambda_logs" {
+  name              = "/aws/lambda/${var.lambda_function_name}"
+  retention_in_days = 14
+}
+
+# See also the following AWS managed policy: AWSLambdaBasicExecutionRole
+resource "aws_iam_policy" "jacobs_lambda_logging" {
+  name        = "lambda_logging"
+  path        = "/"
+  description = "IAM policy for logging from a lambda"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*",
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = aws_iam_role.jacobs_lambda_s3_role.name
+  policy_arn = aws_iam_policy.jacobs_lambda_logging.arn
+}
+
+resource "aws_lambda_function" "jacobs_s3_lambda_function" {
+  filename                       = "${path.module}/myzip/python.zip"
+  function_name                  = var.lambda_function_name
+  role                           = aws_iam_role.jacobs_lambda_s3_role.arn
+  handler                        = "main.lambda_handler"
+  runtime                        = "python3.8"
+  depends_on                     = [aws_iam_role_policy_attachment.lambda_logs]
+}
+
+resource "aws_lambda_permission" "allow_bucket1" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.jyablonski_lambda_bucket.arn
+}
+
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = aws_s3_bucket.jyablonski_lambda_bucket.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_suffix       = ".csv"
+  }
+}
