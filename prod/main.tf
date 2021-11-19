@@ -508,6 +508,28 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_s3" {
 }
 
 # use this to create schemas from now on.
+
+##################
+#                #
+#    POSTGRES    # 
+#                #
+##################
+resource "postgresql_database" "jacobs_practice_db" {
+  name = "jacobs_practice_db"
+  owner = var.pg_user
+}
+
+resource "postgresql_schema" "jacobs_practice_schema" {
+  name  = "jacobs_practice_schema"
+  database = postgresql_database.jacobs_practice_db.name
+  owner = var.pg_user
+}
+
+resource "postgresql_role" "jacobs_dbt_role" {
+  name     = "jacobs_dbt_role"
+  password = var.pg_pass
+}
+
 resource "postgresql_schema" "my_practice_schema" {
   name  = "my_practice_schema"
   owner = var.pg_user
