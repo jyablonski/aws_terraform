@@ -82,3 +82,13 @@ variable "lambda_function_name" {
     type = string
     sensitive = true
 }
+
+variable "grafana_external_id" {
+  type        = string
+  description = "This is your Grafana Cloud identifier and is used for security purposes."
+
+  validation {
+    condition     = length(var.grafana_external_id) > 0
+    error_message = "ExternalID is required."
+  }
+}

@@ -1,6 +1,7 @@
 locals {
     env_type = "Prod" # cant have an apostrophe in the tag name
     env_name = "Jacobs TF Project"
+    grafana_account_id = "008923505280"
 }
 
 resource "aws_vpc" "jacobs_vpc_tf" {
@@ -659,5 +660,56 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
     events              = ["s3:ObjectCreated:*"]
     filter_suffix       = ".csv"
+  }
+}
+
+##################
+#                #
+#     GRAFANA    # 
+#                #
+##################
+data "aws_iam_policy_document" "jacobs_grafana_policy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.grafana_account_id}:root"]
+    }
+
+    actions = ["sts:AssumeRole"]
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [var.grafana_external_id]
+    }
+  }
+}
+
+resource "aws_iam_role" "grafana_labs_cloudwatch_integration" {
+  name        = "jacobs-grafana-role"
+  description = "Role used by Grafana CloudWatch Integration."
+
+  # Allow Grafana Labs' AWS account to assume this role.
+  assume_role_policy = data.aws_iam_policy_document.jacobs_grafana_policy.json
+
+  # This policy allows the role to discover metrics via tags and export them.
+  inline_policy {
+    name = "jacobs-grafana-role"
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "tag:GetResources",
+            "cloudwatch:GetMetricData",
+            "cloudwatch:GetMetricStatistics",
+            "cloudwatch:ListMetrics"
+          ]
+          Resource = "*"
+        }
+      ]
+    })
   }
 }
