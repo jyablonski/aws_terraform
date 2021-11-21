@@ -16,6 +16,9 @@ def lambda_handler(event, context):
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
         print("CONTENT TYPE: " + response['ContentType'])
+        ###############################################
+        # send curl request to trigger_dag('nba_elt_pipeline_qa') here
+        ###############################################
         return response['ContentType']
     except Exception as e:
         print(e)
