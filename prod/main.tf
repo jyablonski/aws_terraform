@@ -508,6 +508,11 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_s3" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
+resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ssm" {
+  user       = aws_iam_user.jacobs_airflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+}
+
 # use this to create schemas from now on.
 
 ##################
@@ -547,6 +552,30 @@ resource "aws_ssm_parameter" "jacobs_ssm_prac_secret" {
   description = "The parameter description"
   type        = "SecureString"
   value       = var.pg_user
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_subnet1" {
+  name        = "jacobs_ssm_subnet1"
+  description = "Public Subnet 1"
+  type        = "SecureString"
+  value       = aws_subnet.jacobs_public_subnet.id
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_subnet2" {
+  name        = "jacobs_ssm_subnet2"
+  description = "Public Subnet 2"
+  type        = "SecureString"
+  value       = aws_subnet.jacobs_public_subnet_2.id
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_sg_task" {
+  name        = "jacobs_ssm_sg_task"
+  description = "RDS Security Group for Tasks"
+  type        = "SecureString"
+  value       = aws_security_group.jacobs_task_security_group_tf.id
 
 }
 
