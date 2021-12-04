@@ -541,6 +541,11 @@ resource "postgresql_schema" "my_practice_schema" {
   owner = var.pg_user
 }
 
+resource "postgresql_schema" "nba_prep" {
+  name  = "nba_prep"
+  owner = var.pg_user
+}
+
 resource "aws_ssm_parameter" "jacobs_ssm_prac_public" {
   name  = "jacobs_ssm_test"
   type  = "String"
@@ -697,48 +702,50 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 #     GRAFANA    # 
 #                #
 ##################
-data "aws_iam_policy_document" "jacobs_grafana_policy" {
-  statement {
-    effect = "Allow"
+# Worked, but cost $$ bc it makes requests for cloudwatch metrics every 60s or something
 
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${local.grafana_account_id}:root"]
-    }
+# data "aws_iam_policy_document" "jacobs_grafana_policy" {
+#   statement {
+#     effect = "Allow"
 
-    actions = ["sts:AssumeRole"]
-    condition {
-      test     = "StringEquals"
-      variable = "sts:ExternalId"
-      values   = [var.grafana_external_id]
-    }
-  }
-}
+#     principals {
+#       type        = "AWS"
+#       identifiers = ["arn:aws:iam::${local.grafana_account_id}:root"]
+#     }
 
-resource "aws_iam_role" "grafana_labs_cloudwatch_integration" {
-  name        = "jacobs-grafana-role"
-  description = "Role used by Grafana CloudWatch Integration."
+#     actions = ["sts:AssumeRole"]
+#     condition {
+#       test     = "StringEquals"
+#       variable = "sts:ExternalId"
+#       values   = [var.grafana_external_id]
+#     }
+#   }
+# }
 
-  # Allow Grafana Labs' AWS account to assume this role.
-  assume_role_policy = data.aws_iam_policy_document.jacobs_grafana_policy.json
+# resource "aws_iam_role" "grafana_labs_cloudwatch_integration" {
+#   name        = "jacobs-grafana-role"
+#   description = "Role used by Grafana CloudWatch Integration."
 
-  # This policy allows the role to discover metrics via tags and export them.
-  inline_policy {
-    name = "jacobs-grafana-role"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Effect = "Allow"
-          Action = [
-            "tag:GetResources",
-            "cloudwatch:GetMetricData",
-            "cloudwatch:GetMetricStatistics",
-            "cloudwatch:ListMetrics"
-          ]
-          Resource = "*"
-        }
-      ]
-    })
-  }
-}
+#   # Allow Grafana Labs' AWS account to assume this role.
+#   assume_role_policy = data.aws_iam_policy_document.jacobs_grafana_policy.json
+
+#   # This policy allows the role to discover metrics via tags and export them.
+#   inline_policy {
+#     name = "jacobs-grafana-role"
+#     policy = jsonencode({
+#       Version = "2012-10-17"
+#       Statement = [
+#         {
+#           Effect = "Allow"
+#           Action = [
+#             "tag:GetResources",
+#             "cloudwatch:GetMetricData",
+#             "cloudwatch:GetMetricStatistics",
+#             "cloudwatch:ListMetrics"
+#           ]
+#           Resource = "*"
+#         }
+#       ]
+#     })
+#   }
+# }
