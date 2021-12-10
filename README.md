@@ -6,3 +6,4 @@ version: 1.0.21
     * [NBA Dashboard](https://github.com/jyablonski/NBA-Dashboard)
     * [Python Dockerfile](https://github.com/jyablonski/python_docker)
     * [DBT](https://github.com/jyablonski/nba_elt_dbt)
+    * [Airflow Proof of Concept](https://github.com/jyablonski/nba_elt_airflow)
