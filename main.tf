@@ -697,3 +697,12 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
+resource "aws_iam_user" "jacobs_terraform_user" {
+  name = "jacobs-terraform-user"
+
+}
+
+resource "aws_iam_user_policy_attachment" "jacobs_terraform_user_attachment" {
+  user       = aws_iam_user.jacobs_terraform_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
