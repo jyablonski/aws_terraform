@@ -732,3 +732,13 @@ resource "aws_s3_bucket" "jyablonski_unhappy_bucket" {
     Environment = local.env_type
   }
 }
+
+resource "aws_s3_bucket" "jyablonski_tf_cicd_bucket" {
+  bucket = "jyablonski-tf-cicd-bucket"
+  acl    = "private"
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
