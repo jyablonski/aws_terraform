@@ -1,4 +1,4 @@
-version: 1.0.24
+version: 1.0.25
 # Terraform Project 
 ### Includes all AWS Infrastructure for [NBA Project](https://github.com/jyablonski/NBA-Dashboard)
 
