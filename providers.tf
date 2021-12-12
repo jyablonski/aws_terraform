@@ -5,11 +5,18 @@ provider "aws" {
 }
 
 terraform {
+  required_version = ">= 1.1.0"
   required_providers {
     postgresql = {
       source = "cyrilgdn/postgresql"
       version = "1.14.0"
     }
+  }
+    cloud {
+      organization = "jyablonski_prac"
+      workspaces {
+        name = "github-terraform-demo"
+      }
   }
 }
 
