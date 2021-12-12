@@ -48,16 +48,16 @@ jobs:
 
       - name: Terraform Format
         id: fmtmain
-        run: terraform -chdir=prod init
+        run: terraform init
       
       - name: Terraform Validate
         id: validate
-        run: terraform -chdir=prod validate -no-color
+        run: terraform validate -no-color
 
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform -chdir=prod plan -no-color
+        run: terraform plan -no-color
         continue-on-error: true
 
       - uses: actions/github-script@0.9.0
@@ -89,4 +89,4 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/DONOTPUSH' && github.event_name == 'push'
-        run: terraform -chdir=prod apply -auto-approve
+        run: terraform apply -auto-approve
