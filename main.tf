@@ -517,34 +517,50 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ssm" {
 
 ##################
 #                #
-#    POSTGRES    # 
+#    POSTGRES    #  Removing as of 12-12-21
 #                #
-##################
-resource "postgresql_database" "jacobs_practice_db" {
-  name = "jacobs_practice_db"
-  owner = var.pg_user
-}
+# ##################
 
-resource "postgresql_schema" "jacobs_practice_schema" {
-  name  = "jacobs_practice_schema"
-  database = postgresql_database.jacobs_practice_db.name
-  owner = var.pg_user
-}
+# provider "postgresql" {
+#   host     = var.pg_host
+#   username = var.pg_user
+#   password = var.pg_pass
+# }
 
-resource "postgresql_role" "jacobs_dbt_role" {
-  name     = "jacobs_dbt_role"
-  password = var.pg_pass
-}
+# terraform {
+    # required_providers {
+  #   postgresql = {
+  #     source = "cyrilgdn/postgresql"
+  #     version = "1.14.0"
+  #   }
+  # }
+# }
 
-resource "postgresql_schema" "my_practice_schema" {
-  name  = "my_practice_schema"
-  owner = var.pg_user
-}
+# resource "postgresql_database" "jacobs_practice_db" {
+#   name = "jacobs_practice_db"
+#   owner = var.pg_user
+# }
 
-resource "postgresql_schema" "nba_prep" {
-  name  = "nba_prep"
-  owner = var.pg_user
-}
+# resource "postgresql_schema" "jacobs_practice_schema" {
+#   name  = "jacobs_practice_schema"
+#   database = postgresql_database.jacobs_practice_db.name
+#   owner = var.pg_user
+# }
+
+# resource "postgresql_role" "jacobs_dbt_role" {
+#   name     = "jacobs_dbt_role"
+#   password = var.pg_pass
+# }
+
+# resource "postgresql_schema" "my_practice_schema" {
+#   name  = "my_practice_schema"
+#   owner = var.pg_user
+# }
+
+# resource "postgresql_schema" "nba_prep" {
+#   name  = "nba_prep"
+#   owner = var.pg_user
+# }
 
 resource "aws_ssm_parameter" "jacobs_ssm_prac_public" {
   name  = "jacobs_ssm_test"
@@ -705,4 +721,14 @@ resource "aws_iam_user" "jacobs_terraform_user" {
 resource "aws_iam_user_policy_attachment" "jacobs_terraform_user_attachment" {
   user       = aws_iam_user.jacobs_terraform_user.name
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+resource "aws_s3_bucket" "jyablonski_unhappy_bucket" {
+  bucket = "jyablonski-unhappy-bucket"
+  acl    = "private"
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
 }
