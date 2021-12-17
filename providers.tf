@@ -22,6 +22,6 @@ terraform {
 provider "snowflake" {
   username = var.snowflake_user
   account  = "rl64113"
-  region   = "us-east-2"
+  region   = "us-east-2.aws"
   password = var.snowflake_pw
 }
