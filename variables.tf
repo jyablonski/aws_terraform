@@ -92,3 +92,15 @@ variable "grafana_external_id" {
     error_message = "ExternalID is required."
   }
 }
+
+
+variable "snowflake_user" {
+    type = string
+    sensitive = true
+}
+
+
+variable "snowflake_pw" {
+    type = string
+    sensitive = true
+}

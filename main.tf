@@ -742,3 +742,15 @@ resource "aws_s3_bucket" "jyablonski_tf_cicd_bucket" {
     Environment = local.env_type
   }
 }
+
+###################
+#                 #
+#    SNOWFLAKE    #
+#                 #
+###################
+
+resource "snowflake_database" "snowflake_tf_db" {
+  name                        = "snowflake_tf_db"
+  comment                     = "test comment"
+  data_retention_time_in_days = 0
+}
