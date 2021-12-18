@@ -759,7 +759,7 @@ resource "snowflake_schema" "NBA_AIRFLOW" {
   name     = "NBA_AIRFLOW"
 
   is_transient        = false
-  is_managed          = false
+  is_managed          = true
   data_retention_days = 0
 }
 
@@ -768,7 +768,7 @@ resource "snowflake_schema" "NBA_AIRFLOW_QA" {
   name     = "NBA_AIRFLOW_QA"
 
   is_transient        = false
-  is_managed          = false
+  is_managed          = true
   data_retention_days = 0
 }
 
@@ -778,6 +778,6 @@ resource "snowflake_schema" "TEST_SCHEMA" {
   name     = "TEST_SCHEMA"
 
   is_transient        = false
-  is_managed          = false
+  is_managed          = true
   data_retention_days = 0
 }
