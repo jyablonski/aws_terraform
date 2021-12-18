@@ -3,5 +3,5 @@ PHONY: git-rebase
 git-rebase:
 	@git checkout master
 	@git pull
-	@git checkout branch feature_integration
+	@git checkout feature_integration
 	@git rebase master
