@@ -742,3 +742,13 @@ resource "aws_s3_bucket" "jyablonski_tf_cicd_bucket" {
     Environment = local.env_type
   }
 }
+
+resource "aws_iam_user" "jacobs_snowflake_user" {
+  name = "jacobs_snowflake_user"
+
+}
+
+resource "aws_iam_user_policy_attachment" "jacobs_snowflake_user_attachment" {
+  user       = aws_iam_user.jacobs_snowflake_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
