@@ -695,7 +695,7 @@ resource "aws_lambda_function" "jacobs_s3_lambda_function" {
   filename                       = "${path.module}/myzip/python.zip"
   function_name                  = var.lambda_function_name
   role                           = aws_iam_role.jacobs_lambda_s3_role.arn
-  handler                        = "main.lambda_handler"
+  handler                        = "main_new.lambda_handler"
   runtime                        = "python3.8"
   depends_on                     = [aws_iam_role_policy_attachment.lambda_logs]
 }
