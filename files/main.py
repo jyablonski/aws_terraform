@@ -4,6 +4,7 @@ import urllib.parse
 import boto3
 from botocore.exceptions import ClientError
 # from botocore.vendored import requests
+
 def send_ses_email(input):
     SENDER = "jyablonski9@gmail.com"
     RECIPIENT = "jyablonski9@gmail.com"
