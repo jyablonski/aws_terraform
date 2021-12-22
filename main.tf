@@ -647,6 +647,11 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment3" {
   policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaS3ExecutionRole-2f559d56-d564-4348-abc7-3afe33f407c6"
 }
 
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {
+  role       = aws_iam_role.jacobs_lambda_s3_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+}
+
 data "archive_file" "default" {
   type        = "zip"
   source_dir  = "${path.module}/files/"
@@ -741,14 +746,4 @@ resource "aws_s3_bucket" "jyablonski_tf_cicd_bucket" {
     Name        = local.env_name
     Environment = local.env_type
   }
-}
-
-resource "aws_iam_user" "jacobs_snowflake_user" {
-  name = "jacobs_snowflake_user"
-
-}
-
-resource "aws_iam_user_policy_attachment" "jacobs_snowflake_user_attachment" {
-  user       = aws_iam_user.jacobs_snowflake_user.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }

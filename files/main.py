@@ -1,7 +1,68 @@
+from datetime import datetime, timedelta
 import json
 import urllib.parse
 import boto3
+from botocore.exceptions import ClientError
 # from botocore.vendored import requests
+def send_ses_email(input):
+    SENDER = "jyablonski9@gmail.com"
+    RECIPIENT = "jyablonski9@gmail.com"
+    CONFIGURATION_SET = "ConfigSet"
+    AWS_REGION = "us-east-1"
+
+    SUBJECT = f"{datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')} S3 FILE ARRIVED IN LAMBDA BUCKET"
+
+    # The email body for recipients with non-HTML email clients.
+    BODY_TEXT = f"{input} arrived in S3 Bucket"
+                
+    # The HTML body of the email.
+    BODY_HTML = f"""<html>
+    <head></head>
+    <body>
+    <h1>Amazon SES Test (SDK for Python)</h1>
+    <p>This email was sent with
+        <a href='https://aws.amazon.com/ses/'>Amazon SES</a> using the
+        <a href='https://aws.amazon.com/sdk-for-python/'>
+        AWS SDK for Python (Boto)</a>.</p>
+        <br>
+        {input} arrived in S3 Bucket
+    </body>
+    </html>
+                """            
+
+    CHARSET = "UTF-8"
+    client = boto3.client('ses',region_name=AWS_REGION)
+    try:
+        response = client.send_email(
+            Destination={
+                'ToAddresses': [
+                    RECIPIENT,
+                ],
+            },
+            Message={
+                'Body': {
+                    'Html': {
+                        'Charset': CHARSET,
+                        'Data': BODY_HTML,
+                    },
+                    'Text': {
+                        'Charset': CHARSET,
+                        'Data': BODY_TEXT,
+                    },
+                },
+                'Subject': {
+                    'Charset': CHARSET,
+                    'Data': SUBJECT,
+                },
+            },
+            Source=SENDER,
+            ConfigurationSetName=CONFIGURATION_SET,
+        )
+    except ClientError as e:
+        print(e.response['Error']['Message'])
+    else:
+        print("Email sent! Message ID:"),
+        print(response['MessageId'])
 
 print('Loading function')
 
@@ -17,6 +78,7 @@ def lambda_handler(event, context):
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
         print("CONTENT TYPE: " + response['ContentType'])
+        send_ses_email(key)
         ###############################################
         # send curl request to trigger_dag('nba_elt_pipeline_qa') here
         ###############################################
