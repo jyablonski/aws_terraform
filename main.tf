@@ -655,7 +655,7 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {
 data "archive_file" "default" {
   type        = "zip"
   source_dir  = "${path.module}/files/"
-  output_path = "${path.module}/myzip/python.zip"
+  output_path = "${path.module}/myzip/python2.zip"
 }
 
 resource "aws_cloudwatch_log_group" "jacobs_lambda_logs" {
@@ -692,7 +692,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 resource "aws_lambda_function" "jacobs_s3_lambda_function" {
-  filename                       = "${path.module}/myzip/python.zip"
+  filename                       = "${path.module}/myzip/python2.zip"
   function_name                  = var.lambda_function_name
   role                           = aws_iam_role.jacobs_lambda_s3_role.arn
   handler                        = "main.lambda_handler"

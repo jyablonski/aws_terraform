@@ -8,7 +8,7 @@ from botocore.exceptions import ClientError
 def send_ses_email(input):
     SENDER = "jyablonski9@gmail.com"
     RECIPIENT = "jyablonski9@gmail.com"
-    CONFIGURATION_SET = "ConfigSet"
+    # CONFIGURATION_SET = "ConfigSet"
     AWS_REGION = "us-east-1"
 
     SUBJECT = f"{datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')} S3 FILE ARRIVED IN LAMBDA BUCKET"
@@ -57,7 +57,7 @@ def send_ses_email(input):
                 },
             },
             Source=SENDER,
-            ConfigurationSetName=CONFIGURATION_SET,
+            # ConfigurationSetName=CONFIGURATION_SET,
         )
     except ClientError as e:
         print(e.response['Error']['Message'])
