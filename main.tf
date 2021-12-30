@@ -513,6 +513,11 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
 }
 
+resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_cloudwatch_logs" {
+  user       = aws_iam_user.jacobs_airflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+}
+
 # use this to create schemas from now on.
 
 ##################
