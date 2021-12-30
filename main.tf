@@ -652,6 +652,7 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
 }
 
+# heads up u literally have to like rename the file (python2 -> python3 etc) for any changes in main.py to get reflected in tf.
 data "archive_file" "default" {
   type        = "zip"
   source_dir  = "${path.module}/files/"
