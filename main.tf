@@ -756,7 +756,7 @@ resource "aws_s3_bucket" "jyablonski_tf_cicd_bucket" {
 
 #########
 resource "aws_lambda_permission" "allow_bucket_jacobsbucket97" {
-  statement_id  = "AllowExecutionFromS3Bucket"
+  statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
   principal     = "s3.amazonaws.com"
