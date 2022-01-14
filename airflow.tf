@@ -12,7 +12,7 @@ resource "aws_instance" "jacobs_ec2_airflow" {
   ami           = "ami-0ed9277fb7eb570c9"
   instance_type = "t3a.medium"
   associate_public_ip_address = true
-  security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
+  vpc_security_group_ids = [aws_security_group.jacobs_task_security_group_tf.id]
   subnet_id = aws_subnet.jacobs_public_subnet.id
   key_name = aws_key_pair.airflow_ec2_key.key_name
 
