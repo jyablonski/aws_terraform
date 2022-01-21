@@ -763,16 +763,16 @@ resource "aws_lambda_permission" "allow_bucket_jacobsbucket97" {
   source_arn    = aws_s3_bucket.jacobs_bucket_tf.arn
 }
 
-resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf.id
+# resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97" {
+#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
 
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "boxscores/"
-    filter_suffix       = ".parquet"
-  }
-}
+#   lambda_function {
+#     lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
+#     events              = ["s3:ObjectCreated:*"]
+#     filter_prefix       = "boxscores/"
+#     filter_suffix       = ".parquet"
+#   }
+# }
 
 
 ### SQS - LAMBDA - S3 BUCKET TRANSACTIONS
@@ -814,18 +814,18 @@ resource "aws_lambda_permission" "allow_bucket_jacobsbucket97_sqs" {
   source_arn    = aws_sqs_queue.jacobs_sqs_queue.arn
 }
 
-resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf.id
+# resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
+#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
 
-  queue {
-    queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "transactions/"
-    filter_suffix       = ".parquet"
-  }
+#   queue {
+#     queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
+#     events              = ["s3:ObjectCreated:*"]
+#     filter_prefix       = "transactions/"
+#     filter_suffix       = ".parquet"
+#   }
 
-  depends_on = [aws_lambda_permission.allow_bucket_jacobsbucket97_sqs]
-}
+#   depends_on = [aws_lambda_permission.allow_bucket_jacobsbucket97_sqs]
+# }
 
 
 
@@ -872,7 +872,23 @@ resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sns" {
     filter_suffix       = ".parquet"
   }
 
-  depends_on = [aws_lambda_permission.allow_bucket_jacobsbucket97_sns]
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "boxscores/"
+    filter_suffix       = ".parquet"
+  }
+
+  queue {
+    queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "transactions/"
+    filter_suffix       = ".parquet"
+  }
+
+  depends_on = [aws_lambda_permission.allow_bucket_jacobsbucket97_sns,
+                aws_lambda_permission.allow_bucket_jacobsbucket97_sqs,
+               ]
 }
 
 resource "aws_sns_topic_subscription" "lambda" {
