@@ -839,7 +839,7 @@ POLICY
 resource "aws_lambda_permission" "allow_bucket_jacobsbucket97_sqs" {
   statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97-sqs"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
+  function_name = aws_lambda_function.jacobs_s3_lambda_function.function_name
   principal     = "sqs.amazonaws.com"
   source_arn    = aws_sqs_queue.jacobs_sqs_queue.arn
 }
@@ -887,7 +887,7 @@ POLICY
 resource "aws_lambda_permission" "allow_bucket_jacobsbucket97_sns" {
   statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97-sns"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
+  function_name = aws_lambda_function.jacobs_s3_lambda_function.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = aws_sns_topic.jacobs_sns_topic.arn
 }
