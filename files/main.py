@@ -11,7 +11,7 @@ def send_ses_email(input):
     # CONFIGURATION_SET = "ConfigSet"
     AWS_REGION = "us-east-1"
 
-    SUBJECT = f"{datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')} S3 FILE ARRIVED IN LAMBDA BUCKET"
+    SUBJECT = f"{input} S3 FILE ARRIVED IN LAMBDA BUCKET at {datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')}"
 
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = f"{input} arrived in S3 Bucket"
