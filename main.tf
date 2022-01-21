@@ -811,7 +811,7 @@ resource "aws_sqs_queue" "jacobs_sqs_queue" {
   delay_seconds = 30
   message_retention_seconds = 345600 # 4 days
   max_message_size = 262144          # 256 KiB
-  visibility_timeout_seconds = 30
+  visibility_timeout_seconds = 43200
 
   policy = <<POLICY
 {
