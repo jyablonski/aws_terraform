@@ -71,7 +71,7 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
     from_port        = -1
     to_port          = -1
     protocol         = "all"
-    security_groups  = [aws_security_group.jacobs_task_security_group_tf.id]
+    security_groups  = [aws_security_group.jacobs_task_security_group_tf.id] # this should be changed to vpc_security_group_ids ?
   }
 
 
@@ -791,7 +791,7 @@ resource "aws_sqs_queue" "jacobs_sqs_queue" {
       "Effect": "Allow",
       "Principal": "*",
       "Action": "sqs:SendMessage",
-      "Resource": "arn:aws:sqs:*:*:s3-event-notification-queue",
+      "Resource": "arn:aws:sqs:*:*:jacobs-first-sqs",
       "Condition": {
         "ArnEquals": { "aws:SourceArn": "${aws_s3_bucket.jacobs_bucket_tf.arn}" }
       }
@@ -830,14 +830,6 @@ resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
 
 
 ### SNS - LAMBDA - S3 BUCKET REDDIT DATA
-resource "aws_lambda_permission" "allow_bucket_jacobsbucket97_sns" {
-  statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97-sns"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.jacobs_sns_topic.arn
-}
-
 resource "aws_sns_topic" "jacobs_sns_topic" {
   name = "jacobs-first-sns-topic"
   fifo_topic = false
@@ -849,7 +841,7 @@ resource "aws_sns_topic" "jacobs_sns_topic" {
         "Effect": "Allow",
         "Principal": { "Service": "s3.amazonaws.com" },
         "Action": "SNS:Publish",
-        "Resource": "arn:aws:sns:*:*:s3-event-notification-topic",
+        "Resource": "arn:aws:sns:*:*:jacobs-first-sns-topic",
         "Condition":{
             "ArnLike":{"aws:SourceArn":"${aws_s3_bucket.jacobs_bucket_tf.arn}"}
         }
@@ -862,6 +854,13 @@ POLICY
   }
 }
 
+resource "aws_lambda_permission" "allow_bucket_jacobsbucket97_sns" {
+  statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97-sns"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.jacobs_sns_topic.arn
+}
 
 resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sns" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
