@@ -681,6 +681,11 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_5" {
   policy_arn = aws_iam_policy.lambda_sns_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_6" {
+  role       = aws_iam_role.jacobs_lambda_s3_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+}
+
 
 # heads up u literally have to like rename the file (python2 -> python3 etc) for any changes in main.py to get reflected in tf.
 data "archive_file" "default" {
