@@ -936,6 +936,7 @@ resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
 
   depends_on = [aws_lambda_permission.allow_bucket_sqs,
                 aws_lambda_permission.allow_bucket_sqs,
+                aws_s3_bucket.jacobs_sqs_sns_bucket,
                ]
 }
 
