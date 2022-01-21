@@ -823,6 +823,8 @@ resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
     filter_prefix       = "transactions/"
     filter_suffix       = ".parquet"
   }
+
+  depends_on = [aws_lambda_permission.allow_bucket_jacobsbucket97_sqs]
 }
 
 
@@ -870,6 +872,8 @@ resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sns" {
     filter_prefix       = "reddit_data/"
     filter_suffix       = ".parquet"
   }
+
+  depends_on = [aws_lambda_permission.allow_bucket_jacobsbucket97_sns]
 }
 
 resource "aws_sns_topic_subscription" "lambda" {
