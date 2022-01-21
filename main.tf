@@ -676,7 +676,7 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_5" {
   role       = aws_iam_role.jacobs_lambda_s3_role.name
   policy_arn = aws_iam_policy.lambda_sns_policy.arn
 }
