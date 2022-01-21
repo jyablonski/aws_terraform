@@ -637,6 +637,25 @@ resource "aws_iam_role" "jacobs_lambda_s3_role" {
 EOF
 }
 
+resource "aws_iam_policy" "lambda_sns_policy" {
+  name        = "lambda-sns-policy"
+  description = "A test policy for lambdasto publish to sns"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+        "Sid":"AllowPublishToMyTopic",
+        "Effect":"Allow",
+        "Action":"sns:Publish",
+        "Resource":"arn:aws:sns:us-east-1:324816727452:jacobs-first-sns-topic"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment1" {
   role       = aws_iam_role.jacobs_lambda_s3_role.name
   policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaBasicExecutionRole-6777176a-f601-4ad8-864d-53578dfceb07"
@@ -656,6 +675,12 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {
   role       = aws_iam_role.jacobs_lambda_s3_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
 }
+
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {
+  role       = aws_iam_role.jacobs_lambda_s3_role.name
+  policy_arn = aws_iam_policy.lambda_sns_policy.arn
+}
+
 
 # heads up u literally have to like rename the file (python2 -> python3 etc) for any changes in main.py to get reflected in tf.
 data "archive_file" "default" {
@@ -895,4 +920,9 @@ resource "aws_sns_topic_subscription" "lambda" {
   topic_arn = aws_sns_topic.jacobs_sns_topic.arn
   protocol  = "lambda"
   endpoint  = aws_lambda_function.jacobs_s3_lambda_function.arn
+}
+
+resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
+  event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
+  function_name    = aws_lambda_function.jacobs_s3_lambda_function.arn
 }
