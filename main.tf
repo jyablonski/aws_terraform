@@ -940,13 +940,13 @@ resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
                ]
 }
 
-resource "aws_sns_topic_subscription" "enable_lambda_sns" {
-  topic_arn = aws_sns_topic.jacobs_sns_topic.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.jacobs_s3_lambda_function.arn
-}
+# resource "aws_sns_topic_subscription" "enable_lambda_sns" {
+#   topic_arn = aws_sns_topic.jacobs_sns_topic.arn
+#   protocol  = "lambda"
+#   endpoint  = aws_lambda_function.jacobs_s3_lambda_function.arn
+# }
 
-resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
-  event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
-  function_name    = aws_lambda_function.jacobs_s3_lambda_function.arn
-}
+# resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
+#   event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
+#   function_name    = aws_lambda_function.jacobs_s3_lambda_function.arn
+# }
