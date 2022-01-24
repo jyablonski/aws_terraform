@@ -700,6 +700,11 @@ resource "aws_cloudwatch_log_group" "jacobs_lambda_logs" {
   retention_in_days = 14
 }
 
+resource "aws_cloudwatch_log_group" "jacobs_sqs_lambda_logs" {
+  name              = "/aws/lambda/jacobs_sqs_lambda_function"
+  retention_in_days = 14
+}
+
 resource "aws_iam_policy" "jacobs_lambda_logging" {
   name        = "lambda_logging"
   path        = "/"
@@ -814,125 +819,145 @@ resource "aws_s3_bucket" "jacobs_sqs_sns_bucket" {
     Terraform      = local.env_terraform
   }
 }
-# resource "aws_sqs_queue" "jacobs_sqs_queue" {
-#   name                              = "jacobs-first-sqs"
-#   delay_seconds = 0
-#   message_retention_seconds = 480 # 4 days
-#   max_message_size = 262144          # 256 KiB
-#   visibility_timeout_seconds = 120
+resource "aws_sqs_queue" "jacobs_sqs_queue" {
+  name                              = "jacobs-first-sqs"
+  delay_seconds = 0
+  message_retention_seconds = 480 # 4 days
+  max_message_size = 262144          # 256 KiB
+  visibility_timeout_seconds = 120
 
-#   policy = <<POLICY
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Principal": "*",
-#       "Action": "sqs:SendMessage",
-#       "Resource": "arn:aws:sqs:*:*:jacobs-first-sqs",
-#       "Condition": {
-#         "ArnEquals": { "aws:SourceArn": "${aws_s3_bucket.jacobs_sqs_sns_bucket.arn}" }
-#       }
-#     }
-#   ]
-# }
-# POLICY
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+                "Service": "s3.amazonaws.com"
+            },
+      "Action": "sqs:SendMessage",
+      "Resource": "arn:aws:sqs:*:*:jacobs-first-sqs",
+      "Condition": {
+        "ArnEquals": { "aws:SourceArn": "${aws_s3_bucket.jacobs_sqs_sns_bucket.arn}" }
+      }
+    }
+  ]
+}
+POLICY
 
-#   tags = {
-#     Name        = local.env_name
-#     Environment = local.env_type
-#     Terraform   = local.env_terraform
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+    Terraform   = local.env_terraform
+  }
+}
+
+data "archive_file" "lambda_sqs" {
+  type        = "zip"
+  source_dir  = "${path.module}/lambda_sqs/"
+  output_path = "${path.module}/myzip/lambda_sqs3.zip"
+}
+
+resource "aws_lambda_function" "jacobs_s3_sqs_lambda_function" {
+  filename                       = "${path.module}/myzip/lambda_sqs3.zip"
+  function_name                  = "jacobs_sqs_lambda_function"
+  role                           = aws_iam_role.jacobs_lambda_s3_role.arn
+  handler                        = "main.lambda_handler"
+  runtime                        = "python3.8"
+  depends_on                     = [aws_iam_role_policy_attachment.lambda_logs]
+}
+
+resource "aws_lambda_permission" "allow_bucket_sqs" {
+  statement_id  = "AllowExecutionFromS3Bucketsqs"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
+  principal     = "sqs.amazonaws.com"
+  source_arn    = aws_sqs_queue.jacobs_sqs_queue.arn
+}
+
+# resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
+#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
+
+#   queue {
+#     id                  = "jacobs-sqs-lambda-trigger"
+#     queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
+#     events              = ["s3:ObjectCreated:*"]
+#     filter_prefix       = "transactions/"
+#     filter_suffix       = ".parquet"
 #   }
+
 # }
 
-# resource "aws_lambda_permission" "allow_bucket_sqs" {
-#   statement_id  = "AllowExecutionFromS3Bucketsqs"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
-#   principal     = "sqs.amazonaws.com"
-#   source_arn    = aws_sqs_queue.jacobs_sqs_queue.arn
-# }
+resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
+  event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
+  function_name    = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
+}
 
-# # resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
-# #   bucket = aws_s3_bucket.jacobs_bucket_tf.id
+### SNS - LAMBDA - S3 BUCKET REDDIT DATA
+resource "aws_sns_topic" "jacobs_sns_topic" {
+  name = "jacobs-first-sns-topic"
+  fifo_topic = false
 
-# #   queue {
-# #     queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
-# #     events              = ["s3:ObjectCreated:*"]
-# #     filter_prefix       = "transactions/"
-# #     filter_suffix       = ".parquet"
-# #   }
-
-# #   depends_on = [aws_lambda_permission.allow_bucket_jacobsbucket97_sqs]
-# # }
-
-
-
-# ### SNS - LAMBDA - S3 BUCKET REDDIT DATA
-# resource "aws_sns_topic" "jacobs_sns_topic" {
-#   name = "jacobs-first-sns-topic"
-#   fifo_topic = false
-
-#   policy = <<POLICY
-# {
-#     "Version":"2012-10-17",
-#     "Statement":[{
-#         "Effect": "Allow",
-#         "Principal": { "Service": "s3.amazonaws.com" },
-#         "Action": "SNS:Publish",
-#         "Resource": "arn:aws:sns:*:*:jacobs-first-sns-topic",
-#         "Condition":{
-#             "ArnLike":{"aws:SourceArn":"${aws_s3_bucket.jacobs_sqs_sns_bucket.arn}"},
-#         "StringEquals": {
-#           "aws:SourceAccount": "324816727452"
-#         }
-#         }
-#     }]
-# }
-# POLICY
-#   tags = {
-#     Name        = local.env_name
-#     Environment = local.env_type
-#     Terraform   = local.env_terraform
-#   }
-# }
+  policy = <<POLICY
+{
+    "Version":"2012-10-17",
+    "Statement":[{
+        "Effect": "Allow",
+        "Principal": { "Service": "s3.amazonaws.com" },
+        "Action": "SNS:Publish",
+        "Resource": "arn:aws:sns:*:*:jacobs-first-sns-topic",
+        "Condition":{
+            "ArnLike":{"aws:SourceArn":"${aws_s3_bucket.jacobs_sqs_sns_bucket.arn}"},
+        "StringEquals": {
+          "aws:SourceAccount": "324816727452"
+        }
+        }
+    }]
+}
+POLICY
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+    Terraform   = local.env_terraform
+  }
+}
 
 # resource "aws_lambda_permission" "allow_bucket_sns" {
 #   statement_id  = "AllowExecutionFromS3Bucketsns"
 #   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
+#   function_name = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
 #   principal     = "sns.amazonaws.com"
 #   source_arn    = aws_sns_topic.jacobs_sns_topic.arn
 # }
 
-# # resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
-# #   bucket = aws_s3_bucket.jacobs_sqs_sns_bucket.id
+# resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
+#   bucket = aws_s3_bucket.jacobs_sqs_sns_bucket.id
 
-# #   # topic {
-# #   #   topic_arn           = aws_sns_topic.jacobs_sns_topic.arn
-# #   #   events              = ["s3:ObjectCreated:*"]
-# #   #   filter_prefix       = "reddit_data/"
-# #   #   filter_suffix       = ".parquet"
-# #   # }
+#   # topic {
+#   #   topic_arn           = aws_sns_topic.jacobs_sns_topic.arn
+#   #   events              = ["s3:ObjectCreated:*"]
+#   #   filter_prefix       = "reddit_data/"
+#   #   filter_suffix       = ".parquet"
+#   # }
 
-# #   lambda_function {
-# #     lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
-# #     events              = ["s3:ObjectCreated:*"]
-# #     filter_prefix       = "boxscores/"
-# #     filter_suffix       = ".parquet"
-# #   }
+#   lambda_function {
+#     lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
+#     events              = ["s3:ObjectCreated:*"]
+#     filter_prefix       = "boxscores/"
+#     filter_suffix       = ".parquet"
+#   }
 
-# #   queue {
-# #     queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
-# #     events              = ["s3:ObjectCreated:*"]
-# #     filter_prefix       = "transactions/"
-# #     filter_suffix       = ".parquet"
-# #   }
+#   queue {
+#     queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
+#     events              = ["s3:ObjectCreated:*"]
+#     filter_prefix       = "transactions/"
+#     filter_suffix       = ".parquet"
+#   }
 
-# #   depends_on = [aws_lambda_permission.allow_bucket_sqs,
-# #                 aws_lambda_permission.allow_bucket_sns,
-# #                ]
-# # }
+#   depends_on = [aws_lambda_permission.allow_bucket_sqs,
+#                 aws_lambda_permission.allow_bucket_sns,
+#                ]
+# }
 
 # resource "aws_sns_topic_subscription" "enable_lambda_sns" {
 #   topic_arn = aws_sns_topic.jacobs_sns_topic.arn
@@ -942,5 +967,5 @@ resource "aws_s3_bucket" "jacobs_sqs_sns_bucket" {
 
 # resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
 #   event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
-#   function_name    = aws_lambda_function.jacobs_s3_lambda_function.arn
+#   function_name    = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
 # }
