@@ -832,7 +832,9 @@ resource "aws_sqs_queue" "jacobs_sqs_queue" {
   "Statement": [
     {
       "Effect": "Allow",
-      "Principal": "*",
+      "Principal": {
+                "Service": "s3.amazonaws.com"
+            },
       "Action": "sqs:SendMessage",
       "Resource": "arn:aws:sqs:*:*:jacobs-first-sqs",
       "Condition": {
