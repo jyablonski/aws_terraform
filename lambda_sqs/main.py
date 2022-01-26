@@ -77,14 +77,14 @@ def lambda_handler(event, context):
     """
     try:
         for sqs_event in event['Records']:
-            print(sqs_event)
+            # print(sqs_event) use this for debugging this bs
             s3_event = json.loads(sqs_event['body'])
             if 'Event' in s3_event.keys() and s3_event['Event'] == 's3:TestEvent':
                 print('LOADED TEST EVENT - EXITING')
                 break
             for s3_record in s3_event['Records']:
                 key = s3_record['s3']['object']['key']
-                print(f"Grabbing key {key}")
+                print(f"Grabbing Key {key}")
 
                 bucket = s3_record['s3']['bucket']['name']
                 print(f"Grabbing Bucket {bucket}")
@@ -92,6 +92,5 @@ def lambda_handler(event, context):
                 send_ses_email(key, bucket)
                 print(f"Sending SES Email")
     except Exception as e:
-        print(e)
-        print(f"Error Occured, {e}")
+        print(f"Error Occurred, {e}")
         raise e
