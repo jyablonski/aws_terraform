@@ -93,14 +93,13 @@ variable "grafana_external_id" {
   }
 }
 
+# variable "snowflake_user" {
+#     type = string
+#     sensitive = true
+# }
 
-variable "snowflake_user" {
-    type = string
-    sensitive = true
-}
 
-
-variable "snowflake_pw" {
-    type = string
-    sensitive = true
-}
+# variable "snowflake_pw" {
+#     type = string
+#     sensitive = true
+# }
