@@ -7,10 +7,10 @@ provider "aws" {
 terraform {
   required_version = ">= 1.1.0"
   required_providers {
-    snowflake = {
-      source = "chanzuckerberg/snowflake"
-      version = "0.25.32"
-    }
+    # snowflake = {
+    #   source = "chanzuckerberg/snowflake"
+    #   version = "0.25.32"
+    # }
     aws = {
       source = "hashicorp/aws"
       version = "3.71.0"
@@ -23,9 +23,9 @@ terraform {
       }
   }
 }
-provider "snowflake" {
-  username = var.snowflake_user
-  account  = "rl64113"
-  region   = "us-east-2.aws"
-  password = var.snowflake_pw
-}
+# provider "snowflake" {
+#   username = var.snowflake_user
+#   account  = "rl64113"
+#   region   = "us-east-2.aws"
+#   password = var.snowflake_pw
+# }
