@@ -269,18 +269,18 @@ resource "aws_lambda_permission" "apigw_lambda_products_get" {
   source_arn = "arn:aws:execute-api:${var.region}:${local.account_id}:${aws_api_gateway_rest_api.jacobs_api_gateway.id}/*/${aws_api_gateway_method.api_gateway_products_get.http_method}${aws_api_gateway_resource.api_gateway_products.path}"
 }
 
-## deployment
-resource "aws_api_gateway_deployment" "jacobs_api_gateway_deployment" {
-  rest_api_id = aws_api_gateway_rest_api.jacobs_api_gateway.id
-  description = "Jacobs Practice API Gateway"
+## deployment - leaving it off for now just in case
+# resource "aws_api_gateway_deployment" "jacobs_api_gateway_deployment" {
+#   rest_api_id = aws_api_gateway_rest_api.jacobs_api_gateway.id
+#   description = "Jacobs Practice API Gateway"
 
-}
+# }
 
-resource "aws_api_gateway_stage" "jacobs_deployment_stage" {
-  deployment_id = aws_api_gateway_deployment.jacobs_api_gateway_deployment.id
-  rest_api_id   = aws_api_gateway_rest_api.jacobs_api_gateway.id
-  stage_name    = "Dev"
-}
+# resource "aws_api_gateway_stage" "jacobs_deployment_stage" {
+#   deployment_id = aws_api_gateway_deployment.jacobs_api_gateway_deployment.id
+#   rest_api_id   = aws_api_gateway_rest_api.jacobs_api_gateway.id
+#   stage_name    = "Dev"
+# }
 
 # General idea is you create dynamodb table with a primary key attribute (productId, String)
 # then create api gateway and its endpoints (resources), and then methods on those endpoints (get, put, post, patch, delete etc).
