@@ -1,7 +1,7 @@
 version: 1.2.0
 
 # Terraform Project 
-### Includes all AWS Infrastructure for [NBA Project](https://github.com/jyablonski/NBA-Dashboard)
+### Includes all AWS Infrastructure for [NBA Project](https://github.com/jyablonski/NBA-Dashboard) is in `main.tf`
 
 1. Links to other Repos providing infrastructure for this Project
     * [Shiny Server](https://github.com/jyablonski/NBA-Dashboard)
