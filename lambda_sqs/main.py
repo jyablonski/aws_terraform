@@ -1,8 +1,10 @@
-from datetime import datetime, timedelta
 import json
 import urllib.parse
+from datetime import datetime, timedelta
+
 import boto3
 from botocore.exceptions import ClientError
+
 # from botocore.vendored import requests
 
 def send_ses_email(s3_key="DEFAULT", s3_bucket="DEFAULT", s3_event_time="DEFAULT", kwargs = ""):
