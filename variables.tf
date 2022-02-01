@@ -103,3 +103,13 @@ variable "grafana_external_id" {
 #     type = string
 #     sensitive = true
 # }
+
+variable "es_master_user" {
+    type = string
+    sensitive = true
+}
+
+variable "es_master_pw" {
+    type = string
+    sensitive = true
+}
