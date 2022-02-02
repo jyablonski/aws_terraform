@@ -158,6 +158,7 @@ CONFIG
 #   depends_on = [aws_iam_service_linked_role.es_access]
 }
 
+# IN FUTURE - manually create this first as a template and let AWS create the lambda for u
 # filter pattern is an or or statement to grab all logging.* from python script.  double quotes need a preceding backslash.
 resource "aws_cloudwatch_log_subscription_filter" "jacobs_lambda_es_logs_stream" {
   name            = "jacobs-lambda-es-logs-stream"
