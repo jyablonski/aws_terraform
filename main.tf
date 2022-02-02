@@ -354,6 +354,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
           {"name": "PORT", "value": "5432"},
           {"name": "RDS_USER", "value": "${var.jacobs_rds_user}"},
           {"name": "RDS_PW", "value": "${var.jacobs_rds_pw}"},
+          {"name": "RDS_SCHEMA", "value": "${var.jacobs_rds_schema}"},
           {"name": "RDS_DB", "value": "jacob_db"},
           {"name": "reddit_user", "value": "${var.jacobs_reddit_user}"},
           {"name": "reddit_pw", "value": "${var.jacobs_reddit_pw}"},
