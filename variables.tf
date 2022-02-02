@@ -28,6 +28,11 @@ variable "jacobs_rds_pw" {
     sensitive = true
 }
 
+variable "jacobs_rds_schema" {
+    type = string
+    sensitive = true
+}
+
 variable "jacobs_email_address" {
     type = string
     sensitive = true
@@ -110,6 +115,11 @@ variable "es_master_user" {
 }
 
 variable "es_master_pw" {
+    type = string
+    sensitive = true
+}
+
+variable "jacobs_ip" {
     type = string
     sensitive = true
 }
