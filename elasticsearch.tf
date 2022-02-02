@@ -6,6 +6,55 @@ locals {
     es_logs_name = "jacobs-es-cluster-logs"
 }
 
+resource "aws_iam_role" "jacobs_lambda_es_role" {
+  name = "jacobs_lambda_es_role"
+  description = "Role created for AWS Lambda ES Logs"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "lambda_es_policy" {
+  name        = "lambda-es-policy"
+  description = "A test policy for lambda to write cloudwatch logs to es"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "es:*"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:es:${var.region}:${data.aws_caller_identity.current.account_id}:domain/${local.es_cluster_name}/*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_es_role_attachment1" {
+  role       = aws_iam_role.jacobs_lambda_es_role.name
+  policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaBasicExecutionRole-6777176a-f601-4ad8-864d-53578dfceb07"
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_lambda_es_role_attachment2" {
+  role       = aws_iam_role.jacobs_lambda_es_role.name
+  policy_arn = aws_iam_policy.lambda_es_policy.arn
+}
+
 resource "aws_cloudwatch_log_group" "jacobs_es_cluster_logs" {
   name              = local.es_logs_name
   retention_in_days = 7
@@ -107,4 +156,12 @@ CONFIG
   }
 
 #   depends_on = [aws_iam_service_linked_role.es_access]
+}
+
+# filter pattern is an or or statement to grab all logging.* from python script.  double quotes need a preceding backslash.
+resource "aws_cloudwatch_log_subscription_filter" "jacobs_lambda_es_logs_stream" {
+  name            = "jacobs-lambda-es-logs-stream"
+  log_group_name  = "jacobs_ecs_logs"
+  filter_pattern  = "?\"[ERROR]\" ?\"[WARNING]\" ?\"[INFO]\""
+  destination_arn = "arn:aws:lambda:us-east-1:324816727452:function:LogsToElasticsearch_jacobs-opensearch-cluster"
 }
