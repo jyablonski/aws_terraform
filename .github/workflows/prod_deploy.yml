@@ -1,8 +1,6 @@
 name: "Terraform Apply after Merged PR"
 
 on:
-  pull_request:
-    types: closed
   push:
     branches:
       - master
