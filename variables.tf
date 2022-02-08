@@ -123,3 +123,23 @@ variable "jacobs_ip" {
     type = string
     sensitive = true
 }
+
+variable "jacobs_rds_db" {
+    type = string
+    sensitive = true
+}
+
+variable "jacobs_rds_schema_twitch" {
+    type = string
+    sensitive = true
+}
+
+variable "jacobs_client_id_twitch" {
+    type = string
+    sensitive = true
+}
+
+variable "jacobs_client_secret_twitch" {
+    type = string
+    sensitive = true
+}
