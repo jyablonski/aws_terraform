@@ -301,11 +301,12 @@ resource "aws_ecr_lifecycle_policy" "jacobs_repo_policy" {
     "rules": [
         {
             "rulePriority": 1,
-            "description": "Remove old images",
+            "description": "Remove Untagged Images after 1 Day",
             "selection": {
-                "tagStatus": "untagged",
-                "countType": "imageCountMoreThan",
-                "countNumber": 0
+              "tagStatus": "untagged",
+              "countType": "sinceImagePushed",
+              "countUnit": "days",
+              "countNumber": 1
             },
             "action": {
                 "type": "expire"
