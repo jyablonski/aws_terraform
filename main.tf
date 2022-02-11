@@ -17,12 +17,16 @@ resource "aws_vpc" "jacobs_vpc_tf" {
 
 resource "aws_s3_bucket" "jacobs_bucket_tf" {
   bucket = "jacobsbucket97"
-  acl    = "private"
 
   tags = {
     Name        = local.env_name
     Environment = local.env_type
   }
+}
+
+resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf.id
+  acl    = "private"
 }
 
 # attach this to things like aws lambda or ecs tasks so they can connect to the rds database
@@ -139,17 +143,17 @@ resource "aws_route_table" "jacobs_public_route_table" {
     {
       cidr_block = "0.0.0.0/0"
       gateway_id = aws_internet_gateway.jacobs_gw.id
-      carrier_gateway_id = ""
-      destination_prefix_list_id = ""
-      egress_only_gateway_id = ""
-      instance_id = ""
-      ipv6_cidr_block = ""
-      local_gateway_id = ""
-      nat_gateway_id = ""
-      network_interface_id = ""
-      transit_gateway_id = ""
-      vpc_endpoint_id = ""
-      vpc_peering_connection_id = ""
+      carrier_gateway_id = null
+      destination_prefix_list_id = null
+      egress_only_gateway_id = null
+      instance_id = null
+      ipv6_cidr_block = null
+      local_gateway_id = null
+      nat_gateway_id = null
+      network_interface_id = null
+      transit_gateway_id = null
+      vpc_endpoint_id = null
+      vpc_peering_connection_id = null
     }
   ]
   tags = {
@@ -204,7 +208,7 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   instance_class       = "db.t2.micro"
   identifier           = "jacobs-rds-server"
   port                 = 5432
-  name                 = "jacob_db"   # this is the name of the default database that will be created.
+  db_name              = "jacob_db"   # this is the name of the default database that will be created.
   username             = var.jacobs_rds_user
   password             = var.jacobs_rds_pw
   # parameter_group_name = "default.mysql8.0.25" # try this
@@ -611,12 +615,16 @@ resource "aws_ssm_parameter" "jacobs_ssm_sg_task" {
 ## Lambda Event-Driven Workflow zz
 resource "aws_s3_bucket" "jyablonski_lambda_bucket" {
   bucket = "jyablonski-lambda-bucket"
-  acl    = "private"
 
   tags = {
     Name        = local.env_name
     Environment = local.env_type
   }
+}
+
+resource "aws_s3_bucket_acl" "jyablonski_lambda_bucket_acl" {
+  bucket = aws_s3_bucket.jyablonski_lambda_bucket.id
+  acl    = "private"
 }
 
 # these aws resources assume these roles, so the assume_role_policy is saying WHICH aws service can assume this role
@@ -774,23 +782,33 @@ resource "aws_iam_user_policy_attachment" "jacobs_terraform_user_attachment" {
 
 resource "aws_s3_bucket" "jyablonski_unhappy_bucket" {
   bucket = "jyablonski-unhappy-bucket"
-  acl    = "private"
 
   tags = {
     Name        = local.env_name
     Environment = local.env_type
   }
+}
+
+resource "aws_s3_bucket_acl" "jyablonski_unhappy_bucket_acl" {
+  bucket = aws_s3_bucket.jyablonski_unhappy_bucket.id
+  acl    = "private"
 }
 
 resource "aws_s3_bucket" "jyablonski_tf_cicd_bucket" {
   bucket = "jyablonski-tf-cicd-bucket"
-  acl    = "private"
 
   tags = {
     Name        = local.env_name
     Environment = local.env_type
   }
 }
+
+resource "aws_s3_bucket_acl" "jyablonski_tf_cicd_bucket_acl" {
+  bucket = aws_s3_bucket.jyablonski_tf_cicd_bucket.id
+  acl    = "private"
+}
+
+
 
 #########
 resource "aws_lambda_permission" "allow_bucket_jacobsbucket97" {
@@ -820,6 +838,11 @@ resource "aws_s3_bucket" "jacobs_sqs_sns_bucket" {
     Environment    = local.env_type
     Terraform      = local.env_terraform
   }
+}
+
+resource "aws_s3_bucket_acl" "jacobs_sqs_sns_bucket_acl" {
+  bucket = aws_s3_bucket.jacobs_sqs_sns_bucket.id
+  acl    = "private"
 }
 
 data "archive_file" "lambda_sqs" {
