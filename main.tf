@@ -73,9 +73,9 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
 
   ingress {
     description      = "Other Security Groups"
-    from_port        = -1
-    to_port          = -1
-    protocol         = "all"
+    from_port        = 0
+    to_port          = 0
+    protocol         = -1
     security_groups  = [aws_security_group.jacobs_task_security_group_tf.id] # this should be changed to vpc_security_group_ids ?
   }
 
@@ -214,6 +214,8 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   # parameter_group_name = "default.mysql8.0.25" # try this
   skip_final_snapshot  = true
   publicly_accessible  = true
+  deletion_protection  = true
+  backup_retention_period = 1
   storage_type         = "gp2" # general purpose ssd
   vpc_security_group_ids = [aws_security_group.jacobs_rds_security_group_tf.id]
   db_subnet_group_name = aws_db_subnet_group.jacobs_subnet_group.id
