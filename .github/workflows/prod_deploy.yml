@@ -26,21 +26,3 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         run: terraform apply -auto-approve
-
-  bump_version:
-    name: Bumpversion
-    needs: terraform
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Bump version and push tag
-        if: github.ref == 'refs/heads/master'
-        uses: jaumann/github-bumpversion-action@v0.0.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push changes
-        if: github.ref == 'refs/heads/master'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tags: true
