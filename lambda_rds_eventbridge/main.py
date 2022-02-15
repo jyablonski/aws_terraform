@@ -1,34 +1,40 @@
 import json
 import urllib.parse
 from datetime import datetime, timedelta
+from typing import Dict
 
 import boto3
 from botocore.exceptions import ClientError
 
 # from botocore.vendored import requests
 
-def send_ses_email(s3_key="DEFAULT", s3_bucket="DEFAULT", s3_event_time="DEFAULT", kwargs = ""):
+def send_ses_email(event_category = "DEFAULT", event_type="DEFAULT", event_message="DEFAULT", event_time="DEFAULT", event_server = "DEFAULT", **kwargs):
     SENDER = "jyablonski9@gmail.com"
     RECIPIENT = "jyablonski9@gmail.com"
     # CONFIGURATION_SET = "ConfigSet"
     AWS_REGION = "us-east-1"
 
-    SUBJECT = f"{s3_key} S3 FILE ARRIVED IN {s3_bucket} at {s3_event_time}"
+    SUBJECT = f"RDS Event at {event_time} - {event_message} for {event_server}"
 
     # The email body for recipients with non-HTML email clients.
-    BODY_TEXT = f"{kwargs}{s3_key} arrived in {s3_bucket} at {s3_event_time}"
+    BODY_TEXT = f"RDS Event at {event_time}, {kwargs} Category: {event_category}, Type: {event_type}, Message: {event_message}, Server: {event_server}"
                 
     # The HTML body of the email.
     BODY_HTML = f"""<html>
     <head></head>
     <body>
-    <h1>Amazon SES Test (SDK for Python)</h1>
-    <p>This email was sent with
-        <a href='https://aws.amazon.com/ses/'>Amazon SES</a> using the
-        <a href='https://aws.amazon.com/sdk-for-python/'>
-        AWS SDK for Python (Boto)</a>.</p>
-        <br>
-        {s3_key} arrived in {s3_bucket} at {s3_event_time}
+
+    RDS Event at {event_time}
+    <br>
+    {kwargs}
+    <br>
+    Server: {event_server}
+    <br>
+    Category: {event_category}
+    <br>
+    Type: {event_type}
+    <br>
+    Message: {event_message}
     </body>
     </html>
                 """            
@@ -69,31 +75,22 @@ def send_ses_email(s3_key="DEFAULT", s3_bucket="DEFAULT", s3_event_time="DEFAULT
 
 print('Loading function')
 
-s3 = boto3.client('s3')
-
-
 def lambda_handler(event, context):
     """
-    SQS Lambda Function - Format is S3 -> SNS -> SQS -> Lambda.
-    The S3 notification code in inside ['body']['Message']
-    The for loops are to iterate throguh dict lists (elements 0, 1, 2), instead of going event['Records'][0]
+    Lambda Function to read RDS Events from an SNS Topic and send email out detailing events.
     """
-    # print(event)
+    # print(event) # do this initally for debugging bc how the fuq else do you see the layering of the nested event.
     try:
-        for s3_event in event['Records']:
-            df = json.loads(json.loads(s3_event['body'])['Message'])
-            for s3_record in df['Records']:
-                bucket = s3_record['s3']['bucket']['name']
-                print(f"Grabbing Bucket {bucket}")
+        for rds_event in event['Records']:
+            df = json.loads(rds_event['Sns']['Message'])['detail']
+            event_category = df['EventCategories'][0]
+            event_type = df['SourceType']
+            event_message = df['Message']
+            event_time = df['Date']
+            event_server = df['SourceIdentifier']
 
-                key = s3_record['s3']['object']['key']
-                print(f"Grabbing key {key}")
-
-                event_time = s3_record['eventTime']
-                print(f"Grabbing event time {event_time}")
-
-                send_ses_email(key, bucket, event_time)
-                print(f"Sending SES Email")
+            send_ses_email(event_category, event_type, event_message, event_time, event_server)
+            print(f"Sending SES Email")
     except BaseException as e:
         print(f"Error Occurred, {e}")
         send_ses_email(kwargs=e)
