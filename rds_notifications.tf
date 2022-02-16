@@ -104,12 +104,12 @@ resource "aws_cloudwatch_log_group" "jacobs_rds_sns_lambda_logs" {
 
 data "archive_file" "lambda_rds" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_rds_eventbridge/"
-  output_path = "${path.module}/myzip/lambda_rds11.zip"
+  source_dir  = "${path.module}/lambdas/lambda_rds_eventbridge/"
+  output_path = "${path.module}/myzip/lambda_rds12.zip"
 }
 
 resource "aws_lambda_function" "jacobs_rds_sns_lambda_function" {
-  filename                       = "${path.module}/myzip/lambda_rds11.zip"
+  filename                       = "${path.module}/myzip/lambda_rds12.zip"
   function_name                  = "jacobs_rds_sns_lambda_function"
   role                           = aws_iam_role.jacobs_rds_sns_lambda_role.arn
   handler                        = "main.lambda_handler"

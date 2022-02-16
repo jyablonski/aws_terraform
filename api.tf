@@ -59,12 +59,12 @@ resource "aws_cloudwatch_log_group" "jacobs_lambda_dynamodb_logs" {
 
 data "archive_file" "lambda_dynamodb_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_dynamodb/"
-  output_path = "${path.module}/myzip/lambda_dynamodb1.zip"
+  source_dir  = "${path.module}/lambdas/lambda_dynamodb/"
+  output_path = "${path.module}/myzip/lambda_dynamodb2.zip"
 }
 
 resource "aws_lambda_function" "jacobs_lambda_dynamodb_function" {
-  filename                       = "${path.module}/myzip/lambda_dynamodb1.zip"
+  filename                       = "${path.module}/myzip/lambda_dynamodb2.zip"
   function_name                  = local.lambda_name_dynamodb
   role                           = aws_iam_role.jacobs_lambda_dynamodb_role.arn
   handler                        = "main.lambda_handler"
