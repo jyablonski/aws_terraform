@@ -703,8 +703,8 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_6" {
 # heads up u literally have to like rename the file (python2 -> python3 etc) for any changes in main.py to get reflected in tf.
 data "archive_file" "default" {
   type        = "zip"
-  source_dir  = "${path.module}/files/"
-  output_path = "${path.module}/myzip/python2.zip"
+  source_dir  = "${path.module}/lambdas/lambda_s3_notification/"
+  output_path = "${path.module}/myzip/python3.zip"
 }
 
 resource "aws_cloudwatch_log_group" "jacobs_lambda_logs" {
@@ -746,7 +746,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 resource "aws_lambda_function" "jacobs_s3_lambda_function" {
-  filename                       = "${path.module}/myzip/python2.zip"
+  filename                       = "${path.module}/myzip/python3.zip"
   function_name                  = var.lambda_function_name
   role                           = aws_iam_role.jacobs_lambda_s3_role.arn
   handler                        = "main.lambda_handler"
@@ -849,12 +849,12 @@ resource "aws_s3_bucket_acl" "jacobs_sqs_sns_bucket_acl" {
 
 data "archive_file" "lambda_sqs" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda_sqs/"
-  output_path = "${path.module}/myzip/lambda_sqs7.zip"
+  source_dir  = "${path.module}/lambdas/lambda_sqs/"
+  output_path = "${path.module}/myzip/lambda_sqs8.zip"
 }
 
 resource "aws_lambda_function" "jacobs_s3_sqs_lambda_function" {
-  filename                       = "${path.module}/myzip/lambda_sqs7.zip"
+  filename                       = "${path.module}/myzip/lambda_sqs8.zip"
   function_name                  = "jacobs_sqs_lambda_function"
   role                           = aws_iam_role.jacobs_lambda_s3_role.arn
   handler                        = "main.lambda_handler"
