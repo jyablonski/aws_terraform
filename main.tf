@@ -37,6 +37,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy
     }
 
     id = "60-day-removal"
+    status = "Enabled"
   }
 
 }
