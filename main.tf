@@ -24,6 +24,23 @@ resource "aws_s3_bucket" "jacobs_bucket_tf" {
   }
 }
 
+resource "aws_s3control_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf.arn
+
+  rule {
+    expiration {
+      days = 60
+    }
+
+    filter {
+      prefix = "sample_files/"
+    }
+
+    id = "60-day-removal"
+  }
+
+}
+
 resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
   acl    = "private"
@@ -76,7 +93,7 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
     from_port        = 0
     to_port          = 0
     protocol         = -1
-    security_groups  = [aws_security_group.jacobs_task_security_group_tf.id] # this should be changed to vpc_security_group_ids ?
+    security_groups  = [aws_security_group.jacobs_task_security_group_tf.id]
   }
 
 
@@ -814,24 +831,24 @@ resource "aws_s3_bucket_acl" "jyablonski_tf_cicd_bucket_acl" {
 
 
 #########
-resource "aws_lambda_permission" "allow_bucket_jacobsbucket97" {
-  statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
-  principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.jacobs_bucket_tf.arn
-}
+# resource "aws_lambda_permission" "allow_bucket_jacobsbucket97" {
+#   statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97"
+#   action        = "lambda:InvokeFunction"
+#   function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
+#   principal     = "s3.amazonaws.com"
+#   source_arn    = aws_s3_bucket.jacobs_bucket_tf.arn
+# }
 
-resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf.id
+# resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97" {
+#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
 
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "boxscores/"
-    filter_suffix       = ".parquet"
-  }
-}
+#   lambda_function {
+#     lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
+#     events              = ["s3:ObjectCreated:*"]
+#     filter_prefix       = "boxscores/"
+#     filter_suffix       = ".parquet"
+#   }
+# }
 
 ## SQS - LAMBDA - S3 BUCKET TRANSACTIONS
 resource "aws_s3_bucket" "jacobs_sqs_sns_bucket" {
