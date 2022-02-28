@@ -1,4 +1,4 @@
-version: 1.5.0
+version: 1.5.1
 
 # Terraform Project 
 ### Includes all AWS Infrastructure for [NBA Project](https://github.com/jyablonski/NBA-Dashboard) is in `main.tf`
