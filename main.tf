@@ -24,8 +24,10 @@ resource "aws_s3_bucket" "jacobs_bucket_tf" {
   }
 }
 
+# 1 config file per s3 bucket
+# can add things like s3 files -> glacier after 90 days here etc.
 resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf.arn
+  bucket = aws_s3_bucket.jacobs_bucket_tf.bucket
 
   rule {
     expiration {
