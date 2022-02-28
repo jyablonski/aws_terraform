@@ -24,7 +24,7 @@ resource "aws_s3_bucket" "jacobs_bucket_tf" {
   }
 }
 
-resource "aws_s3control_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
+resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.arn
 
   rule {
@@ -37,6 +37,7 @@ resource "aws_s3control_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle
     }
 
     id = "60-day-removal"
+    status = "Enabled"
   }
 
 }
