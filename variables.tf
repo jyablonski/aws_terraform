@@ -143,3 +143,8 @@ variable "jacobs_client_secret_twitch" {
     type = string
     sensitive = true
 }
+
+variable "jacobs_rds_schema_ml" {
+    type = string
+    sensitive = true
+}
