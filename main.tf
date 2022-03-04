@@ -91,13 +91,13 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
 
   }
 
-  ingress {
-    description      = "Open Access"
-    from_port        = 0
-    to_port          = 0
-    protocol         = -1
+  # ingress {
+  #   description      = "Open Access"
+  #   from_port        = 0
+  #   to_port          = 0
+  #   protocol         = "-1"
 
-  }
+  # }
 
   ingress {
     description      = "Other Security Groups"
