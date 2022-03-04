@@ -92,6 +92,14 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
   }
 
   ingress {
+    description      = "Open Access"
+    from_port        = 0
+    to_port          = 0
+    protocol         = -1
+
+  }
+
+  ingress {
     description      = "Other Security Groups"
     from_port        = 0
     to_port          = 0
@@ -458,7 +466,7 @@ resource "aws_cloudwatch_event_rule" "every_15_mins" {
 
 resource "aws_cloudwatch_event_rule" "etl_rule" {
   name = "python_scheduled_task_prod" # change this name
-  description = "Run every day at 12PM UTC"
+  description = "Run every day at 12 pm UTC"
   schedule_expression = "cron(0 12 * * ? *)"
 }
 
