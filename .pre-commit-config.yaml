@@ -1,8 +1,6 @@
 repos:
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.17 # Get the latest from: https://github.com/gruntwork-io/pre-commit/releases
-                # run curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-                # run brew install pre-commit
     hooks:
       - id: terraform-fmt
       #- id: terraform-validate
@@ -10,3 +8,8 @@ repos:
         args:
           - "--config=.tflint.hcl"
       - id: shellcheck
+# run curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+# run brew install pre-commit
+# essentially, terraform plan would say the config is fine but terraform apply would fail, 
+# bc there are provider specific things that terraform cant account for
+# pre commit hooks allow you to install provider checks to account for these scenarios as you commit your code before it hits ci / cd and fails
