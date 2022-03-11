@@ -1,8 +1,8 @@
 locals {
-    env_name_dynamodb = "Jacobs Practice API"
-    env_type_dynamodb = "Test" # cant have an apostrophe in the tag name
-    lambda_name_dynamodb = "jacobs_lambda_dynamodb"
-    account_id = data.aws_caller_identity.current.account_id
+  env_name_dynamodb    = "Jacobs Practice API"
+  env_type_dynamodb    = "Test" # cant have an apostrophe in the tag name
+  lambda_name_dynamodb = "jacobs_lambda_dynamodb"
+  account_id           = data.aws_caller_identity.current.account_id
 }
 
 resource "aws_dynamodb_table" "jacobs_dynamodb_table" {
@@ -12,20 +12,20 @@ resource "aws_dynamodb_table" "jacobs_dynamodb_table" {
   write_capacity = 5
   hash_key       = "productId"
 
-    attribute {
+  attribute {
     name = "productId"
     type = "S"
   }
 
-    tags = {
+  tags = {
     Name        = local.env_name_dynamodb
     Environment = local.env_type_dynamodb
   }
 }
 
 resource "aws_iam_role" "jacobs_lambda_dynamodb_role" {
-  name = "jacobs_lambda_dynamodb_role"
-  description = "Role created for AWS DynamoDB and API Prac"
+  name               = "jacobs_lambda_dynamodb_role"
+  description        = "Role created for AWS DynamoDB and API Prac"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -64,13 +64,13 @@ data "archive_file" "lambda_dynamodb_zip" {
 }
 
 resource "aws_lambda_function" "jacobs_lambda_dynamodb_function" {
-  filename                       = "${path.module}/myzip/lambda_dynamodb2.zip"
-  function_name                  = local.lambda_name_dynamodb
-  role                           = aws_iam_role.jacobs_lambda_dynamodb_role.arn
-  handler                        = "main.lambda_handler"
-  runtime                        = "python3.9"
-  memory_size                    = 128
-  timeout                        = 60
+  filename      = "${path.module}/myzip/lambda_dynamodb2.zip"
+  function_name = local.lambda_name_dynamodb
+  role          = aws_iam_role.jacobs_lambda_dynamodb_role.arn
+  handler       = "main.lambda_handler"
+  runtime       = "python3.9"
+  memory_size   = 128
+  timeout       = 60
 
   tags = {
     Name        = local.env_name_dynamodb
@@ -121,7 +121,7 @@ resource "aws_api_gateway_rest_api_policy" "jacobs_api_policy" {
   ]
 }
 EOF
-}# arn:aws:execute-api:us-east-1:324816727452:fgvdktt1h3/*/GET/product
+} # arn:aws:execute-api:us-east-1:324816727452:fgvdktt1h3/*/GET/product
 
 # RESOURCES
 resource "aws_api_gateway_resource" "api_gateway_health" {

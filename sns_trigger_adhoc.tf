@@ -7,15 +7,15 @@
 #             Message="Hello World!")
 
 locals {
-    env_name_adhoc = "Jacobs Practice ad hoc Lambda Trigger"
-    env_type_adhoc = "Test" # cant have an apostrophe in the tag name
-    adhoc_sns_name = "jacobs-adhoc-sns-topic"
-    adhoc_logs_name = "jacobs-adhoc-logs"
-    adhoc_lambda_name = "jacobs_adhoc_lambda_function"
+  env_name_adhoc    = "Jacobs Practice ad hoc Lambda Trigger"
+  env_type_adhoc    = "Test" # cant have an apostrophe in the tag name
+  adhoc_sns_name    = "jacobs-adhoc-sns-topic"
+  adhoc_logs_name   = "jacobs-adhoc-logs"
+  adhoc_lambda_name = "jacobs_adhoc_lambda_function"
 }
 
 resource "aws_sns_topic" "jacobs_adhoc_sns_topic" {
-  name = local.adhoc_sns_name
+  name       = local.adhoc_sns_name
   fifo_topic = false
 
   tags = {
@@ -25,8 +25,8 @@ resource "aws_sns_topic" "jacobs_adhoc_sns_topic" {
 }
 
 resource "aws_iam_role" "jacobs_adhoc_sns_lambda_role" {
-  name = "jacobs_adhoc_sns_lambda_role"
-  description = "Role created for AWS Lambda to Run ad hoc jobs after sns message"
+  name               = "jacobs_adhoc_sns_lambda_role"
+  description        = "Role created for AWS Lambda to Run ad hoc jobs after sns message"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -71,13 +71,13 @@ data "archive_file" "lambda_adhoc_sns_zip" {
 }
 
 resource "aws_lambda_function" "jacobs_adhoc_sns_lambda_function" {
-  filename                       = "${path.module}/myzip/lambda_adhoc_sns3.zip"
-  function_name                  = local.adhoc_lambda_name
-  role                           = aws_iam_role.jacobs_adhoc_sns_lambda_role.arn
-  handler                        = "main.lambda_handler"
-  runtime                        = "python3.9"
-  memory_size                    = 128
-  timeout                        = 3
+  filename      = "${path.module}/myzip/lambda_adhoc_sns3.zip"
+  function_name = local.adhoc_lambda_name
+  role          = aws_iam_role.jacobs_adhoc_sns_lambda_role.arn
+  handler       = "main.lambda_handler"
+  runtime       = "python3.9"
+  memory_size   = 128
+  timeout       = 3
 
   tags = {
     Name        = local.env_name_adhoc

@@ -1,6 +1,6 @@
 locals {
-    env_type_airflow = "Dev" # cant have an apostrophe in the tag name
-    env_name_airflow = "Jacob's EC2 Airflow Server"
+  env_type_airflow = "Dev" # cant have an apostrophe in the tag name
+  env_name_airflow = "Jacob's EC2 Airflow Server"
 }
 
 resource "aws_key_pair" "airflow_ec2_key" {

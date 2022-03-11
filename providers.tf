@@ -1,7 +1,7 @@
 provider "aws" {
-    region = var.region
-    access_key = var.access_key
-    secret_key = var.secret_key
+  region     = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 terraform {
@@ -12,15 +12,15 @@ terraform {
     #   version = "0.25.32"
     # }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "4.0.0"
     }
   }
-    cloud {
-      organization = "jyablonski_prac"
-      workspaces {
-        name = "github-terraform-demo"
-      }
+  cloud {
+    organization = "jyablonski_prac"
+    workspaces {
+      name = "github-terraform-demo"
+    }
   }
 }
 # provider "snowflake" {

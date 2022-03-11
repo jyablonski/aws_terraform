@@ -103,18 +103,18 @@ you have to do historical load for any files previously in the bucket that were 
 #   enabled = true
 #   storage_aws_role_arn = 'arn:aws:iam::324816727452:role/mysnowflakerole'
 #   storage_allowed_locations = ('s3://jacobsbucket97/sample_files/');
-  
+
 #   DESC INTEGRATION s3_int;
-  
+
 #   -- go input aws iam user arn + external id arn into the snowflake_role on aws iam
-  
+
 #   USE DATABASE NBA_ELT_DB;
 #   USE SCHEMA TEST_SCHEMA;
-  
+
 #   create stage mystage
 #   url = 's3://jacobsbucket97/sample_files/'
 #   storage_integration = s3_int;
-  
+
 #   create pipe mypipe auto_ingest=true as
 #   copy into mytable
 #   from @NBA_ELT_DB.TEST_SCHEMA.mystage
@@ -166,5 +166,5 @@ you have to do historical load for any files previously in the bucket that were 
 # copy into mytable
 #   from @mystage
 #   file_format = (format_name='TEST_SCHEMA_CSV');
-  
+
 #   info loading_data;

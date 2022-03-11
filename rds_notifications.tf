@@ -63,8 +63,8 @@ resource "aws_sns_topic_policy" "jacobs_rds_sns_topic_policy" {
 # }
 
 resource "aws_iam_role" "jacobs_rds_sns_lambda_role" {
-  name = "jacobs_rds_sns_lambda_role"
-  description = "Role created for AWS Lambda to process RDS Events"
+  name               = "jacobs_rds_sns_lambda_role"
+  description        = "Role created for AWS Lambda to process RDS Events"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -109,16 +109,16 @@ data "archive_file" "lambda_rds" {
 }
 
 resource "aws_lambda_function" "jacobs_rds_sns_lambda_function" {
-  filename                       = "${path.module}/myzip/lambda_rds12.zip"
-  function_name                  = "jacobs_rds_sns_lambda_function"
-  role                           = aws_iam_role.jacobs_rds_sns_lambda_role.arn
-  handler                        = "main.lambda_handler"
-  runtime                        = "python3.8"
-  memory_size                    = 128
-  timeout                        = 3
-  depends_on                     = [aws_iam_role_policy_attachment.lambda_logs,
-                                    aws_cloudwatch_log_group.jacobs_rds_sns_lambda_logs,
-                                   ]
+  filename      = "${path.module}/myzip/lambda_rds12.zip"
+  function_name = "jacobs_rds_sns_lambda_function"
+  role          = aws_iam_role.jacobs_rds_sns_lambda_role.arn
+  handler       = "main.lambda_handler"
+  runtime       = "python3.8"
+  memory_size   = 128
+  timeout       = 3
+  depends_on = [aws_iam_role_policy_attachment.lambda_logs,
+    aws_cloudwatch_log_group.jacobs_rds_sns_lambda_logs,
+  ]
 }
 
 resource "aws_sns_topic_subscription" "allow_sns_invoke_rds_lambda" {
