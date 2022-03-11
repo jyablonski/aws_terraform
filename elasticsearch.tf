@@ -1,14 +1,14 @@
 locals {
-    env_name_es = "Jacobs Practice ES Cluster"
-    env_type_es = "Test" # cant have an apostrophe in the tag name
-    terraform_es = true
-    es_cluster_name = "jacobs-opensearch-cluster"
-    es_logs_name = "jacobs-es-cluster-logs"
+  env_name_es     = "Jacobs Practice ES Cluster"
+  env_type_es     = "Test" # cant have an apostrophe in the tag name
+  terraform_es    = true
+  es_cluster_name = "jacobs-opensearch-cluster"
+  es_logs_name    = "jacobs-es-cluster-logs"
 }
 
 resource "aws_iam_role" "jacobs_lambda_es_role" {
-  name = "jacobs_lambda_es_role"
-  description = "Role created for AWS Lambda ES Logs"
+  name               = "jacobs_lambda_es_role"
+  description        = "Role created for AWS Lambda ES Logs"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -99,22 +99,22 @@ resource "aws_elasticsearch_domain" "jacobs_opensearch_cluster" {
   }
 
   ebs_options {
-      ebs_enabled = true
-      volume_size = 10
-      volume_type = "gp2"
+    ebs_enabled = true
+    volume_size = 10
+    volume_type = "gp2"
   }
 
-#   vpc_options {
-#     subnet_ids = [
-#         aws_subnet.jacobs_public_subnet.id,
-#     ]
+  #   vpc_options {
+  #     subnet_ids = [
+  #         aws_subnet.jacobs_public_subnet.id,
+  #     ]
 
-#     security_group_ids = [aws_security_group.jacobs_task_security_group_tf.id]
-#   }
+  #     security_group_ids = [aws_security_group.jacobs_task_security_group_tf.id]
+  #   }
 
   log_publishing_options {
     cloudwatch_log_group_arn = aws_cloudwatch_log_group.jacobs_es_cluster_logs.arn
-    log_type = "INDEX_SLOW_LOGS"
+    log_type                 = "INDEX_SLOW_LOGS"
   }
 
   access_policies = <<CONFIG
@@ -155,7 +155,7 @@ CONFIG
     Terraform   = local.terraform_es
   }
 
-#   depends_on = [aws_iam_service_linked_role.es_access]
+  #   depends_on = [aws_iam_service_linked_role.es_access]
 }
 
 # IN FUTURE - manually create this first as a template and let AWS create the lambda for u

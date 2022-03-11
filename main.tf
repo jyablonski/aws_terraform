@@ -1,12 +1,12 @@
 locals {
-    env_type = "Prod" # cant have an apostrophe in the tag name
-    env_name = "Jacobs TF Project"
-    grafana_account_id = "008923505280"
-    env_terraform = true
+  env_type           = "Prod" # cant have an apostrophe in the tag name
+  env_name           = "Jacobs TF Project"
+  grafana_account_id = "008923505280"
+  env_terraform      = true
 }
 
 resource "aws_vpc" "jacobs_vpc_tf" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
 
   tags = {
@@ -38,7 +38,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy
       prefix = "sample_files/"
     }
 
-    id = "60-day-removal"
+    id     = "60-day-removal"
     status = "Enabled"
   }
 
@@ -50,12 +50,12 @@ resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
 }
 
 # attach this to things like aws lambda or ecs tasks so they can connect to the rds database
-resource "aws_security_group" "jacobs_task_security_group_tf"{
-    name = "jacobs_security_group for tasks"
-    description = "Connect Tasks to RDS"
-    vpc_id = aws_vpc.jacobs_vpc_tf.id
+resource "aws_security_group" "jacobs_task_security_group_tf" {
+  name        = "jacobs_security_group for tasks"
+  description = "Connect Tasks to RDS"
+  vpc_id      = aws_vpc.jacobs_vpc_tf.id
 
-    ingress {
+  ingress {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
@@ -63,7 +63,7 @@ resource "aws_security_group" "jacobs_task_security_group_tf"{
     ipv6_cidr_blocks = ["::/0"]
   }
 
-    egress {
+  egress {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
@@ -83,11 +83,11 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
   vpc_id      = aws_vpc.jacobs_vpc_tf.id
 
   ingress {
-    description      = "Custom IP Addresses"
-    from_port        = 5432
-    to_port          = 5432
-    protocol         = "tcp"
-    cidr_blocks      = var.jacobs_cidr_block
+    description = "Custom IP Addresses"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = var.jacobs_cidr_block
 
   }
 
@@ -100,11 +100,11 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
   }
 
   ingress {
-    description      = "Other Security Groups"
-    from_port        = 0
-    to_port          = 0
-    protocol         = -1
-    security_groups  = [aws_security_group.jacobs_task_security_group_tf.id]
+    description     = "Other Security Groups"
+    from_port       = 0
+    to_port         = 0
+    protocol        = -1
+    security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
   }
 
 
@@ -124,8 +124,8 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
 }
 
 resource "aws_subnet" "jacobs_public_subnet" {
-  vpc_id     = aws_vpc.jacobs_vpc_tf.id
-  cidr_block = cidrsubnet(aws_vpc.jacobs_vpc_tf.cidr_block, 8, 1)
+  vpc_id                  = aws_vpc.jacobs_vpc_tf.id
+  cidr_block              = cidrsubnet(aws_vpc.jacobs_vpc_tf.cidr_block, 8, 1)
   map_public_ip_on_launch = true
 
   tags = {
@@ -135,8 +135,8 @@ resource "aws_subnet" "jacobs_public_subnet" {
 }
 
 resource "aws_subnet" "jacobs_public_subnet_2" {
-  vpc_id     = aws_vpc.jacobs_vpc_tf.id
-  cidr_block = cidrsubnet(aws_vpc.jacobs_vpc_tf.cidr_block, 8, 3)
+  vpc_id                  = aws_vpc.jacobs_vpc_tf.id
+  cidr_block              = cidrsubnet(aws_vpc.jacobs_vpc_tf.cidr_block, 8, 3)
   map_public_ip_on_launch = true
 
   tags = {
@@ -146,7 +146,7 @@ resource "aws_subnet" "jacobs_public_subnet_2" {
 }
 
 resource "aws_db_subnet_group" "jacobs_subnet_group" {
-  name = "jacobs-subnet-group"
+  name       = "jacobs-subnet-group"
   subnet_ids = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id]
 
   tags = {
@@ -169,19 +169,19 @@ resource "aws_route_table" "jacobs_public_route_table" {
 
   route = [
     {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_internet_gateway.jacobs_gw.id
-      carrier_gateway_id = null
+      cidr_block                 = "0.0.0.0/0"
+      gateway_id                 = aws_internet_gateway.jacobs_gw.id
+      carrier_gateway_id         = null
       destination_prefix_list_id = null
-      egress_only_gateway_id = null
-      instance_id = null
-      ipv6_cidr_block = null
-      local_gateway_id = null
-      nat_gateway_id = null
-      network_interface_id = null
-      transit_gateway_id = null
-      vpc_endpoint_id = null
-      vpc_peering_connection_id = null
+      egress_only_gateway_id     = null
+      instance_id                = null
+      ipv6_cidr_block            = null
+      local_gateway_id           = null
+      nat_gateway_id             = null
+      network_interface_id       = null
+      transit_gateway_id         = null
+      vpc_endpoint_id            = null
+      vpc_peering_connection_id  = null
     }
   ]
   tags = {
@@ -229,24 +229,24 @@ resource "aws_route_table_association" "jacobs_public_route_2" {
 # }
 
 resource "aws_db_instance" "jacobs_rds_tf" {
-  allocated_storage    = 20
+  allocated_storage     = 20
   max_allocated_storage = 21
-  engine               = "postgres"
-  engine_version       = "12.7" # newest possible version that's in free tier eligiblity
-  instance_class       = "db.t2.micro"
-  identifier           = "jacobs-rds-server"
-  port                 = 5432
-  db_name              = "jacob_db"   # this is the name of the default database that will be created.
-  username             = var.jacobs_rds_user
-  password             = var.jacobs_rds_pw
+  engine                = "postgres"
+  engine_version        = "12.7" # newest possible version that's in free tier eligiblity
+  instance_class        = "db.t2.micro"
+  identifier            = "jacobs-rds-server"
+  port                  = 5432
+  db_name               = "jacob_db" # this is the name of the default database that will be created.
+  username              = var.jacobs_rds_user
+  password              = var.jacobs_rds_pw
   # parameter_group_name = "default.mysql8.0.25" # try this
-  skip_final_snapshot  = true
-  publicly_accessible  = true
-  deletion_protection  = true
+  skip_final_snapshot     = true
+  publicly_accessible     = true
+  deletion_protection     = true
   backup_retention_period = 1
-  storage_type         = "gp2" # general purpose ssd
-  vpc_security_group_ids = [aws_security_group.jacobs_rds_security_group_tf.id]
-  db_subnet_group_name = aws_db_subnet_group.jacobs_subnet_group.id
+  storage_type            = "gp2" # general purpose ssd
+  vpc_security_group_ids  = [aws_security_group.jacobs_rds_security_group_tf.id]
+  db_subnet_group_name    = aws_db_subnet_group.jacobs_subnet_group.id
 
   tags = {
     Name        = local.env_name
@@ -256,8 +256,8 @@ resource "aws_db_instance" "jacobs_rds_tf" {
 }
 
 resource "aws_iam_role" "jacobs_ecs_role" {
-  name = "jacobs_ecs_role"
-  description = "Role created for AWS ECS"
+  name               = "jacobs_ecs_role"
+  description        = "Role created for AWS ECS"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -273,7 +273,7 @@ resource "aws_iam_role" "jacobs_ecs_role" {
   ]
 }
 EOF
-  
+
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment" {
@@ -292,8 +292,8 @@ resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_s3" {
 }
 
 resource "aws_iam_role" "jacobs_ecs_ecr_role" {
-  name = "jacobs_ecs_ecr_role"
-  description = "Role created for AWS ECS ECR Access"
+  name               = "jacobs_ecs_ecr_role"
+  description        = "Role created for AWS ECS ECR Access"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -309,7 +309,7 @@ resource "aws_iam_role" "jacobs_ecs_ecr_role" {
   ]
 }
 EOF
-  
+
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_ecs_ecr_role_attachment" {
@@ -356,13 +356,13 @@ EOF
 # docker push 324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:latest
 
 resource "aws_cloudwatch_log_group" "aws_ecs_logs" {
-  name = "jacobs_ecs_logs"
+  name              = "jacobs_ecs_logs"
   retention_in_days = 30
 
 }
 
 resource "aws_cloudwatch_log_group" "aws_ecs_logs_airflow" {
-  name = "jacobs_ecs_logs_airflow"
+  name              = "jacobs_ecs_logs_airflow"
   retention_in_days = 30
 
 }
@@ -378,8 +378,8 @@ resource "aws_ecs_cluster" "jacobs_ecs_cluster" {
 
 # cloudwatch log stuff would go in the container defintion part with logConfiguration
 resource "aws_ecs_task_definition" "jacobs_ecs_task" {
-  family                = "jacobs_task"
-  container_definitions = <<TASK_DEFINITION
+  family                   = "jacobs_task"
+  container_definitions    = <<TASK_DEFINITION
 [
     {
         "image": "${aws_ecr_repository.jacobs_repo.repository_url}:latest",
@@ -410,17 +410,17 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
     } 
 ]
 TASK_DEFINITION
-  execution_role_arn = aws_iam_role.jacobs_ecs_role.arn # permissions needed for pulling ecr or writing to cloudwatch logs etc
-  task_role_arn = aws_iam_role.jacobs_ecs_role.arn      # the actual permissions needed for when code runs (s3 access, ses access etc)
-  cpu = 256
-  memory = 512
-  network_mode = "awsvpc"
+  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # permissions needed for pulling ecr or writing to cloudwatch logs etc
+  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn # the actual permissions needed for when code runs (s3 access, ses access etc)
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
 }
 
 resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
-  family                = "jacobs_task_airflow"
-  container_definitions = <<TASK_DEFINITION
+  family                   = "jacobs_task_airflow"
+  container_definitions    = <<TASK_DEFINITION
 [
     {
         "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_airflow",
@@ -450,23 +450,23 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
     } 
 ]
 TASK_DEFINITION
-  execution_role_arn = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
-  task_role_arn = aws_iam_role.jacobs_ecs_role.arn
-  cpu = 256
-  memory = 512
-  network_mode = "awsvpc"
+  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
+  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
 }
 
 resource "aws_cloudwatch_event_rule" "every_15_mins" {
-  name = "python_scheduled_task_test" # change this name
-  description = "Run every 15 minutes"
+  name                = "python_scheduled_task_test" # change this name
+  description         = "Run every 15 minutes"
   schedule_expression = "cron(0/15 * * * ? *)"
 }
 
 resource "aws_cloudwatch_event_rule" "etl_rule" {
-  name = "python_scheduled_task_prod" # change this name
-  description = "Run every day at 12 pm UTC"
+  name                = "python_scheduled_task_prod" # change this name
+  description         = "Run every day at 12 pm UTC"
   schedule_expression = "cron(0 12 * * ? *)"
 }
 
@@ -474,19 +474,19 @@ resource "aws_cloudwatch_event_rule" "etl_rule" {
 # # # uncomment the block below when nba season starts and change the rule to etl_rule instead of every_15_min
 resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
   target_id = "jacobs_target_id"
-  arn = aws_ecs_cluster.jacobs_ecs_cluster.arn
-  rule = aws_cloudwatch_event_rule.etl_rule.name
+  arn       = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  rule      = aws_cloudwatch_event_rule.etl_rule.name
   role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
 
   ecs_target {
     launch_type = "FARGATE"
     network_configuration {
-      subnets = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
-      security_groups = [aws_security_group.jacobs_task_security_group_tf.id]
+      subnets          = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
+      security_groups  = [aws_security_group.jacobs_task_security_group_tf.id]
       assign_public_ip = true
     }
-    platform_version = "LATEST"
-    task_count = 1
+    platform_version    = "LATEST"
+    task_count          = 1
     task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
   }
 }
@@ -571,12 +571,12 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_cloudw
 # }
 
 # terraform {
-    # required_providers {
-  #   postgresql = {
-  #     source = "cyrilgdn/postgresql"
-  #     version = "1.14.0"
-  #   }
-  # }
+# required_providers {
+#   postgresql = {
+#     source = "cyrilgdn/postgresql"
+#     version = "1.14.0"
+#   }
+# }
 # }
 
 # resource "postgresql_database" "jacobs_practice_db" {
@@ -661,8 +661,8 @@ resource "aws_s3_bucket_acl" "jyablonski_lambda_bucket_acl" {
 # these aws resources assume these roles, so the assume_role_policy is saying WHICH aws service can assume this role
 # so ecs, ecr, in this case lambda
 resource "aws_iam_role" "jacobs_lambda_s3_role" {
-  name = "jacobs_lambda_s3_role"
-  description = "Role created for AWS Lambda S3 File Detection"
+  name               = "jacobs_lambda_s3_role"
+  description        = "Role created for AWS Lambda S3 File Detection"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -775,12 +775,12 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 resource "aws_lambda_function" "jacobs_s3_lambda_function" {
-  filename                       = "${path.module}/myzip/python3.zip"
-  function_name                  = var.lambda_function_name
-  role                           = aws_iam_role.jacobs_lambda_s3_role.arn
-  handler                        = "main.lambda_handler"
-  runtime                        = "python3.8"
-  depends_on                     = [aws_iam_role_policy_attachment.lambda_logs]
+  filename      = "${path.module}/myzip/python3.zip"
+  function_name = var.lambda_function_name
+  role          = aws_iam_role.jacobs_lambda_s3_role.arn
+  handler       = "main.lambda_handler"
+  runtime       = "python3.8"
+  depends_on    = [aws_iam_role_policy_attachment.lambda_logs]
 }
 
 resource "aws_lambda_permission" "allow_bucket1" {
@@ -865,9 +865,9 @@ resource "aws_s3_bucket_acl" "jyablonski_tf_cicd_bucket_acl" {
 resource "aws_s3_bucket" "jacobs_sqs_sns_bucket" {
   bucket = "jacobs-sqs-bucket"
   tags = {
-    Name           = local.env_name
-    Environment    = local.env_type
-    Terraform      = local.env_terraform
+    Name        = local.env_name
+    Environment = local.env_type
+    Terraform   = local.env_terraform
   }
 }
 
@@ -883,12 +883,12 @@ data "archive_file" "lambda_sqs" {
 }
 
 resource "aws_lambda_function" "jacobs_s3_sqs_lambda_function" {
-  filename                       = "${path.module}/myzip/lambda_sqs8.zip"
-  function_name                  = "jacobs_sqs_lambda_function"
-  role                           = aws_iam_role.jacobs_lambda_s3_role.arn
-  handler                        = "main.lambda_handler"
-  runtime                        = "python3.8"
-  depends_on                     = [aws_iam_role_policy_attachment.lambda_logs]
+  filename      = "${path.module}/myzip/lambda_sqs8.zip"
+  function_name = "jacobs_sqs_lambda_function"
+  role          = aws_iam_role.jacobs_lambda_s3_role.arn
+  handler       = "main.lambda_handler"
+  runtime       = "python3.8"
+  depends_on    = [aws_iam_role_policy_attachment.lambda_logs]
 }
 
 # resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
@@ -906,7 +906,7 @@ resource "aws_lambda_function" "jacobs_s3_sqs_lambda_function" {
 
 ### SNS - LAMBDA - S3 BUCKET REDDIT DATA
 resource "aws_sns_topic" "jacobs_sns_topic" {
-  name = "jacobs-first-sns-topic"
+  name       = "jacobs-first-sns-topic"
   fifo_topic = false
 
   policy = <<POLICY
@@ -931,10 +931,10 @@ POLICY
 }
 
 resource "aws_sqs_queue" "jacobs_sqs_queue" {
-  name                              = "jacobs-first-sqs"
-  delay_seconds = 0
-  message_retention_seconds = 480 # 4 days
-  max_message_size = 262144          # 256 KiB
+  name                       = "jacobs-first-sqs"
+  delay_seconds              = 0
+  message_retention_seconds  = 480    # 4 days
+  max_message_size           = 262144 # 256 KiB
   visibility_timeout_seconds = 120
 
   policy = <<POLICY
@@ -996,10 +996,10 @@ resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
   bucket = aws_s3_bucket.jacobs_sqs_sns_bucket.id
 
   topic {
-    topic_arn           = aws_sns_topic.jacobs_sns_topic.arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "reddit_data/"
-    filter_suffix       = ".parquet"
+    topic_arn     = aws_sns_topic.jacobs_sns_topic.arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = "reddit_data/"
+    filter_suffix = ".parquet"
   }
 
   # lambda_function {
@@ -1017,5 +1017,5 @@ resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
   # }
 
   depends_on = [aws_lambda_permission.allow_bucket_sqs,
-               ]
+  ]
 }
