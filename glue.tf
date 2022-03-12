@@ -142,8 +142,9 @@ resource "aws_glue_job" "jacobs_glue_job" {
   name         = local.glue_job_name
   role_arn     = aws_iam_role.jacobs_glue_role.arn
   timeout      = 1      # 1 minute timeout
-  max_capacity = 0.0625 # use 1/16 data processing unites
+  max_capacity = 0.0625 # use 1/16 data processing units
   max_retries  = 0
+  glue_version = 3.0
 
   command {
     name            = "pythonshell"
