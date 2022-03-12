@@ -11,7 +11,7 @@ resource "aws_key_pair" "mlflow_ec2_key" {
 
 # 2022-01-19 update: turning off for now.  want to save credits for a bit
 resource "aws_instance" "jacobs_ec2_airflow" {
-  ami                         = "ami-0b6539181920009de"
+  ami                         = "ami-0e1d30f2c40c4c701"
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.jacobs_task_security_group_tf.id]
