@@ -42,11 +42,13 @@ TASK_DEFINITION
   requires_compatibilities = ["FARGATE"]
 }
 
+# in march change to 11:30 am utc
+# in nov change to 11:30 pm utc
 # run everyday 30 minutes after main python script, 15 minutes after dbt
 resource "aws_cloudwatch_event_rule" "etl_rule_ml" {
   name                = "python_scheduled_task_ml" # change this name
-  description         = "Run every day at 12:30 pm UTC"
-  schedule_expression = "cron(30 12 * * ? *)"
+  description         = "Run every day at 11:30 am UTC"
+  schedule_expression = "cron(30 11 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "ecs_scheduled_task_ml" {
