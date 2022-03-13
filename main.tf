@@ -464,10 +464,12 @@ resource "aws_cloudwatch_event_rule" "every_15_mins" {
   schedule_expression = "cron(0/15 * * * ? *)"
 }
 
+# in march change to 11 am utc
+# in nov change to 12 pm utc
 resource "aws_cloudwatch_event_rule" "etl_rule" {
   name                = "python_scheduled_task_prod" # change this name
-  description         = "Run every day at 12 pm UTC"
-  schedule_expression = "cron(0 12 * * ? *)"
+  description         = "Run every day at 11 am UTC"
+  schedule_expression = "cron(0 11 * * ? *)"
 }
 
 
