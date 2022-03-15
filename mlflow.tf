@@ -39,6 +39,6 @@ resource "aws_s3_bucket" "jyablonski_mlflow_bucket" {
   bucket = "jyablonski-mlflow-bucket"
 
   tags = {
-    Terraform = local.Terraform
+    Terraform = local.env_terraform
   }
 }
