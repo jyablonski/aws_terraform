@@ -2,6 +2,7 @@ locals {
   mlflow_key_name      = "jacobs_mlflow_key"
   mlflow_env_name      = "Dev"
   mlflow_instance_name = "jacobs_mlflow_server"
+  mlflow_user_name     = "jacobs-mlflow-user"
 }
 
 resource "aws_key_pair" "mlflow_ec2_key" {
@@ -22,5 +23,22 @@ resource "aws_instance" "jacobs_ec2_airflow" {
     Name        = local.mlflow_instance_name
     Environment = local.mlflow_env_name
     Terraform   = local.env_terraform
+  }
+}
+
+resource "aws_iam_user" "jacobs_mlflow_user" {
+  name = local.mlflow_user_name
+}
+
+resource "aws_iam_user_policy_attachment" "jacobs_mlflow_user_attachment_s3" {
+  user       = aws_iam_user.jacobs_mlflow_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
+resource "aws_s3_bucket" "jyablonski_mlflow_bucket" {
+  bucket = "jyablonski-mlflow-bucket"
+
+  tags = {
+    Terraform = local.env_terraform
   }
 }
