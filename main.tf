@@ -3,6 +3,7 @@ locals {
   env_name           = "Jacobs TF Project"
   grafana_account_id = "008923505280"
   env_terraform      = true
+  Terraform          = true
 }
 
 resource "aws_iam_role" "jacobs_ecs_role" {
