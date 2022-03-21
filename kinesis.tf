@@ -83,10 +83,12 @@ resource "aws_kinesis_stream" "jacobs_kinesis_stream" {
 
 # this creates the delivery stream which connects TO the data stream above, and provides an output of where to store the data
 #  (s3, elasticsearch, redshift).
+# need to add error logging with the cloudwatch_logging_options config block
 resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream" {
   name        = local.kinesis_firehose_name
   destination = "extended_s3"
 
+  # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
   extended_s3_configuration {
     role_arn   = aws_iam_role.jacobs_firehose_role.arn
     bucket_arn = aws_s3_bucket.jacobs_kinesis_bucket.arn
