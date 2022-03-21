@@ -8,40 +8,6 @@ resource "aws_vpc" "jacobs_vpc_tf" {
   }
 }
 
-resource "aws_s3_bucket" "jacobs_bucket_tf" {
-  bucket = "jacobsbucket97"
-
-  tags = {
-    Name        = local.env_name
-    Environment = local.env_type
-  }
-}
-
-# 1 config file per s3 bucket
-# can add things like s3 files -> glacier after 90 days here etc.
-resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf.bucket
-
-  rule {
-    expiration {
-      days = 60
-    }
-
-    filter {
-      prefix = "sample_files/"
-    }
-
-    id     = "60-day-removal"
-    status = "Enabled"
-  }
-
-}
-
-resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf.id
-  acl    = "private"
-}
-
 # attach this to things like aws lambda or ecs tasks so they can connect to the rds database
 resource "aws_security_group" "jacobs_task_security_group_tf" {
   name        = "jacobs_security_group for tasks"
