@@ -63,55 +63,55 @@ resource "aws_s3_bucket_acl" "kinesis_bucket_acl" {
   acl    = "private"
 }
 
-# this creates the data stream
-resource "aws_kinesis_stream" "jacobs_kinesis_stream" {
-  name             = local.kinesis_stream_name
-  shard_count      = 1
-  retention_period = 24
-  encryption_type  = "NONE"
+# this creates the data stream - cancelling as of 2022-03-23 bc it costs money
+# resource "aws_kinesis_stream" "jacobs_kinesis_stream" {
+#   name             = local.kinesis_stream_name
+#   shard_count      = 1
+#   retention_period = 24
+#   encryption_type  = "NONE"
 
 
-  stream_mode_details {
-    stream_mode = "PROVISIONED"
-  }
+#   stream_mode_details {
+#     stream_mode = "PROVISIONED"
+#   }
 
-  tags = {
-    Environment = local.project_name
-    Terraform   = local.Terraform
-  }
-}
+#   tags = {
+#     Environment = local.project_name
+#     Terraform   = local.Terraform
+#   }
+# }
 
-# this creates the delivery stream which connects TO the data stream above, and provides an output of where to store the data
-#  (s3, elasticsearch, redshift).
-# need to add error logging with the cloudwatch_logging_options config block
-resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream" {
-  name        = local.kinesis_firehose_name
-  destination = "extended_s3"
+# # this creates the delivery stream which connects TO the data stream above, and provides an output of where to store the data
+# #  (s3, elasticsearch, redshift).
+# # need to add error logging with the cloudwatch_logging_options config block
+# resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream" {
+#   name        = local.kinesis_firehose_name
+#   destination = "extended_s3"
 
-  # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
-  extended_s3_configuration {
-    role_arn   = aws_iam_role.jacobs_firehose_role.arn
-    bucket_arn = aws_s3_bucket.jacobs_kinesis_bucket.arn
+#   # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
+#   extended_s3_configuration {
+#     role_arn   = aws_iam_role.jacobs_firehose_role.arn
+#     bucket_arn = aws_s3_bucket.jacobs_kinesis_bucket.arn
 
-    # the idea is that you can use lambda to transform the data in the stream BEFORE it gets written to s3 / redshift / elasticsearch etc
+#     # the idea is that you can use lambda to transform the data in the stream BEFORE it gets written to s3 / redshift / elasticsearch etc
 
-    # processing_configuration {
-    #   enabled = "true"
+#     # processing_configuration {
+#     #   enabled = "true"
 
-    #   processors {
-    #     type = "Lambda"
+#     #   processors {
+#     #     type = "Lambda"
 
-    #     parameters {
-    #       parameter_name  = "LambdaArn"
-    #       parameter_value = "${aws_lambda_function.lambda_processor.arn}:$LATEST"
-    #     }
-    #   }
-    # }
-  }
+#     #     parameters {
+#     #       parameter_name  = "LambdaArn"
+#     #       parameter_value = "${aws_lambda_function.lambda_processor.arn}:$LATEST"
+#     #     }
+#     #   }
+#     # }
+#   }
 
-  tags = {
-    Environment = local.project_name
-    Terraform   = local.Terraform
-  }
-}
+#   tags = {
+#     Environment = local.project_name
+#     Terraform   = local.Terraform
+#   }
+# }
 

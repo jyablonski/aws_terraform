@@ -15,6 +15,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "4.0.0"
     }
+    # postgresql = {
+    #   source  = "cyrilgdn/postgresql"
+    #   version = "1.15.0"
+    # }
   }
   cloud {
     organization = "jyablonski_prac"
@@ -22,7 +26,17 @@ terraform {
       name = "github-terraform-demo"
     }
   }
+
 }
+
+# provider "postgresql" {
+#   alias    = "pg1"
+#   host     = var.pg_host
+#   username = var.pg_user
+#   password = var.pg_pass
+#   sslmode  = "disable"
+# }
+
 # provider "snowflake" {
 #   username = var.snowflake_user
 #   account  = "rl64113"
