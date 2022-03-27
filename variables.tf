@@ -148,3 +148,8 @@ variable "jacobs_rds_schema_ml" {
   type      = string
   sensitive = true
 }
+
+variable "jacobs_sentry_token" {
+  type      = string
+  sensitive = true
+}

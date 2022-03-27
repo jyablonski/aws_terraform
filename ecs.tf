@@ -77,7 +77,8 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
           {"name": "reddit_secretkey", "value": "${var.jacobs_reddit_secretkey}"},
           {"name": "USER_PW", "value": "${var.jacobs_pw}"},
           {"name": "USER_EMAIL", "value": "${var.jacobs_email_address}"},
-          {"name": "S3_BUCKET", "value": "${var.jacobs_bucket}"}
+          {"name": "S3_BUCKET", "value": "${var.jacobs_bucket}"},
+          {"name": "SENTRY_TOKEN", "value": "${var.jacobs_sentry_token}"}
         ],
         "logConfiguration": {
           "logDriver": "awslogs",
