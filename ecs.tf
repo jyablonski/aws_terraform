@@ -78,7 +78,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
           {"name": "USER_PW", "value": "${var.jacobs_pw}"},
           {"name": "USER_EMAIL", "value": "${var.jacobs_email_address}"},
           {"name": "S3_BUCKET", "value": "${var.jacobs_bucket}"},
-          {"name": "SENTRY_TOKEN", "value": "${var.jacobs_sentry_token}"},
+          {"name": "SENTRY_TOKEN", "value": "${var.jacobs_sentry_token}"}
         ],
         "logConfiguration": {
           "logDriver": "awslogs",
