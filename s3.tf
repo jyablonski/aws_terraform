@@ -67,3 +67,14 @@ resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
 EOF
 
 }
+
+# this is how you would add default server side encryption-at-rest
+# resource "aws_s3_bucket_server_side_encryption_configuration" "jacobs_bucket_encryption" {
+#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
+
+#   rule {
+#     apply_server_side_encryption_by_default {
+#       sse_algorithm     = "AES256"
+#     }
+#   }
+# }
