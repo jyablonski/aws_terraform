@@ -28,7 +28,7 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   allocated_storage     = 20
   max_allocated_storage = 21
   engine                = "postgres"
-  engine_version        = "12.7" # newest possible version that's in free tier eligiblity
+  engine_version        = "12.8" # newest possible version that's in free tier eligiblity
   instance_class        = "db.t2.micro"
   identifier            = "jacobs-rds-server"
   port                  = 5432
