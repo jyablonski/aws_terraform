@@ -7,6 +7,15 @@ resource "aws_s3_bucket" "jacobs_bucket_tf" {
   }
 }
 
+resource "aws_s3_bucket" "jacobs_bucket_tf_dev" {
+  bucket = "jacobsbucket97_dev"
+
+  tags = {
+    Name        = local.env_name
+    Environment = local.env_type
+  }
+}
+
 # 1 config file per s3 bucket
 # can add things like s3 files -> glacier after 90 days here etc.
 resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
@@ -33,6 +42,11 @@ resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
   acl    = "private"
 }
 
+resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl_dev" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf_dev.id
+  acl    = "private"
+}
+
 resource "aws_s3_bucket_public_access_block" "jacobs_bucket_tf_access" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
 
@@ -41,6 +55,16 @@ resource "aws_s3_bucket_public_access_block" "jacobs_bucket_tf_access" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+resource "aws_s3_bucket_public_access_block" "jacobs_bucket_tf_access_dev" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf_dev.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 
 resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
@@ -60,6 +84,32 @@ resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
       "Resource": [
         "${aws_s3_bucket.jacobs_bucket_tf.arn}/*",
         "${aws_s3_bucket.jacobs_bucket_tf.arn}"
+      ]
+    }
+  ]
+}
+EOF
+
+}
+
+resource "aws_s3_bucket_policy" "allow_access_from_another_account_dev" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf_dev.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+        "${data.aws_caller_identity.current.account_id}"
+        ]
+      },
+      "Action": "s3:*",
+      "Resource": [
+        "${aws_s3_bucket.jacobs_bucket_tf_dev.arn}/*",
+        "${aws_s3_bucket.jacobs_bucket_tf_dev.arn}"
       ]
     }
   ]
