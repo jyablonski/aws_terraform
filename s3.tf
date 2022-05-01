@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "jacobs_bucket_tf" {
 }
 
 resource "aws_s3_bucket" "jacobs_bucket_tf_dev" {
-  bucket = "jacobsbucket97_dev"
+  bucket = "jacobsbucket97-dev"
 
   tags = {
     Name        = local.env_name
