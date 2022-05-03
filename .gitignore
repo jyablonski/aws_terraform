@@ -5,3 +5,5 @@ terraform.tfstate.backup
 terraform.tfstate
 myzip
 *.ipynb
+jacobs_notes.md
+.jacobs-makefile

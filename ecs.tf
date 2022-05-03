@@ -47,6 +47,12 @@ resource "aws_cloudwatch_log_group" "aws_ecs_logs_airflow" {
 
 }
 
+resource "aws_cloudwatch_log_group" "aws_ecs_logs_fake_ecs" {
+  name              = "jacobs_ecs_logs_fake_ecs"
+  retention_in_days = 7
+
+}
+
 resource "aws_ecs_cluster" "jacobs_ecs_cluster" {
   name = "jacobs_fargate_cluster"
 
@@ -172,4 +178,33 @@ resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
     task_count          = 1
     task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
   }
+}
+
+resource "aws_ecs_task_definition" "jacobs_fake_ecs_task" {
+  family                   = "jacobs_fake_ecs_task"
+  container_definitions    = <<TASK_DEFINITION
+[
+    {
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:fake_ecs_task",
+        "name": "jacobs_container_fake_ecs",
+        "environment": [
+          {"name": "test", "value": "test1"}
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "jacobs_ecs_logs_fake_ecs",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+    } 
+]
+TASK_DEFINITION
+  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
+  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
 }
