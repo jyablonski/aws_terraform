@@ -26,7 +26,6 @@ def send_ses_email(event_message="DEFAULT", event_timestamp = "DEFAULT", **kwarg
 
     Ad Hoc SNS Event at {event_timestamp}
     <br>
-    {kwargs['kwargs']}
     <br>
     Message: {event_message}
     </body>
@@ -72,8 +71,12 @@ print('Loading function')
 def lambda_handler(event, context):
     """
     Lambda Function to read RDS Events from an SNS Topic and send email out detailing events.
+
+    The event_message variable is how you extract the raw message out of the SNS Notification.
+
+    In the future, i want to send a task_definition name in the message and then use this lambda to trigger ECS Tasks
     """
-    print(event) # do this initally for debugging bc how the fuq else do you see the layering of the nested event.
+    # print(event) # do this initally for debugging bc how the fuq else do you see the layering of the nested event.
     try:
         for sns_event in event['Records']:
             df = sns_event['Sns']
