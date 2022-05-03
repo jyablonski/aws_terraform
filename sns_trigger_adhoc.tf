@@ -67,11 +67,11 @@ resource "aws_cloudwatch_log_group" "jacobs_adhoc_sns_lambda_logs" {
 data "archive_file" "lambda_adhoc_sns_zip" {
   type        = "zip"
   source_dir  = "${path.module}/lambdas/lambda_adhoc_sns/"
-  output_path = "${path.module}/myzip/lambda_adhoc_sns3.zip"
+  output_path = "${path.module}/myzip/lambda_adhoc_sns4.zip"
 }
 
 resource "aws_lambda_function" "jacobs_adhoc_sns_lambda_function" {
-  filename      = "${path.module}/myzip/lambda_adhoc_sns3.zip"
+  filename      = "${path.module}/myzip/lambda_adhoc_sns4.zip"
   function_name = local.adhoc_lambda_name
   role          = aws_iam_role.jacobs_adhoc_sns_lambda_role.arn
   handler       = "main.lambda_handler"
