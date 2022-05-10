@@ -36,6 +36,31 @@ resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy
 
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy_dev" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf_dev.bucket
+
+  rule {
+    id = "cost-reports"
+
+    expiration {
+      days = 90
+    }
+
+    filter {
+      prefix = "cost-reports/"
+    }
+
+    status = "Enabled"
+
+    transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+
+  }
+
+}
+
 # 2022-03-21 fix this naming in the future
 resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
