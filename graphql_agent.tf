@@ -21,11 +21,39 @@ resource "aws_sns_topic" "jacobs_graphql_sns_topic" {
   }
 }
 
+resource "aws_iam_user" "jacobs_deta_user" {
+  name = "jacobs_deta_user"
+
+  tags = {
+    Name        = local.env_name_graphql
+    Environment = local.env_type_graphql
+  }
+}
+
+resource "aws_iam_user_policy" "jacobs_deta_user_policy" {
+  name = "jacobs-deta-user-policy"
+  user = aws_iam_user.jacobs_deta_user.name
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "sns:Publish"
+      ],
+      "Effect": "Allow",
+      "Resource": "${aws_sns_topic.jacobs_graphql_sns_topic.arn}"
+    }
+  ]
+}
+EOF
+}
 
 resource "aws_sqs_queue" "jacobs_graphql_sqs_queue" {
   name                       = local.graphql_sqs_name
   delay_seconds              = 0
-  message_retention_seconds  = 14400 # 4 hrs boi
+  message_retention_seconds  = 86400 # 24 hrs boi
   max_message_size           = 262144
   visibility_timeout_seconds = 120
 
@@ -158,8 +186,8 @@ resource "aws_sns_topic_subscription" "jacobs_graphql_topic_subscription" {
 
 resource "aws_cloudwatch_event_rule" "jacobs_graphql_agent_rule" {
   name                = "jacobs_graphql_agent_trigger"
-  description         = "GraphQL Agent which processes SQS Messages every 1 hr"
-  schedule_expression = "cron(0 * * * ? *)"
+  description         = "GraphQL Agent which processes SQS Messages every 12 hrs"
+  schedule_expression = "cron(0 0/12 * * ? *)"
 }
 
 resource "aws_lambda_permission" "jacobs_graphql_cloudwatch_permission" {
