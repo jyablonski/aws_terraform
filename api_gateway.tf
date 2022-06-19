@@ -122,6 +122,7 @@ resource "aws_api_gateway_rest_api_policy" "jacobs_api_policy" {
 }
 EOF
 } # arn:aws:execute-api:us-east-1:324816727452:fgvdktt1h3/*/GET/product
+# aws source ip only allows access from my ip
 
 # RESOURCES
 resource "aws_api_gateway_resource" "api_gateway_health" {
