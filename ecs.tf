@@ -47,6 +47,12 @@ resource "aws_cloudwatch_log_group" "aws_ecs_logs_airflow" {
 
 }
 
+resource "aws_cloudwatch_log_group" "aws_ecs_logs_dbt" {
+  name              = "jacobs_ecs_logs_dbt"
+  retention_in_days = 7
+
+}
+
 resource "aws_cloudwatch_log_group" "aws_ecs_logs_fake_ecs" {
   name              = "jacobs_ecs_logs_fake_ecs"
   retention_in_days = 7
@@ -130,6 +136,42 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
           "logDriver": "awslogs",
           "options": {
             "awslogs-group": "jacobs_ecs_logs_airflow",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+    } 
+]
+TASK_DEFINITION
+  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
+  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+}
+
+# this works - the issue is idk how ill be able to tell if the workflow was successful or not w/o looking at cloudwatch logs
+# you can add a CATCH FAIL STATE in step functions so maybe that?  and trigger some kind of lambda to send an email after?
+resource "aws_ecs_task_definition" "jacobs_ecs_task_dbt" {
+  family                   = "jacobs_task_dbt"
+  container_definitions    = <<TASK_DEFINITION
+[
+    {
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_elt_pipeline_dbt",
+        "name": "jacobs_container_dbt",
+        "environment": [
+          {"name": "DBT_DBNAME", "value": "${var.jacobs_rds_db}"},
+          {"name": "DBT_HOST", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
+          {"name": "DBT_USER", "value": "${var.jacobs_rds_user}"},
+          {"name": "DBT_PASS", "value": "${var.jacobs_rds_pw}"},
+          {"name": "DBT_SCHEMA", "value": "${var.jacobs_rds_schema}"},
+          {"name": "DBT_PRAC_KEY", "value": "dbt_docker_test"}
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "jacobs_ecs_logs_dbt",
             "awslogs-region": "us-east-1",
             "awslogs-stream-prefix": "ecs"
           }
