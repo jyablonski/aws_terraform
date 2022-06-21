@@ -109,6 +109,12 @@ resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment_
   policy_arn = aws_iam_policy.jacobs_stepfunction_execution_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment_ses" {
+  role       = aws_iam_role.jacobs_stepfunctions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+}
+
+
 resource "aws_cloudwatch_log_group" "aws_stepfunction_logs" {
   name              = "jacobs_stepfuntion_logs"
   retention_in_days = 7
@@ -165,7 +171,73 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
             }
         }
       },
-      "Next": "ml_pipeline"
+    "Next": "SendEmailSuccess",
+          "Catch": [
+            {
+              "ErrorEquals": [
+                "States.ALL"
+              ],
+              "Next": "SendEmailFail"
+            }
+          ]
+        },
+    "SendEmailSuccess": {
+      "Type": "Task",
+      "Next": "ml_pipeline",
+      "Parameters": {
+        "Destination": {
+          "ToAddresses": [
+            "jyablonski9@gmail.com"
+          ]
+        },
+        "Message": {
+          "Body": {
+            "Html": {
+              "Charset": "UTF-8",
+              "Data": "dbt Job Succeeded"
+            },
+            "Text": {
+              "Charset": "UTF-8",
+              "Data": "dbt Job Succeeded"
+            }
+          },
+          "Subject": {
+            "Charset": "UTF-8",
+            "Data": "dbt Job Succeeded"
+          }
+        },
+        "Source": "jyablonski9@gmail.com"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:ses:sendEmail"
+    },
+    "SendEmailFail": {
+      "Type": "Task",
+      "End": true,
+      "Parameters": {
+        "Destination": {
+          "ToAddresses": [
+            "jyablonski9@gmail.com"
+          ]
+        },
+        "Message": {
+          "Body": {
+            "Html": {
+              "Charset": "UTF-8",
+              "Data": "dbt Job Failed"
+            },
+            "Text": {
+              "Charset": "UTF-8",
+              "Data": "dbt Job Failed"
+            }
+          },
+          "Subject": {
+            "Charset": "UTF-8",
+            "Data": "dbt Job Failed"
+          }
+        },
+        "Source": "jyablonski9@gmail.com"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:ses:sendEmail"
     },
     "ml_pipeline": {
       "Type": "Task",
