@@ -4,6 +4,9 @@ provider "aws" {
   secret_key = var.secret_key
 }
 
+# 2022-06-24 reminder:
+# https://learn.hashicorp.com/tutorials/terraform/aws-default-tags
+# implement default tags when deploying infra next august pls
 terraform {
   required_version = ">= 1.1.0"
   required_providers {

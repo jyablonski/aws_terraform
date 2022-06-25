@@ -223,7 +223,7 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
           "Body": {
             "Html": {
               "Charset": "UTF-8",
-              "Data": "dbt Job Failed"
+              "Data": "dbt Job Failed <br> <a href="https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/jacobs_ecs_logs_dbt">Logs</a>"
             },
             "Text": {
               "Charset": "UTF-8",
