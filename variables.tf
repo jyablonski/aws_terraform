@@ -153,3 +153,8 @@ variable "jacobs_sentry_token" {
   type      = string
   sensitive = true
 }
+
+variable "jacobs_discord_webhook" {
+  type      = string
+  sensitive = true
+}
