@@ -222,6 +222,56 @@ resource "aws_ssm_parameter" "jacobs_ssm_sg_task" {
 
 }
 
+## airflow ssm vars
+resource "aws_ssm_parameter" "jacobs_ssm_rds_db_name" {
+  name        = "jacobs_ssm_rds_db_name"
+  description = "RDS DB Name"
+  type        = "SecureString"
+  value       = var.jacobs_rds_db
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_rds_host" {
+  name        = "jacobs_ssm_rds_host"
+  description = "RDS Host IP"
+  type        = "SecureString"
+  value       = aws_db_instance.jacobs_rds_tf.address
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_rds_user" {
+  name        = "jacobs_ssm_rds_user"
+  description = "RDS Username"
+  type        = "SecureString"
+  value       = var.jacobs_rds_user
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_rds_pw" {
+  name        = "jacobs_ssm_rds_pw"
+  description = "RDS Host IP"
+  type        = "SecureString"
+  value       = var.jacobs_rds_pw
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_rds_schema" {
+  name        = "jacobs_ssm_rds_schema"
+  description = "RDS Schema"
+  type        = "SecureString"
+  value       = var.jacobs_rds_schema
+
+}
+
+resource "aws_ssm_parameter" "jacobs_ssm_dbt_prac_key" {
+  name        = "jacobs_ssm_dbt_prac_key"
+  description = "dbt prac key"
+  type        = "String"
+  value       = "dbt_docker_test"
+
+}
+
+
 ## Lambda Event-Driven Workflow zz
 resource "aws_s3_bucket" "jyablonski_lambda_bucket" {
   bucket = "jyablonski-lambda-bucket"
