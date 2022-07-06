@@ -1,3 +1,11 @@
+locals {
+  module_dbt_logs       = "jacobs_ecs_logs_dbt"
+  module_webscrape_logs = "jacobs_ecs_logs"
+  module_ml_logs        = "jacobs_ecs_logs_ml"
+  module_fake_logs      = "jacobs_ecs_logs_fake_ecs"
+  module_airflow_logs   = "jacobs_ecs_logs_airflow"
+}
+
 resource "aws_ecr_repository" "jacobs_repo" {
   name                 = "jacobs_repo"
   image_tag_mutability = "MUTABLE"
@@ -31,34 +39,6 @@ resource "aws_ecr_lifecycle_policy" "jacobs_repo_policy" {
 EOF
 }
 
-## STOP at this step and upload docker image to this repo.  format below
-# docker tag jacobs-python-docker-2:latest 324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:latest
-# docker push 324816727452.dkr.ecr.us-east-1.amazonaws.com/jacobs_repo:latest
-
-resource "aws_cloudwatch_log_group" "aws_ecs_logs" {
-  name              = "jacobs_ecs_logs"
-  retention_in_days = 30
-
-}
-
-resource "aws_cloudwatch_log_group" "aws_ecs_logs_airflow" {
-  name              = "jacobs_ecs_logs_airflow"
-  retention_in_days = 30
-
-}
-
-resource "aws_cloudwatch_log_group" "aws_ecs_logs_dbt" {
-  name              = "jacobs_ecs_logs_dbt"
-  retention_in_days = 7
-
-}
-
-resource "aws_cloudwatch_log_group" "aws_ecs_logs_fake_ecs" {
-  name              = "jacobs_ecs_logs_fake_ecs"
-  retention_in_days = 7
-
-}
-
 resource "aws_ecs_cluster" "jacobs_ecs_cluster" {
   name = "jacobs_fargate_cluster"
 
@@ -68,10 +48,11 @@ resource "aws_ecs_cluster" "jacobs_ecs_cluster" {
   }
 }
 
-# cloudwatch log stuff would go in the container defintion part with logConfiguration
-resource "aws_ecs_task_definition" "jacobs_ecs_task" {
-  family                   = "jacobs_task"
-  container_definitions    = <<TASK_DEFINITION
+module "webscrape_ecs_module" {
+  source                   = "./modules/ecs"
+  ecs_schedule             = true
+  ecs_id                   = "jacobs_webscrape_task"
+  ecs_container_definition = <<TASK_DEFINITION
 [
     {
         "image": "${aws_ecr_repository.jacobs_repo.repository_url}:latest",
@@ -95,7 +76,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
         "logConfiguration": {
           "logDriver": "awslogs",
           "options": {
-            "awslogs-group": "jacobs_ecs_logs",
+            "awslogs-group": "${local.module_webscrape_logs}",
             "awslogs-region": "us-east-1",
             "awslogs-stream-prefix": "ecs"
           }
@@ -103,17 +84,170 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task" {
     } 
 ]
 TASK_DEFINITION
-  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # permissions needed for pulling ecr or writing to cloudwatch logs etc
-  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn # the actual permissions needed for when code runs (s3 access, ses access etc)
-  cpu                      = 256
-  memory                   = 512
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
+  ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
+  ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
+  ecs_cpu                  = 256
+  ecs_memory               = 512
+
+  ecs_logs_name      = local.module_webscrape_logs
+  ecs_logs_retention = 30
+
+  ecs_rule_name        = "jacobs_webscrape_rule"
+  ecs_rule_description = "Run every day at 11 am UTC"
+  ecs_rule_cron        = "cron(0 11 * * ? *)"
+
+  ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  ecs_target_id         = "jacobs_webscrape_target"
+  ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
+  ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
+  ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
+  ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
 }
 
-resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
-  family                   = "jacobs_task_airflow"
-  container_definitions    = <<TASK_DEFINITION
+module "dbt_ecs_module" {
+  source                   = "./modules/ecs"
+  ecs_schedule             = false
+  ecs_id                   = "jacobs_dbt_task"
+  ecs_container_definition = <<TASK_DEFINITION
+[
+    {
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_elt_pipeline_dbt",
+        "name": "jacobs_container_dbt",
+        "environment": [
+          {"name": "DBT_DBNAME", "value": "${var.jacobs_rds_db}"},
+          {"name": "DBT_HOST", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
+          {"name": "DBT_USER", "value": "${var.jacobs_rds_user}"},
+          {"name": "DBT_PASS", "value": "${var.jacobs_rds_pw}"},
+          {"name": "DBT_SCHEMA", "value": "${var.jacobs_rds_schema}"},
+          {"name": "DBT_PRAC_KEY", "value": "dbt_docker_test"}
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "${local.module_dbt_logs}",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+    } 
+]
+TASK_DEFINITION
+  ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
+  ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
+  ecs_cpu                  = 256
+  ecs_memory               = 512
+
+  ecs_logs_name      = local.module_dbt_logs
+  ecs_logs_retention = 7
+
+  ecs_rule_name        = "jacobs_dbt_rule"
+  ecs_rule_description = "Run everyday at 11:15 AM UTC"
+  ecs_rule_cron        = "cron(15 11 * * ? *)"
+
+  ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  ecs_target_id         = "jacobs_dbt_target"
+  ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
+  ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
+  ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
+  ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
+}
+
+module "ml_ecs_module" {
+  source                   = "./modules/ecs"
+  ecs_schedule             = true
+  ecs_id                   = "jacobs_ml_task"
+  ecs_container_definition = <<TASK_DEFINITION
+[
+    {
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_elt_ml",
+        "name": "jacobs_container_ml",
+        "environment": [
+          {"name": "IP", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
+          {"name": "PORT", "value": "5432"},
+          {"name": "RDS_USER", "value": "${var.jacobs_rds_user}"},
+          {"name": "RDS_PW", "value": "${var.jacobs_rds_pw}"},
+          {"name": "RDS_SCHEMA", "value": "${var.jacobs_rds_schema_ml}"},
+          {"name": "RDS_DB", "value": "jacob_db"}
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "${local.module_ml_logs}",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+    } 
+]
+TASK_DEFINITION
+  ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
+  ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
+  ecs_cpu                  = 256
+  ecs_memory               = 512
+
+  ecs_logs_name      = local.module_ml_logs
+  ecs_logs_retention = 30
+
+  ecs_rule_name        = "jacobs_ml_rule"
+  ecs_rule_description = "Run everyday at 11:30 AM"
+  ecs_rule_cron        = "cron(30 11 * * ? *)"
+
+  ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  ecs_target_id         = "jacobs_ml_target"
+  ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
+  ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
+  ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
+  ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
+}
+
+module "fake_ecs_module" {
+  source                   = "./modules/ecs"
+  ecs_schedule             = false
+  ecs_id                   = "jacobs_fake_task"
+  ecs_container_definition = <<TASK_DEFINITION
+[
+    {
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:fake_ecs_task",
+        "name": "jacobs_container_fake",
+        "environment": [
+          {"name": "test", "value": "test1"}
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "${local.module_fake_logs}",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+    } 
+]
+TASK_DEFINITION
+  ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
+  ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
+  ecs_cpu                  = 256
+  ecs_memory               = 512
+
+  ecs_logs_name      = local.module_fake_logs
+  ecs_logs_retention = 7
+
+  ecs_rule_name        = "jacobs_fake_rule"
+  ecs_rule_description = "First Module Test - run everyday at 3 AM"
+  ecs_rule_cron        = "cron(0 3 * * ? *)"
+
+  ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  ecs_target_id         = "jacobs_fake_target"
+  ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
+  ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
+  ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
+  ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
+}
+
+module "airflow_ecs_module" {
+  source                   = "./modules/ecs"
+  ecs_schedule             = false
+  ecs_id                   = "jacobs_airflow_task"
+  ecs_container_definition = <<TASK_DEFINITION
 [
     {
         "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_airflow",
@@ -135,7 +269,7 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
         "logConfiguration": {
           "logDriver": "awslogs",
           "options": {
-            "awslogs-group": "jacobs_ecs_logs_airflow",
+            "awslogs-group": "${local.module_airflow_logs}",
             "awslogs-region": "us-east-1",
             "awslogs-stream-prefix": "ecs"
           }
@@ -143,110 +277,22 @@ resource "aws_ecs_task_definition" "jacobs_ecs_task_airflow" {
     } 
 ]
 TASK_DEFINITION
-  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
-  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn
-  cpu                      = 256
-  memory                   = 512
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-}
+  ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
+  ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
+  ecs_cpu                  = 256
+  ecs_memory               = 512
 
-# this works - the issue is idk how ill be able to tell if the workflow was successful or not w/o looking at cloudwatch logs
-# you can add a CATCH FAIL STATE in step functions so maybe that?  and trigger some kind of lambda to send an email after?
-resource "aws_ecs_task_definition" "jacobs_ecs_task_dbt" {
-  family                   = "jacobs_task_dbt"
-  container_definitions    = <<TASK_DEFINITION
-[
-    {
-        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_elt_pipeline_dbt",
-        "name": "jacobs_container_dbt",
-        "environment": [
-          {"name": "DBT_DBNAME", "value": "${var.jacobs_rds_db}"},
-          {"name": "DBT_HOST", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
-          {"name": "DBT_USER", "value": "${var.jacobs_rds_user}"},
-          {"name": "DBT_PASS", "value": "${var.jacobs_rds_pw}"},
-          {"name": "DBT_SCHEMA", "value": "${var.jacobs_rds_schema}"},
-          {"name": "DBT_PRAC_KEY", "value": "dbt_docker_test"}
-        ],
-        "logConfiguration": {
-          "logDriver": "awslogs",
-          "options": {
-            "awslogs-group": "jacobs_ecs_logs_dbt",
-            "awslogs-region": "us-east-1",
-            "awslogs-stream-prefix": "ecs"
-          }
-        }
-    } 
-]
-TASK_DEFINITION
-  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
-  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn
-  cpu                      = 256
-  memory                   = 512
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-}
+  ecs_logs_name      = local.module_airflow_logs
+  ecs_logs_retention = 30
 
-resource "aws_cloudwatch_event_rule" "every_15_mins" {
-  name                = "python_scheduled_task_test" # change this name
-  description         = "Run every 15 minutes"
-  schedule_expression = "cron(0/15 * * * ? *)"
-}
+  ecs_rule_name        = "jacobs_airflow_rule"
+  ecs_rule_description = "First Module Test - run everyday at 3 AM"
+  ecs_rule_cron        = "cron(0 3 * * ? *)"
 
-# in march change to 11 am utc
-# in nov change to 12 pm utc
-resource "aws_cloudwatch_event_rule" "etl_rule" {
-  name                = "python_scheduled_task_prod" # change this name
-  description         = "Run every day at 11 am UTC"
-  schedule_expression = "cron(0 11 * * ? *)"
-}
-
-
-# # # uncomment the block below when nba season starts and change the rule to etl_rule instead of every_15_min
-resource "aws_cloudwatch_event_target" "ecs_scheduled_task" {
-  target_id = "jacobs_target_id"
-  arn       = aws_ecs_cluster.jacobs_ecs_cluster.arn
-  rule      = aws_cloudwatch_event_rule.etl_rule.name
-  role_arn  = aws_iam_role.jacobs_ecs_ecr_role.arn
-
-  ecs_target {
-    launch_type = "FARGATE"
-    network_configuration {
-      subnets          = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id] # do not use subnet group here - wont work.  need list of the individual subnet ids.
-      security_groups  = [aws_security_group.jacobs_task_security_group_tf.id]
-      assign_public_ip = true
-    }
-    platform_version    = "LATEST"
-    task_count          = 1
-    task_definition_arn = aws_ecs_task_definition.jacobs_ecs_task.arn
-  }
-}
-
-resource "aws_ecs_task_definition" "jacobs_fake_ecs_task" {
-  family                   = "jacobs_fake_ecs_task"
-  container_definitions    = <<TASK_DEFINITION
-[
-    {
-        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:fake_ecs_task",
-        "name": "jacobs_container_fake_ecs",
-        "environment": [
-          {"name": "test", "value": "test1"}
-        ],
-        "logConfiguration": {
-          "logDriver": "awslogs",
-          "options": {
-            "awslogs-group": "jacobs_ecs_logs_fake_ecs",
-            "awslogs-region": "us-east-1",
-            "awslogs-stream-prefix": "ecs"
-          }
-        }
-    } 
-]
-TASK_DEFINITION
-  execution_role_arn       = aws_iam_role.jacobs_ecs_role.arn # aws managed role to give permission to private ecr repo i just made.
-  task_role_arn            = aws_iam_role.jacobs_ecs_role.arn
-  cpu                      = 256
-  memory                   = 512
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
+  ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  ecs_target_id         = "jacobs_airflow_target"
+  ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
+  ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
+  ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
+  ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
 }
