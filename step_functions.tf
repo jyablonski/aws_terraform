@@ -145,7 +145,7 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
       "Parameters": {
         "LaunchType": "FARGATE",
         "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
-        "TaskDefinition": "${aws_ecs_task_definition.jacobs_ecs_task.arn}",
+        "TaskDefinition": "${module.webscrape_ecs_module.ecs_task_definition_arn}",
         "NetworkConfiguration": {
             "AwsvpcConfiguration": {
                 "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
@@ -162,7 +162,7 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
       "Parameters": {
         "LaunchType": "FARGATE",
         "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
-        "TaskDefinition": "${aws_ecs_task_definition.jacobs_fake_ecs_task.arn}",
+        "TaskDefinition": "${module.dbt_ecs_module.ecs_task_definition_arn}",
         "NetworkConfiguration": {
             "AwsvpcConfiguration": {
                 "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
@@ -245,7 +245,7 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
       "Parameters": {
         "LaunchType": "FARGATE",
         "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
-        "TaskDefinition": "${aws_ecs_task_definition.jacobs_ecs_task_ml.arn}",
+        "TaskDefinition": "${module.ml_ecs_module.ecs_task_definition_arn}",
         "NetworkConfiguration": {
             "AwsvpcConfiguration": {
                 "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
