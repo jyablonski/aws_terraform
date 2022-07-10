@@ -648,3 +648,46 @@ resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
   depends_on = [aws_lambda_permission.allow_bucket_sqs,
   ]
 }
+
+resource "aws_iam_user" "jacobs_github_s3_user" {
+  name = "jacobs_github_s3_user"
+
+}
+
+resource "aws_iam_policy" "github_s3_policy" {
+  name        = "jacobsbucket97_github_s3_policy"
+  description = "A Policy for GitHub Actions to write to S3 Bucket"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${aws_s3_bucket.jacobs_bucket_tf_dev.bucket}/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${aws_s3_bucket.jacobs_bucket_tf_dev.bucket}"
+            ]
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_user_policy_attachment" "jacobs_github_s3_user_attachment" {
+  user       = aws_iam_user.jacobs_github_s3_user.name
+  policy_arn = aws_iam_policy.github_s3_policy.arn
+}
