@@ -3,6 +3,7 @@ locals {
   env_type_dynamodb    = "Test" # cant have an apostrophe in the tag name
   lambda_name_dynamodb = "jacobs_lambda_dynamodb"
   account_id           = data.aws_caller_identity.current.account_id
+  jacobs_ip            = "104.153.228.249/32"
 }
 
 resource "aws_dynamodb_table" "jacobs_dynamodb_table" {
@@ -113,7 +114,7 @@ resource "aws_api_gateway_rest_api_policy" "jacobs_api_policy" {
       "Condition": {
         "IpAddress": {
           "aws:SourceIp": [
-            "104.153.228.249/32"
+            "${local.jacobs_ip}"
           ]
         }
       }

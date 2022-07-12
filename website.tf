@@ -119,6 +119,7 @@ resource "aws_s3_bucket_policy" "jacobs_bucket_website_policy" {
   })
 }
 
+# probably needs to just be jyablonski.dev in order to properly route www.jyablonski.dev and jyablonski.dev to www.
 resource "aws_route53_zone" "jacobs_website_zone" {
   name = "www.jyablonski.dev"
 
