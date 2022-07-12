@@ -592,62 +592,52 @@ POLICY
   }
 }
 
-resource "aws_lambda_permission" "allow_bucket_sqs" {
-  statement_id  = "AllowExecutionFromS3Bucketsqs"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
-  principal     = "sqs.amazonaws.com"
-  source_arn    = aws_sqs_queue.jacobs_sqs_queue.arn
-}
-
-
-# resource "aws_lambda_permission" "allow_bucket_sns" {
-#   statement_id  = "AllowExecutionFromS3Bucketsns"
+# resource "aws_lambda_permission" "allow_bucket_sqs" {
+#   statement_id  = "AllowExecutionFromS3Bucketsqs"
 #   action        = "lambda:InvokeFunction"
 #   function_name = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
-#   principal     = "sns.amazonaws.com"
-#   source_arn    = aws_sns_topic.jacobs_sns_topic.arn
+#   principal     = "sqs.amazonaws.com"
+#   source_arn    = aws_sqs_queue.jacobs_sqs_queue.arn
 # }
 
+# resource "aws_sns_topic_subscription" "enable_lambda_sns" {
+#   topic_arn = aws_sns_topic.jacobs_sns_topic.arn
+#   protocol  = "sqs"
+#   endpoint  = aws_sqs_queue.jacobs_sqs_queue.arn
+# }
 
-resource "aws_sns_topic_subscription" "enable_lambda_sns" {
-  topic_arn = aws_sns_topic.jacobs_sns_topic.arn
-  protocol  = "sqs"
-  endpoint  = aws_sqs_queue.jacobs_sqs_queue.arn
-}
+# resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
+#   event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
+#   function_name    = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
+# }
 
-resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
-  event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
-  function_name    = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
-}
+# resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
+#   bucket = aws_s3_bucket.jacobs_sqs_sns_bucket.id
 
-resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
-  bucket = aws_s3_bucket.jacobs_sqs_sns_bucket.id
+#   topic {
+#     topic_arn     = aws_sns_topic.jacobs_sns_topic.arn
+#     events        = ["s3:ObjectCreated:*"]
+#     filter_prefix = "reddit_data/"
+#     filter_suffix = ".parquet"
+#   }
 
-  topic {
-    topic_arn     = aws_sns_topic.jacobs_sns_topic.arn
-    events        = ["s3:ObjectCreated:*"]
-    filter_prefix = "reddit_data/"
-    filter_suffix = ".parquet"
-  }
+#   # lambda_function {
+#   #   lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
+#   #   events              = ["s3:ObjectCreated:*"]
+#   #   filter_prefix       = "boxscores/"
+#   #   filter_suffix       = ".parquet"
+#   # }
 
-  # lambda_function {
-  #   lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
-  #   events              = ["s3:ObjectCreated:*"]
-  #   filter_prefix       = "boxscores/"
-  #   filter_suffix       = ".parquet"
-  # }
+#   # queue {
+#   #   queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
+#   #   events              = ["s3:ObjectCreated:*"]
+#   #   filter_prefix       = "transactions/"
+#   #   filter_suffix       = ".parquet"
+#   # }
 
-  # queue {
-  #   queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
-  #   events              = ["s3:ObjectCreated:*"]
-  #   filter_prefix       = "transactions/"
-  #   filter_suffix       = ".parquet"
-  # }
-
-  depends_on = [aws_lambda_permission.allow_bucket_sqs,
-  ]
-}
+#   depends_on = [aws_lambda_permission.allow_bucket_sqs,
+#   ]
+# }
 
 resource "aws_iam_user" "jacobs_github_s3_user" {
   name = "jacobs_github_s3_user"

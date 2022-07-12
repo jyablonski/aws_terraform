@@ -16,28 +16,21 @@ resource "aws_s3_bucket" "jacobs_bucket_tf_dev" {
   }
 }
 
-# 1 config file per s3 bucket
-# can add things like s3 files -> glacier after 90 days here etc.
-resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf.bucket
+resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_dev_lifecycle_policy" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf_dev.bucket
 
   rule {
     expiration {
-      days = 60
+      days = 7
     }
 
     filter {
-      prefix = "sample_files/"
+      prefix = "website/"
     }
 
-    id     = "60-day-removal"
+    id     = "7-day-removal"
     status = "Enabled"
   }
-
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy_dev" {
-  bucket = aws_s3_bucket.jacobs_bucket_tf_dev.bucket
 
   rule {
     id = "cost-reports"
@@ -57,6 +50,26 @@ resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy
       storage_class = "STANDARD_IA"
     }
 
+  }
+
+}
+
+# 1 config file per s3 bucket
+# can add things like s3 files -> glacier after 90 days here etc.
+resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy" {
+  bucket = aws_s3_bucket.jacobs_bucket_tf.bucket
+
+  rule {
+    expiration {
+      days = 60
+    }
+
+    filter {
+      prefix = "sample_files/"
+    }
+
+    id     = "60-day-removal"
+    status = "Enabled"
   }
 
 }

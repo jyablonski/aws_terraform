@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import boto3
 from botocore.exceptions import ClientError
 
+# Deactiviating as of 2022-07-12 - lambda subscribed to sqs makes it poll 1000s of times a month.
 # from botocore.vendored import requests
 
 def send_ses_email(s3_key="DEFAULT", s3_bucket="DEFAULT", s3_event_time="DEFAULT", kwargs = ""):
