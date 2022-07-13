@@ -158,3 +158,13 @@ variable "jacobs_discord_webhook" {
   type      = string
   sensitive = true
 }
+
+variable "jacobs_twitter_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "jacobs_twitter_secret" {
+  type      = string
+  sensitive = true
+}

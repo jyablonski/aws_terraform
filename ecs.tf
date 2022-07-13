@@ -71,7 +71,9 @@ module "webscrape_ecs_module" {
           {"name": "USER_PW", "value": "${var.jacobs_pw}"},
           {"name": "USER_EMAIL", "value": "${var.jacobs_email_address}"},
           {"name": "S3_BUCKET", "value": "${var.jacobs_bucket}"},
-          {"name": "SENTRY_TOKEN", "value": "${var.jacobs_sentry_token}"}
+          {"name": "SENTRY_TOKEN", "value": "${var.jacobs_sentry_token}"},
+          {"name": "twitter_consumer_api_key", "value": "${var.jacobs_twitter_key}"},
+          {"name": "twitter_consumer_api_secret", "value": "${var.jacobs_twitter_secret}"}
         ],
         "logConfiguration": {
           "logDriver": "awslogs",
