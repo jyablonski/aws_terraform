@@ -168,3 +168,14 @@ variable "jacobs_twitter_secret" {
   type      = string
   sensitive = true
 }
+
+variable "default_tags" {
+  default = {
+
+    Environment = "Dev"
+    Project     = "Test Project"
+
+  }
+  description = "Default Tags for AWS Resources"
+  type        = map(string)
+}
