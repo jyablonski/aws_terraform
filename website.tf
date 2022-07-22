@@ -1,5 +1,6 @@
 locals {
-  s3_origin_id = "jacobs_s3_website_origin"
+  s3_origin_id   = "jacobs_s3_website_origin"
+  website_domain = "jyablonski.dev"
 }
 
 
@@ -63,7 +64,7 @@ resource "aws_s3_bucket_acl" "jacobs_bucket_website_acl" {
 }
 
 resource "aws_s3_bucket" "jacobs_bucket_website_link" {
-  bucket = "jyablonski.dev"
+  bucket = local.website_domain
 
   tags = {
     Name        = local.env_name
@@ -121,7 +122,7 @@ resource "aws_s3_bucket_policy" "jacobs_bucket_website_policy" {
 
 # probably needs to just be jyablonski.dev in order to properly route www.jyablonski.dev and jyablonski.dev to www.
 resource "aws_route53_zone" "jacobs_website_zone" {
-  name = "www.jyablonski.dev"
+  name = local.website_domain
 
   tags = {
     Environment = "dev"
@@ -132,6 +133,17 @@ resource "aws_route53_zone" "jacobs_website_zone" {
 resource "aws_route53_record" "jacobs_website_route53_record" {
   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
   name    = ""
+  type    = "A"
+  alias {
+    name                   = aws_cloudfront_distribution.jacobs_website_s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.jacobs_website_s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "jacobs_website_route53_record_www" {
+  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
+  name    = "www.${local.website_domain}"
   type    = "A"
   alias {
     name                   = aws_cloudfront_distribution.jacobs_website_s3_distribution.domain_name
@@ -158,8 +170,8 @@ resource "aws_route53_record" "jacobs_website_route53_record_cert" {
 }
 
 resource "aws_acm_certificate" "jacobs_website_cert" {
-  domain_name               = "jyablonski.dev"
-  subject_alternative_names = ["www.jyablonski.dev"]
+  domain_name               = local.website_domain
+  subject_alternative_names = ["www.${local.website_domain}"]
   validation_method         = "DNS"
 
   tags = {
@@ -213,7 +225,7 @@ resource "aws_cloudfront_distribution" "jacobs_website_s3_distribution" {
     prefix          = "website"
   }
 
-  aliases = ["jyablonski.dev", "www.jyablonski.dev"]
+  aliases = [local.website_domain, "www.${local.website_domain}"]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
