@@ -1,12 +1,13 @@
 locals {
-  kinesis_role_name     = "jacobs_firehose_role"
-  kinesis_job_name      = "jacobs_kinesis_job"
-  kinesis_policy_name   = "jacobs_kinesis_policy"
-  kinesis_logs_name     = "jacobs-kinesis-logs"
-  kinesis_stream_name   = "jacobs-kinesis-stream"
-  kinesis_firehose_name = "jacobs-kinesis-firehose-stream"
-  kinesis_bucket_name   = "jacobs-kinesis-bucket"
-  project_name          = "kinesis-test"
+  kinesis_role_name        = "jacobs_firehose_role"
+  kinesis_job_name         = "jacobs_kinesis_job"
+  kinesis_policy_name      = "jacobs_kinesis_policy"
+  kinesis_logs_name        = "jacobs-kinesis-logs"
+  kinesis_logs_stream_name = "jacobs-kinesis-logs-stream"
+  kinesis_stream_name      = "jacobs-kinesis-stream"
+  kinesis_firehose_name    = "jacobs-kinesis-firehose-stream"
+  kinesis_bucket_name      = "jacobs-kinesis-bucket"
+  project_name             = "kinesis-test"
 }
 
 resource "aws_iam_role" "jacobs_firehose_role" {
@@ -29,6 +30,11 @@ resource "aws_iam_role" "jacobs_firehose_role" {
 EOF
 }
 
+resource "aws_cloudwatch_log_group" "jacobs_kinesis_firehose_logs" {
+  name              = local.kinesis_logs_name
+  retention_in_days = 7
+}
+
 resource "aws_iam_role_policy_attachment" "jacobs_kinesis_role_attachment1" {
   role       = aws_iam_role.jacobs_firehose_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
@@ -39,14 +45,9 @@ resource "aws_iam_role_policy_attachment" "jacobs_kinesis_role_attachment2" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaKinesisExecutionRole"
 }
 
-resource "aws_iam_role_policy_attachment" "jacobs_kinesis_role_attachment3" {
-  role       = aws_iam_role.jacobs_firehose_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess"
-}
-
 resource "aws_iam_role_policy_attachment" "jacobs_kinesis_role_attachment4" {
   role       = aws_iam_role.jacobs_firehose_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseReadOnlyAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
 }
 
 resource "aws_s3_bucket" "jacobs_kinesis_bucket" {
@@ -63,7 +64,7 @@ resource "aws_s3_bucket_acl" "kinesis_bucket_acl" {
   acl    = "private"
 }
 
-# this creates the data stream - cancelling as of 2022-03-23 bc it costs money daily even if no data is being sent through
+# this creates the data stream - cancelling as of 2022-03-23 bc it costs money daily even if no data is being sent through bc of the shard
 # resource "aws_kinesis_stream" "jacobs_kinesis_stream" {
 #   name             = local.kinesis_stream_name
 #   shard_count      = 1
@@ -81,37 +82,30 @@ resource "aws_s3_bucket_acl" "kinesis_bucket_acl" {
 #   }
 # }
 
-# # this creates the delivery stream which connects TO the data stream above, and provides an output of where to store the data
-# #  (s3, elasticsearch, redshift).
-# # need to add error logging with the cloudwatch_logging_options config block
-# resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream" {
-#   name        = local.kinesis_firehose_name
-#   destination = "extended_s3"
+resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream" {
+  name        = local.kinesis_firehose_name
+  destination = "extended_s3"
 
-#   # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
-#   extended_s3_configuration {
-#     role_arn   = aws_iam_role.jacobs_firehose_role.arn
-#     bucket_arn = aws_s3_bucket.jacobs_kinesis_bucket.arn
+  # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
+  extended_s3_configuration {
+    role_arn        = aws_iam_role.jacobs_firehose_role.arn
+    bucket_arn      = aws_s3_bucket.jacobs_kinesis_bucket.arn
+    buffer_size     = 20  # store every 20 mb
+    buffer_interval = 600 # or every 10 minutes
 
-#     # the idea is that you can use lambda to transform the data in the stream BEFORE it gets written to s3 / redshift / elasticsearch etc
+    prefix              = "kinesis-firehose/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+    error_output_prefix = "kinesis-firehose-errors/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}/"
+    # data_format_conversion_configuration {} # used to change format of the data from json into something like (compressed) parquet
+    cloudwatch_logging_options {
+      enabled         = true
+      log_group_name  = aws_cloudwatch_log_group.jacobs_kinesis_firehose_logs.name
+      log_stream_name = local.kinesis_logs_stream_name
+    }
+  }
 
-#     # processing_configuration {
-#     #   enabled = "true"
-
-#     #   processors {
-#     #     type = "Lambda"
-
-#     #     parameters {
-#     #       parameter_name  = "LambdaArn"
-#     #       parameter_value = "${aws_lambda_function.lambda_processor.arn}:$LATEST"
-#     #     }
-#     #   }
-#     # }
-#   }
-
-#   tags = {
-#     Environment = local.project_name
-#     Terraform   = local.Terraform
-#   }
-# }
+  tags = {
+    Environment = local.project_name
+    Terraform   = local.Terraform
+  }
+}
 
