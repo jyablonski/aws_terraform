@@ -126,23 +126,22 @@ resource "aws_internet_gateway" "jacobs_gw" {
 resource "aws_route_table" "jacobs_public_route_table" {
   vpc_id = aws_vpc.jacobs_vpc_tf.id
 
-  route = [
-    {
-      cidr_block                 = "0.0.0.0/0"
-      gateway_id                 = aws_internet_gateway.jacobs_gw.id
-      carrier_gateway_id         = null
-      destination_prefix_list_id = null
-      egress_only_gateway_id     = null
-      instance_id                = null
-      ipv6_cidr_block            = null
-      local_gateway_id           = null
-      nat_gateway_id             = null
-      network_interface_id       = null
-      transit_gateway_id         = null
-      vpc_endpoint_id            = null
-      vpc_peering_connection_id  = null
-    }
-  ]
+  route {
+    cidr_block                 = "0.0.0.0/0"
+    gateway_id                 = aws_internet_gateway.jacobs_gw.id
+    carrier_gateway_id         = null
+    destination_prefix_list_id = null
+    egress_only_gateway_id     = null
+    instance_id                = null
+    ipv6_cidr_block            = null
+    local_gateway_id           = null
+    nat_gateway_id             = null
+    network_interface_id       = null
+    transit_gateway_id         = null
+    vpc_endpoint_id            = null
+    vpc_peering_connection_id  = null
+  }
+
   tags = {
     Name        = "Jacobs Public Route Table"
     Environment = local.env_type
