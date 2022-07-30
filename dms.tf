@@ -120,7 +120,9 @@ resource "aws_dms_replication_task" "jacobs_replication_task" {
   source_endpoint_arn      = aws_dms_endpoint.jacobs_dms_postgres_source.endpoint_arn
   table_mappings           = "{\r\n    \"rules\": [\r\n        {\r\n            \"rule-type\": \"selection\",\r\n            \"rule-id\": \"208194555\",\r\n            \"rule-name\": \"208194555\",\r\n            \"object-locator\": {\r\n                \"schema-name\": \"nba_prod\",\r\n                \"table-name\": \"prod_twitter_comments\"\r\n            },\r\n            \"rule-action\": \"include\",\r\n            \"filters\": []\r\n        }\r\n    ]\r\n}"
   target_endpoint_arn      = aws_dms_endpoint.jacobs_dms_s3_target.endpoint_arn
+  start_replication_task   = true
 
+  lifecycle { ignore_changes = [replication_task_settings] }
   tags = {
     Terraform   = "true"
     Environment = "dev"
