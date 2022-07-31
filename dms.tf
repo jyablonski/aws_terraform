@@ -47,7 +47,7 @@ resource "aws_dms_replication_subnet_group" "jacobs_replication_subnet_group" {
 
 ### my stuff
 resource "aws_dms_replication_instance" "jacobs_replication_instance" {
-  allocated_storage            = 15
+  allocated_storage            = 50
   apply_immediately            = true
   auto_minor_version_upgrade   = true
   availability_zone            = "us-east-1c"
@@ -111,16 +111,40 @@ resource "aws_dms_endpoint" "jacobs_dms_s3_target" {
 
 }
 
-# might be able to improve table_mappings https://stackoverflow.com/questions/69521857/how-to-set-an-escaped-json-for-aws-dms-with-terraform
 resource "aws_dms_replication_task" "jacobs_replication_task" {
   #   cdc_start_position       = "2022-07-30T11:25:00"
   migration_type           = "full-load-and-cdc"
   replication_instance_arn = aws_dms_replication_instance.jacobs_replication_instance.replication_instance_arn
   replication_task_id      = "jacobs-dms-replication-task"
   source_endpoint_arn      = aws_dms_endpoint.jacobs_dms_postgres_source.endpoint_arn
-  table_mappings           = "{\r\n    \"rules\": [\r\n        {\r\n            \"rule-type\": \"selection\",\r\n            \"rule-id\": \"208194555\",\r\n            \"rule-name\": \"208194555\",\r\n            \"object-locator\": {\r\n                \"schema-name\": \"nba_prod\",\r\n                \"table-name\": \"prod_twitter_comments\"\r\n            },\r\n            \"rule-action\": \"include\",\r\n            \"filters\": []\r\n        }\r\n    ]\r\n}"
-  target_endpoint_arn      = aws_dms_endpoint.jacobs_dms_s3_target.endpoint_arn
-  start_replication_task   = true
+  table_mappings = jsonencode({
+    "rules" : [
+      {
+        "rule-type" : "selection",
+        "rule-id" : "1",
+        "rule-name" : "1",
+        "object-locator" : {
+          "schema-name" : "nba_source",
+          "table-name" : "aws_injury_data_source"
+        },
+        "rule-action" : "include",
+        "filters" : []
+      },
+      {
+        "rule-type" : "selection",
+        "rule-id" : "2",
+        "rule-name" : "2",
+        "object-locator" : {
+          "schema-name" : "nba_source",
+          "table-name" : "aws_transactions_source"
+        },
+        "rule-action" : "include",
+        "filters" : []
+      }
+    ]
+  })
+  target_endpoint_arn    = aws_dms_endpoint.jacobs_dms_s3_target.endpoint_arn
+  start_replication_task = true
 
   lifecycle { ignore_changes = [replication_task_settings] }
   tags = {
