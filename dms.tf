@@ -111,48 +111,49 @@ resource "aws_dms_endpoint" "jacobs_dms_s3_target" {
 
 }
 
-resource "aws_dms_replication_task" "jacobs_replication_task" {
-  #   cdc_start_position       = "2022-07-30T11:25:00"
-  migration_type           = "full-load-and-cdc"
-  replication_instance_arn = aws_dms_replication_instance.jacobs_replication_instance.replication_instance_arn
-  replication_task_id      = "jacobs-dms-replication-task"
-  source_endpoint_arn      = aws_dms_endpoint.jacobs_dms_postgres_source.endpoint_arn
-  table_mappings = jsonencode({
-    "rules" : [
-      {
-        "rule-type" : "selection",
-        "rule-id" : "1",
-        "rule-name" : "1",
-        "object-locator" : {
-          "schema-name" : "nba_source",
-          "table-name" : "aws_injury_data_source"
-        },
-        "rule-action" : "include",
-        "filters" : []
-      },
-      {
-        "rule-type" : "selection",
-        "rule-id" : "2",
-        "rule-name" : "2",
-        "object-locator" : {
-          "schema-name" : "nba_source",
-          "table-name" : "aws_transactions_source"
-        },
-        "rule-action" : "include",
-        "filters" : []
-      }
-    ]
-  })
-  target_endpoint_arn    = aws_dms_endpoint.jacobs_dms_s3_target.endpoint_arn
-  start_replication_task = true
+# disabling bc transaction log backups take up a ton of storage on rds
+# resource "aws_dms_replication_task" "jacobs_replication_task" {
+#   #   cdc_start_position       = "2022-07-30T11:25:00"
+#   migration_type           = "full-load-and-cdc"
+#   replication_instance_arn = aws_dms_replication_instance.jacobs_replication_instance.replication_instance_arn
+#   replication_task_id      = "jacobs-dms-replication-task"
+#   source_endpoint_arn      = aws_dms_endpoint.jacobs_dms_postgres_source.endpoint_arn
+#   table_mappings = jsonencode({
+#     "rules" : [
+#       {
+#         "rule-type" : "selection",
+#         "rule-id" : "1",
+#         "rule-name" : "1",
+#         "object-locator" : {
+#           "schema-name" : "nba_source",
+#           "table-name" : "aws_injury_data_source"
+#         },
+#         "rule-action" : "include",
+#         "filters" : []
+#       },
+#       {
+#         "rule-type" : "selection",
+#         "rule-id" : "2",
+#         "rule-name" : "2",
+#         "object-locator" : {
+#           "schema-name" : "nba_source",
+#           "table-name" : "aws_transactions_source"
+#         },
+#         "rule-action" : "include",
+#         "filters" : []
+#       }
+#     ]
+#   })
+#   target_endpoint_arn    = aws_dms_endpoint.jacobs_dms_s3_target.endpoint_arn
+#   start_replication_task = true
 
-  lifecycle { ignore_changes = [replication_task_settings] }
-  tags = {
-    Terraform   = "true"
-    Environment = "dev"
-    Replication = "hellyah"
-  }
+#   lifecycle { ignore_changes = [replication_task_settings] }
+#   tags = {
+#     Terraform   = "true"
+#     Environment = "dev"
+#     Replication = "hellyah"
+#   }
 
-}
+# }
 
 # works but the first cell in the csv in s3 is fkn missing for some reason idk so headers are 1 spot out of order

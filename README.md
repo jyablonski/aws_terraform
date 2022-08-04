@@ -1,4 +1,4 @@
-version: 1.8.8
+version: 1.9.0
 
 # Terraform Project 
 ### Includes all AWS Infrastructure for the NBA Project as well as various other projects

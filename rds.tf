@@ -10,22 +10,22 @@ resource "aws_db_parameter_group" "jacobs_parameter_group" {
 
   parameter {
     name         = "rds.logical_replication"
-    value        = 1
+    value        = 0
     apply_method = "pending-reboot"
   }
 
   # it yelled at me if this wasn't set to 15 so yeet bby
   parameter {
     name         = "max_wal_senders"
-    value        = 15
+    value        = 10
     apply_method = "pending-reboot"
   }
 
 }
 
 resource "aws_db_instance" "jacobs_rds_tf" {
-  allocated_storage       = 20
-  max_allocated_storage   = 21
+  allocated_storage       = 30
+  max_allocated_storage   = 33
   engine                  = local.rds_engine
   engine_version          = local.rds_engine_ver # newest possible version that's in free tier eligiblity
   instance_class          = "db.t2.micro"
