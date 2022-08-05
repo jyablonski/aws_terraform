@@ -179,3 +179,18 @@ variable "default_tags" {
   description = "Default Tags for AWS Resources"
   type        = map(string)
 }
+
+variable "honeycomb_endpoint" {
+  type      = string
+  sensitive = true
+}
+
+variable "honeycomb_headers" {
+  type      = string
+  sensitive = true
+}
+
+variable "honeycomb_app_name" {
+  type      = string
+  sensitive = true
+}
