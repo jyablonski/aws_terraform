@@ -11,7 +11,7 @@ resource "aws_key_pair" "mlflow_ec2_key" {
 }
 
 # 2022-01-19 update: turning off for now.  want to save credits for a bit
-resource "aws_instance" "jacobs_ec2_airflow" {
+resource "aws_instance" "jacobs_ec2_mlflow" {
   ami = "ami-0e1d30f2c40c4c701"
   # ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t2.micro"

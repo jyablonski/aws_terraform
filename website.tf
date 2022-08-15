@@ -192,10 +192,10 @@ resource "aws_acm_certificate" "jacobs_website_cert" {
   }
 }
 
-# resource "aws_acm_certificate_validation" "jacobs_website_cert_verifiy" {
-#   certificate_arn         = aws_acm_certificate.jacobs_website_cert.arn
-#   validation_record_fqdns = [for record in aws_route53_record.jacobs_website_route53_record_cert : record.fqdn]
-# }
+resource "aws_acm_certificate_validation" "jacobs_website_cert_verifiy" {
+  certificate_arn         = aws_acm_certificate.jacobs_website_cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.jacobs_website_route53_record_cert : record.fqdn]
+}
 
 resource "aws_cloudfront_origin_access_identity" "jacobs_website_origin_identity" {
   comment = "Jacobs Website Origin Identity"
@@ -453,7 +453,7 @@ resource "aws_route53_record" "jacobs_website_route53_record_api" {
 resource "aws_cloudfront_distribution" "jacobs_website_graphql_distribution" {
   origin {
     # can't have the https://
-    domain_name = "jyablonski_graphql.deta.dev"
+    domain_name = "${aws_lambda_function_url.jacobs_graphql_api_lambda_function_url.url_id}.lambda-url.us-east-1.on.aws"
     origin_id   = local.graphql_origin_id
     origin_path = "/graphql"
 

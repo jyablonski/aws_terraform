@@ -122,7 +122,7 @@ print('Loading function')
 
 def lambda_handler(event, context):
     """
-    Lambda function that's triggered by EventBridge every 1 hr to read in and 
+    Lambda function that's triggered by EventBridge every 12 hrs to process SQS Messages for the GraphQL API.
     """
     # print(event)
     try:

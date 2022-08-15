@@ -9,3 +9,5 @@ version: 1.9.1
     * [dbt](https://github.com/jyablonski/nba_elt_dbt)
     * [ML Pipeline](https://github.com/jyablonski/nba_elt_mlflow)
     * [Airflow Proof of Concept](https://github.com/jyablonski/nba_elt_airflow)
+    * [GraphQL](https://github.com/jyablonski/graphql_praq)
+    * [REST API](https://github.com/jyablonski/nba_elt_rest_api)

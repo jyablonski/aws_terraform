@@ -86,6 +86,7 @@ resource "aws_subnet" "jacobs_public_subnet" {
   vpc_id                  = aws_vpc.jacobs_vpc_tf.id
   cidr_block              = cidrsubnet(aws_vpc.jacobs_vpc_tf.cidr_block, 8, 1)
   map_public_ip_on_launch = true
+  availability_zone       = "us-east-1a"
 
   tags = {
     Name        = "Jacobs Public Subnet"
@@ -97,6 +98,7 @@ resource "aws_subnet" "jacobs_public_subnet_2" {
   vpc_id                  = aws_vpc.jacobs_vpc_tf.id
   cidr_block              = cidrsubnet(aws_vpc.jacobs_vpc_tf.cidr_block, 8, 3)
   map_public_ip_on_launch = true
+  availability_zone       = "us-east-1b"
 
   tags = {
     Name        = "Jacobs Public Subnet 2"

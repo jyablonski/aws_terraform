@@ -101,7 +101,7 @@ you have to do historical load for any files previously in the bucket that were 
 #   type = external_stage
 #   storage_provider = s3
 #   enabled = true
-#   storage_aws_role_arn = 'arn:aws:iam::324816727452:role/mysnowflakerole'
+#   storage_aws_role_arn = 'arn:aws:iam::288364792694:role/mysnowflakerole'
 #   storage_allowed_locations = ('s3://jacobsbucket97/sample_files/');
 
 #   DESC INTEGRATION s3_int;

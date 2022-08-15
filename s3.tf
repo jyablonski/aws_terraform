@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "jacobs_bucket_tf" {
-  bucket = "jacobsbucket97"
+  bucket = "nba-elt-prod"
 
   tags = {
     Name        = local.env_name

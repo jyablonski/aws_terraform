@@ -135,55 +135,6 @@ resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_cloudw
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
 }
 
-# use this to create schemas from now on.
-
-##################
-#                #
-#    POSTGRES    #  Removing as of 12-12-21
-#                #
-# ##################
-
-# provider "postgresql" {
-#   host     = var.pg_host
-#   username = var.pg_user
-#   password = var.pg_pass
-# }
-
-# terraform {
-# required_providers {
-#   postgresql = {
-#     source = "cyrilgdn/postgresql"
-#     version = "1.14.0"
-#   }
-# }
-# }
-
-# resource "postgresql_database" "jacobs_practice_db" {
-#   name = "jacobs_practice_db"
-#   owner = var.pg_user
-# }
-
-# resource "postgresql_schema" "jacobs_practice_schema" {
-#   name  = "jacobs_practice_schema"
-#   database = postgresql_database.jacobs_practice_db.name
-#   owner = var.pg_user
-# }
-
-# resource "postgresql_role" "jacobs_dbt_role" {
-#   name     = "jacobs_dbt_role"
-#   password = var.pg_pass
-# }
-
-# resource "postgresql_schema" "my_practice_schema" {
-#   name  = "my_practice_schema"
-#   owner = var.pg_user
-# }
-
-# resource "postgresql_schema" "nba_prep" {
-#   name  = "nba_prep"
-#   owner = var.pg_user
-# }
-
 resource "aws_ssm_parameter" "jacobs_ssm_prac_public" {
   name  = "jacobs_ssm_test"
   type  = "String"
@@ -320,7 +271,7 @@ resource "aws_iam_policy" "lambda_sns_policy" {
         "Sid":"AllowPublishToMyTopic",
         "Effect":"Allow",
         "Action":"sns:Publish",
-        "Resource":"arn:aws:sns:us-east-1:324816727452:jacobs-first-sns-topic"
+        "Resource":"arn:aws:sns:us-east-1:288364792694:jacobs-first-sns-topic"
     }
   ]
 }
@@ -329,7 +280,7 @@ EOF
 
 resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment1" {
   role       = aws_iam_role.jacobs_lambda_s3_role.name
-  policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaBasicExecutionRole-6777176a-f601-4ad8-864d-53578dfceb07"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment2" {
@@ -339,7 +290,7 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment2" {
 
 resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_role_attachment3" {
   role       = aws_iam_role.jacobs_lambda_s3_role.name
-  policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaS3ExecutionRole-2f559d56-d564-4348-abc7-3afe33f407c6"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonS3ObjectLambdaExecutionRolePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_4" {

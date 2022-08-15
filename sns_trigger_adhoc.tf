@@ -85,7 +85,7 @@ EOF
 
 resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment1" {
   role       = aws_iam_role.jacobs_adhoc_sns_lambda_role.name
-  policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaBasicExecutionRole-6777176a-f601-4ad8-864d-53578dfceb07"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment2" {
@@ -159,17 +159,19 @@ resource "aws_cloudwatch_log_group" "jacobs_adhoc_sns_ecs_lambda_logs" {
 data "archive_file" "lambda_adhoc_sns_fake_ecs_zip" {
   type        = "zip"
   source_dir  = "${path.module}/lambdas/lambda_adhoc_sns_ecs/"
-  output_path = "${path.module}/myzip/lambda_adhoc_sns_ecs2.zip"
+  output_path = "${path.module}/myzip/lambda_adhoc_sns_ecs.zip"
 }
 
 resource "aws_lambda_function" "jacobs_adhoc_sns_ecs_lambda_function" {
-  filename      = "${path.module}/myzip/lambda_adhoc_sns_ecs2.zip"
+  filename      = "${path.module}/myzip/lambda_adhoc_sns_ecs.zip"
   function_name = "jacobs_adhoc_sns_ecs_lambda_function"
   role          = aws_iam_role.jacobs_adhoc_sns_lambda_role.arn
   handler       = "main.lambda_handler"
   runtime       = "python3.9"
   memory_size   = 128
   timeout       = 3
+
+  source_code_hash = data.archive_file.lambda_adhoc_sns_fake_ecs_zip.output_base64sha256
 
   tags = {
     Name        = local.env_name_adhoc
