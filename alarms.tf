@@ -37,13 +37,13 @@ resource "aws_cloudwatch_log_group" "jacobs_lambda_alarm_logs" {
 data "archive_file" "lambda_alarm_zip" {
   type        = "zip"
   source_dir  = "${path.module}/lambdas/lambda_alarm/"
-  output_path = "${path.module}/myzip/lambda_alarm5.zip"
+  output_path = "${path.module}/myzip/lambda_alarm.zip"
 }
 
 # im cheating and using an old role for now
 # https://api.klayers.cloud//api/v2/p3.9/layers/latest/us-east-1/html
 resource "aws_lambda_function" "jacobs_lambda_alarm_function" {
-  filename      = "${path.module}/myzip/lambda_alarm5.zip"
+  filename      = "${path.module}/myzip/lambda_alarm.zip"
   function_name = local.lambda_alarm_function
   role          = aws_iam_role.jacobs_adhoc_sns_lambda_role.arn
   handler       = "main.lambda_handler"
@@ -51,6 +51,7 @@ resource "aws_lambda_function" "jacobs_lambda_alarm_function" {
   memory_size   = 128
   timeout       = 3
 
+  source_code_hash = data.archive_file.lambda_alarm_zip.output_base64sha256
   layers = [
     "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p39-requests:4",
   ]

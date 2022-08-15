@@ -50,7 +50,7 @@ resource "aws_ecs_cluster" "jacobs_ecs_cluster" {
 
 module "webscrape_ecs_module" {
   source                   = "./modules/ecs"
-  ecs_schedule             = true
+  ecs_schedule             = false
   ecs_id                   = "jacobs_webscrape_task"
   ecs_container_definition = <<TASK_DEFINITION
 [
@@ -70,7 +70,7 @@ module "webscrape_ecs_module" {
           {"name": "reddit_secretkey", "value": "${var.jacobs_reddit_secretkey}"},
           {"name": "USER_PW", "value": "${var.jacobs_pw}"},
           {"name": "USER_EMAIL", "value": "${var.jacobs_email_address}"},
-          {"name": "S3_BUCKET", "value": "${var.jacobs_bucket}"},
+          {"name": "S3_BUCKET", "value": "${aws_s3_bucket.jacobs_bucket_tf_dev.bucket}"},
           {"name": "SENTRY_TOKEN", "value": "${var.jacobs_sentry_token}"},
           {"name": "twitter_consumer_api_key", "value": "${var.jacobs_twitter_key}"},
           {"name": "twitter_consumer_api_secret", "value": "${var.jacobs_twitter_secret}"}
@@ -156,7 +156,7 @@ TASK_DEFINITION
 
 module "ml_ecs_module" {
   source                   = "./modules/ecs"
-  ecs_schedule             = true
+  ecs_schedule             = false
   ecs_id                   = "jacobs_ml_task"
   ecs_container_definition = <<TASK_DEFINITION
 [

@@ -83,7 +83,7 @@ EOF
 
 resource "aws_iam_role_policy_attachment" "jacobs_rds_sns_lambda_log_attachment1" {
   role       = aws_iam_role.jacobs_rds_sns_lambda_role.name
-  policy_arn = "arn:aws:iam::324816727452:policy/service-role/AWSLambdaBasicExecutionRole-6777176a-f601-4ad8-864d-53578dfceb07"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_rds_sns_lambda_log_attachment2" {

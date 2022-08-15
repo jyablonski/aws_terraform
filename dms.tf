@@ -27,6 +27,12 @@ resource "aws_iam_role_policy_attachment" "jacobs_dms_role_attachment1" {
 resource "aws_iam_role_policy_attachment" "jacobs_dms_role_attachment2" {
   role       = aws_iam_role.jacobs_dms_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonDMSVPCManagementRole"
+
+  # It takes some time for these attachments to work, and creating the aws_dms_replication_subnet_group fails if this attachment hasn't completed.
+  provisioner "local-exec" {
+    command = "sleep 30"
+  }
+
 }
 
 resource "aws_dms_replication_subnet_group" "jacobs_replication_subnet_group" {
@@ -36,6 +42,10 @@ resource "aws_dms_replication_subnet_group" "jacobs_replication_subnet_group" {
   subnet_ids = [
     aws_subnet.jacobs_public_subnet.id,
     aws_subnet.jacobs_public_subnet_2.id,
+  ]
+
+  depends_on = [
+    aws_iam_role_policy_attachment.jacobs_dms_role_attachment2
   ]
 
   tags = {
@@ -50,7 +60,7 @@ resource "aws_dms_replication_instance" "jacobs_replication_instance" {
   allocated_storage            = 50
   apply_immediately            = true
   auto_minor_version_upgrade   = true
-  availability_zone            = "us-east-1c"
+  availability_zone            = "us-east-1a"
   engine_version               = "3.4.7"
   multi_az                     = false
   preferred_maintenance_window = "sat:01:30-sat:04:30"

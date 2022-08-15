@@ -274,9 +274,9 @@ resource "aws_cloudwatch_event_rule" "step_functions_schedule" {
   schedule_expression = "cron(0 11 * * ? *)"
 }
 
-# resource "aws_cloudwatch_event_target" "step_function_event_target" {
-#   target_id = "jacobs_stepfunctions_target"
-#   rule      = aws_cloudwatch_event_rule.step_functions_schedule.name
-#   arn       = aws_sfn_state_machine.jacobs_state_machine.arn
-#   role_arn  = aws_iam_role.jacobs_stepfunctions_role.arn
-# }
+resource "aws_cloudwatch_event_target" "step_function_event_target" {
+  target_id = "jacobs_stepfunctions_target"
+  rule      = aws_cloudwatch_event_rule.step_functions_schedule.name
+  arn       = aws_sfn_state_machine.jacobs_state_machine.arn
+  role_arn  = aws_iam_role.jacobs_stepfunctions_role.arn
+}

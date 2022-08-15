@@ -61,11 +61,11 @@ resource "aws_cloudwatch_log_group" "jacobs_lambda_dynamodb_logs" {
 data "archive_file" "lambda_dynamodb_zip" {
   type        = "zip"
   source_dir  = "${path.module}/lambdas/lambda_dynamodb/"
-  output_path = "${path.module}/myzip/lambda_dynamodb2.zip"
+  output_path = "${path.module}/myzip/lambda_dynamodb.zip"
 }
 
 resource "aws_lambda_function" "jacobs_lambda_dynamodb_function" {
-  filename      = "${path.module}/myzip/lambda_dynamodb2.zip"
+  filename      = "${path.module}/myzip/lambda_dynamodb.zip"
   function_name = local.lambda_name_dynamodb
   role          = aws_iam_role.jacobs_lambda_dynamodb_role.arn
   handler       = "main.lambda_handler"
@@ -73,6 +73,7 @@ resource "aws_lambda_function" "jacobs_lambda_dynamodb_function" {
   memory_size   = 128
   timeout       = 60
 
+  source_code_hash = data.archive_file.lambda_dynamodb_zip.output_base64sha256
   tags = {
     Name        = local.env_name_dynamodb
     Environment = local.env_type_dynamodb
@@ -122,7 +123,7 @@ resource "aws_api_gateway_rest_api_policy" "jacobs_api_policy" {
   ]
 }
 EOF
-} # arn:aws:execute-api:us-east-1:324816727452:fgvdktt1h3/*/GET/product
+} # arn:aws:execute-api:us-east-1:288364792694:fgvdktt1h3/*/GET/product
 # aws source ip only allows access from my ip
 
 # RESOURCES
