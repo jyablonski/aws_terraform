@@ -72,6 +72,38 @@ resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy
     status = "Enabled"
   }
 
+  rule {
+    id = "Reddit 60 day Storage"
+
+    filter {
+      prefix = "reddit_comment_data/"
+    }
+
+    status = "Enabled"
+
+    transition {
+      days          = 60
+      storage_class = "STANDARD_IA"
+    }
+
+  }
+
+  rule {
+    id = "Twitter 60 day Storage"
+
+    filter {
+      prefix = "twitter_tweepy_data/"
+    }
+
+    status = "Enabled"
+
+    transition {
+      days          = 60
+      storage_class = "STANDARD_IA"
+    }
+
+  }
+
 }
 
 # 2022-03-21 fix this naming in the future
