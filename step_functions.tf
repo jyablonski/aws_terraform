@@ -73,7 +73,8 @@ resource "aws_iam_policy" "jacobs_stepfunction_execution_policy" {
             "states:ListStateMachines",
             "states:ListActivities",
             "states:CreateStateMachine",
-            "states:CreateActivity"
+            "states:CreateActivity",
+            "states:StartExecution"
         ],
         "Resource": [
             "*"
