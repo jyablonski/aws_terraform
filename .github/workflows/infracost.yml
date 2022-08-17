@@ -1,3 +1,5 @@
+name: "Infracost Detection on PR"
+
 on: [pull_request]
 env:
   # If you use private modules you'll need this env variable to use
