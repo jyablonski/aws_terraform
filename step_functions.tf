@@ -1,3 +1,49 @@
+resource "aws_iam_role" "jacobs_stepfunctions_event_role" {
+  name               = "jacobs_stepfunctions_event_role"
+  description        = "Role created for EventBridge to trigger Step Functions Jobs"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "events.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "jacobs_stepfunction_event_policy" {
+  name        = "jacobs_stepfunctions_event_policy"
+  description = "A policy for EventBridge to Trigger Step Functions Jobs"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "states:StartExecution"
+            ],
+            "Resource": [
+                "arn:aws:states:us-east-1:${local.account_id}:stateMachine:*"
+            ]
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_event_role_attachment" {
+  role       = aws_iam_role.jacobs_stepfunctions_event_role.name
+  policy_arn = aws_iam_policy.jacobs_stepfunction_event_policy.arn
+}
+
 resource "aws_iam_role" "jacobs_stepfunctions_role" {
   name               = "jacobs_stepfunctions_role"
   description        = "Role created for AWS Step Functions Execution"
@@ -279,5 +325,5 @@ resource "aws_cloudwatch_event_target" "step_function_event_target" {
   target_id = "jacobs_stepfunctions_target"
   rule      = aws_cloudwatch_event_rule.step_functions_schedule.name
   arn       = aws_sfn_state_machine.jacobs_state_machine.arn
-  role_arn  = aws_iam_role.jacobs_stepfunctions_role.arn
+  role_arn  = aws_iam_role.jacobs_stepfunctions_event_role.arn
 }
