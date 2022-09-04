@@ -24,3 +24,7 @@ bump-major:
 	@bump2version major
 	@git push --tags
 	@git push
+
+.PHONY: docs
+docs:
+	@terraform-docs markdown table --output-file tf_docs.md --output-mode inject ./
