@@ -1,8 +1,7 @@
 locals {
-  s3_origin_id      = "jacobs_s3_website_origin"
-  api_origin_id     = "jacobs_api_website_origin"
-  graphql_origin_id = "jacobs_graphql_website_origin"
-  website_domain    = "jyablonski.dev"
+  s3_origin_id   = "jacobs_s3_website_origin"
+  api_origin_id  = "jacobs_api_website_origin"
+  website_domain = "jyablonski.dev"
 }
 
 
@@ -154,13 +153,13 @@ resource "aws_route53_record" "jacobs_website_route53_record_www" {
   }
 }
 
-resource "aws_route53_record" "jacobs_website_route53_record_mlflow" {
+resource "aws_route53_record" "jacobs_website_route53_record_graphql" {
   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-  name    = "mlflow.${local.website_domain}"
+  name    = "graphql.${local.website_domain}"
   type    = "A"
   alias {
-    name                   = aws_lb.mlflow_alb.dns_name
-    zone_id                = aws_lb.mlflow_alb.zone_id
+    name                   = aws_lb.graphql_alb.dns_name
+    zone_id                = aws_lb.graphql_alb.zone_id
     evaluate_target_health = false
   }
 }
@@ -456,138 +455,6 @@ resource "aws_route53_record" "jacobs_website_route53_record_api" {
   alias {
     name                   = aws_cloudfront_distribution.jacobs_website_api_distribution.domain_name
     zone_id                = aws_cloudfront_distribution.jacobs_website_api_distribution.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-## GraphQL
-resource "aws_cloudfront_distribution" "jacobs_website_graphql_distribution" {
-  origin {
-    # can't have the https://
-    domain_name = "${aws_lambda_function_url.jacobs_graphql_api_lambda_function_url.url_id}.lambda-url.us-east-1.on.aws"
-    origin_id   = local.graphql_origin_id
-    origin_path = "/graphql"
-
-    custom_origin_config {
-      http_port                = "80"
-      https_port               = "443"
-      origin_protocol_policy   = "https-only"
-      origin_ssl_protocols     = ["TLSv1.2"]
-      origin_keepalive_timeout = 60
-      origin_read_timeout      = 60
-    }
-
-  }
-
-  enabled         = true
-  is_ipv6_enabled = true
-  comment         = "GraphQL Distribution"
-  # default_root_object = "index.html"
-
-  # custom_error_response {
-  #   error_code         = 404
-  #   response_code      = 200
-  #   response_page_path = "/index.html"
-  # }
-
-  logging_config {
-    include_cookies = false
-    bucket          = aws_s3_bucket.jacobs_bucket_tf_dev.bucket_domain_name
-    prefix          = "website"
-  }
-
-  aliases = ["graphql.${local.website_domain}"]
-
-  default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = local.graphql_origin_id
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
-  }
-
-  # Cache behavior with precedence 0
-  ordered_cache_behavior {
-    path_pattern     = "/content/immutable/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD", "OPTIONS"]
-    target_origin_id = local.graphql_origin_id
-
-    forwarded_values {
-      query_string = false
-      headers      = ["Origin"]
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
-  }
-
-  # Cache behavior with precedence 1
-  ordered_cache_behavior {
-    path_pattern     = "/content/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = local.graphql_origin_id
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
-    compress               = true
-    viewer_protocol_policy = "redirect-to-https"
-  }
-
-  price_class = "PriceClass_200"
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["US", "CA", "GB", "DE"]
-    }
-  }
-
-  tags = {
-    Environment = "production"
-  }
-
-  viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.jacobs_website_cert.arn
-    ssl_support_method  = "sni-only"
-  }
-}
-
-resource "aws_route53_record" "jacobs_website_route53_record_graphql" {
-  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-  name    = "graphql.${local.website_domain}"
-  type    = "A"
-  alias {
-    name                   = aws_cloudfront_distribution.jacobs_website_graphql_distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.jacobs_website_graphql_distribution.hosted_zone_id
     evaluate_target_health = false
   }
 }
