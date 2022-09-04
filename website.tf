@@ -154,6 +154,17 @@ resource "aws_route53_record" "jacobs_website_route53_record_www" {
   }
 }
 
+resource "aws_route53_record" "jacobs_website_route53_record_mlflow" {
+  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
+  name    = "mlflow.${local.website_domain}"
+  type    = "A"
+  alias {
+    name                   = aws_lb.mlflow_alb.dns_name
+    zone_id                = aws_lb.mlflow_alb.zone_id
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_route53_record" "jacobs_website_route53_record_cert" {
   for_each = {
     for dvo in aws_acm_certificate.jacobs_website_cert.domain_validation_options : dvo.domain_name => {
