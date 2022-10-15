@@ -18,17 +18,17 @@ resource "postgresql_role" "dbt_role" {
 
 resource "postgresql_role" "python_scrape_role" {
   name     = "python_scrape_role"
-  password = "${var.pg_role_pass}dbt"
+  password = "${var.pg_role_pass}python"
 }
 
 resource "postgresql_role" "shiny_read_role" {
   name     = "shiny_read_role"
-  password = "${var.pg_role_pass}dbt"
+  password = "${var.pg_role_pass}shiny"
 }
 
 resource "postgresql_role" "rest_api_read_role" {
   name     = "rest_api_read_role"
-  password = "${var.pg_role_pass}dbt"
+  password = "${var.pg_role_pass}restapi"
 }
 
 resource "postgresql_schema" "nba_source" {
