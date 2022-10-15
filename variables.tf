@@ -194,3 +194,8 @@ variable "honeycomb_app_name" {
   type      = string
   sensitive = true
 }
+
+variable "pg_role_pass" {
+  type      = string
+  sensitive = true
+}

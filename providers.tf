@@ -6,6 +6,8 @@ provider "aws" {
   default_tags {
     tags = {
       Owner = "jacob"
+      # last_modified_by = "jyablonski"
+      # updated_at = timestamp()
     }
   }
 }
@@ -16,18 +18,14 @@ provider "aws" {
 terraform {
   required_version = ">= 1.1.0"
   required_providers {
-    # snowflake = {
-    #   source = "chanzuckerberg/snowflake"
-    #   version = "0.25.32"
-    # }
     aws = {
       source  = "hashicorp/aws"
       version = "4.24.0"
     }
-    # postgresql = {
-    #   source  = "cyrilgdn/postgresql"
-    #   version = "1.15.0"
-    # }
+    postgresql = {
+      source  = "cyrilgdn/postgresql"
+      version = "1.17.1"
+    }
   }
   cloud {
     organization = "jyablonski_prac"
@@ -38,13 +36,13 @@ terraform {
 
 }
 
-# provider "postgresql" {
-#   alias    = "pg1"
-#   host     = var.pg_host
-#   username = var.pg_user
-#   password = var.pg_pass
-#   sslmode  = "disable"
-# }
+provider "postgresql" {
+  # alias    = "pg1" - this fucks shit up for some reason yo
+  host     = var.pg_host
+  username = var.pg_user
+  password = var.pg_pass
+  sslmode  = "disable"
+}
 
 # provider "snowflake" {
 #   username = var.snowflake_user
