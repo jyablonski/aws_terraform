@@ -317,8 +317,8 @@ EOF
 
 resource "aws_cloudwatch_event_rule" "step_functions_schedule" {
   name                = "jacobs_stepfunctions_schedule" # change this name
-  description         = "Run every day at 11am UTC"
-  schedule_expression = "cron(0 11 * * ? *)"
+  description         = "Run every day at 12pm UTC"
+  schedule_expression = "cron(0 12 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "step_function_event_target" {
