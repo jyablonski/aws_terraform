@@ -98,17 +98,6 @@ variable "grafana_external_id" {
   }
 }
 
-# variable "snowflake_user" {
-#     type = string
-#     sensitive = true
-# }
-
-
-# variable "snowflake_pw" {
-#     type = string
-#     sensitive = true
-# }
-
 variable "es_master_user" {
   type      = string
   sensitive = true
@@ -196,6 +185,16 @@ variable "honeycomb_app_name" {
 }
 
 variable "pg_role_pass" {
+  type      = string
+  sensitive = true
+}
+
+variable "pagerduty_endpoint" {
+  type      = string
+  sensitive = true
+}
+
+variable "ecs_pagerduty_endpoint" {
   type      = string
   sensitive = true
 }
