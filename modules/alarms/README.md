@@ -1,0 +1,2 @@
+# Alarms
+Terraform Module to create Cloudwatch Metric Alarms and/or Eventbridge Rule Patterns and send off notifications to an SNS Topic with a target destination: typically a Slack Webhook or a Pagerduty Integration Endpoint.

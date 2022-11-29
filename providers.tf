@@ -26,6 +26,14 @@ terraform {
       source  = "cyrilgdn/postgresql"
       version = "1.17.1"
     }
+    # snowflake = {
+    #   source  = "Snowflake-Labs/snowflake"
+    #   version = "0.51.0"
+    # }
+    # snowsql = {
+    #   source  = "aidanmelen/snowsql"
+    #   version = "1.0.1"
+
   }
   cloud {
     organization = "jyablonski_prac"
@@ -45,8 +53,9 @@ provider "postgresql" {
 }
 
 # provider "snowflake" {
-#   username = var.snowflake_user
-#   account  = "rl64113"
-#   region   = "us-east-2.aws"
-#   password = var.snowflake_pw
+#   username    = var.snowflake_username
+#   account     = var.snowflake_account
+#   region      = var.snowflake_region
+#   private_key = var.private_key_path
+#   role        = var.snowflake_role
 # }
