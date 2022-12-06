@@ -8,7 +8,7 @@ module "rds_alarm" {
   alarm_description        = "Metric Alarm to check RDS CPU Utilization and send alarms to Pagerduty"
   alarm_comparison         = "GreaterThanOrEqualToThreshold"
   alarm_threshold          = 75
-  alarm_evaluation_periods = 1
+  alarm_evaluation_periods = 2
   alarm_metric_type        = "CPUUtilization"
   alarm_period             = 300
   db_id                    = aws_db_instance.jacobs_rds_tf.id
