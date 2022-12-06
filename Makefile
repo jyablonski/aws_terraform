@@ -28,3 +28,11 @@ bump-major:
 .PHONY: docs
 docs:
 	@terraform-docs markdown table --output-file tf_docs.md --output-mode inject ./
+
+.PHONY: plan
+plan:
+	@terraform plan
+
+.PHONY: apply
+apply:
+	@terraform apply --auto-approve
