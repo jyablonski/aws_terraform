@@ -24,17 +24,24 @@ module "ecs_task_alarm" {
   is_metric_alarm    = false
   event_rule_pattern = <<EOF
 {
-   "source":[
-      "aws.states"
-   ],
-   "detail-type":[
-      "Step Functions Execution Status Change"
-   ],
-   "detail":{
-      "status":[
-         "FAILED"
+  "source": [
+    "aws.ecs"
+  ],
+  "detail-type": [
+    "ECS Task State Change"
+  ],
+  "detail": {
+    "lastStatus": [
+      "STOPPED"
+    ],
+    "containers": {
+      "exitCode": [
+        {
+          "anything-but": 0
+        }
       ]
-   }
+    }
+  }
 }
 EOF
 

@@ -42,6 +42,33 @@ resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_s3" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
+resource "aws_iam_policy" "ecs_ec2_cs_role_policy_sts" {
+  name        = "${local.ecs_cluster_name}-cs-sts-policy"
+  description = "A test policy for cs iam role to run ecs cluster tasks"
+  policy      = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Resource": [
+            "arn:aws:iam::288364792694:role/jacobs-ecs-ec2-cluster-cs-role"
+          ]
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_cs_sts" {
+  role       = aws_iam_role.jacobs_ecs_role.name
+  policy_arn = aws_iam_policy.ecs_ec2_cs_role_policy_sts.arn
+}
+
+
 resource "aws_iam_role" "jacobs_ecs_ecr_role" {
   name               = "jacobs_ecs_ecr_role"
   description        = "Role created for AWS ECS ECR Access"

@@ -10,6 +10,8 @@ locals {
 
 }
 
+# need subnets + security groups for this
+
 resource "aws_iam_role" "ecs_ec2_role" {
   name = "${local.ecs_cluster_name}-role"
 
@@ -31,9 +33,54 @@ resource "aws_iam_role" "ecs_ec2_role" {
 
 }
 
+# aws managed role AmazonEC2ContainerServiceforEC2Role
+resource "aws_iam_policy" "ecs_ec2_role_policy" {
+  name        = "${local.ecs_cluster_name}-policy"
+  description = "A test policy for ec2 instances to run ecs cluster tasks"
+  policy      = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeTags",
+                "ecs:DeregisterContainerInstance",
+                "ecs:DiscoverPollEndpoint",
+                "ecs:Poll",
+                "ecs:RegisterContainerInstance",
+                "ecs:StartTelemetrySession",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:Submit*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage"
+            ],
+            "Resource": "${aws_ecr_repository.jacobs_repo.arn}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/ecs/hello-world-ec2"
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy_attachment" "ecs_ec2_role_attach1" {
   role       = aws_iam_role.ecs_ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+  policy_arn = aws_iam_policy.ecs_ec2_role_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_ec2_role_attach3" {
@@ -113,3 +160,97 @@ resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_provider" {
 }
 
 # have to have > memory in ec2 instance than is assigned in the ecs task definition, or task will be forever stuck in provisioning.
+
+## test role for work
+resource "aws_iam_role" "ecs_ec2_role_cs" {
+  name = "${local.ecs_cluster_name}-cs-role"
+
+  # Terraform's "jsonencode" function converts a
+  # arn:aws:sts::494531898010:assumed-role/AirflowS3Logs-cl4cd06hj01900t0hoszeaqm/botocore-session-1671228174
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::494531898010:role/AirflowS3Logs-cl4cd06hj01900t0fhoszeaqm"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "ecs_ec2_cs_role_policy" {
+  name        = "${local.ecs_cluster_name}-cs-policy"
+  description = "A test policy for cs iam role to run ecs cluster tasks"
+  policy      = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeTags",
+                "ecs:DeregisterContainerInstance",
+                "ecs:DiscoverPollEndpoint",
+                "ecs:Poll",
+                "ecs:RegisterContainerInstance",
+                "ecs:StartTelemetrySession",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:Submit*",
+                "ecs:RunTask",
+                "ecs:DescribeTasks",
+                "logs:GetLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage"
+            ],
+            "Resource": "${aws_ecr_repository.jacobs_repo.arn}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/ecs/hello-world-ec2"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Resource": [
+            "arn:aws:iam::288364792694:role/jacobs_ecs_role",
+            "arn:aws:aws::494531898010:role/AirflowS3Logs-cl4cd06hj01900t0fhoszeaqm"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "iam:PassRole"
+          ],
+          "Resource": [
+            "arn:aws:iam::288364792694:role/jacobs_ecs_role"
+          ]
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_ec2_role_cs_attach1" {
+  role       = aws_iam_role.ecs_ec2_role_cs.name
+  policy_arn = aws_iam_policy.ecs_ec2_cs_role_policy.arn
+}
