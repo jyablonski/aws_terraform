@@ -73,7 +73,7 @@ resource "aws_lambda_function_url" "jacobs_rest_api_lambda_function_url" {
   cors {
     allow_credentials = false
     allow_origins     = ["*"]
-    allow_methods     = ["GET"]
+    allow_methods     = ["GET", "POST"]
     max_age           = 43200 # 12 hrs
   }
 }
