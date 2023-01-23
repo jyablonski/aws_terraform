@@ -9,9 +9,9 @@ locals {
   EOT
 
 }
+# ^ this is needed to tell EC2 that these instances in the ASG are to be used for this specific ECS Cluster
 
-# need subnets + security groups for this
-
+# The IAM Role the EC2 Instances in the ASG use
 resource "aws_iam_role" "ecs_ec2_role" {
   name = "${local.ecs_cluster_name}-role"
 
@@ -33,7 +33,8 @@ resource "aws_iam_role" "ecs_ec2_role" {
 
 }
 
-# aws managed role AmazonEC2ContainerServiceforEC2Role
+# mostly copied from aws managed role AmazonEC2ContainerServiceforEC2Role
+# these permissions can prolly be limited to specific ECS Clusters or task definitions
 resource "aws_iam_policy" "ecs_ec2_role_policy" {
   name        = "${local.ecs_cluster_name}-policy"
   description = "A test policy for ec2 instances to run ecs cluster tasks"
@@ -102,6 +103,8 @@ resource "aws_ecs_cluster" "ecs_ec2_cluster" {
   }
 }
 
+# this is needed for the ASG to boot up ec2 instances used in the ECS Cluster
+# image template, the size of the instance, iam profile that the instance assumes, and the bootstrap ecs stuff.
 resource "aws_launch_template" "ecs_launch_template" {
   name_prefix   = "${local.ecs_cluster_name}-launch-template"
   image_id      = "ami-0fe5f366c083f59ca"
@@ -118,9 +121,9 @@ resource "aws_launch_template" "ecs_launch_template" {
 
 resource "aws_autoscaling_group" "ecs_ec2_cluster_asg" {
   name                  = "${local.ecs_cluster_name}-asg"
-  min_size              = 1
+  min_size              = 0
   max_size              = 1
-  desired_capacity      = 1
+  desired_capacity      = 1 # basically the intial capacity for the ASG.
   protect_from_scale_in = true
 
   vpc_zone_identifier = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id]
@@ -131,23 +134,26 @@ resource "aws_autoscaling_group" "ecs_ec2_cluster_asg" {
   }
 }
 
+# basically this is what actually determines when to spin up new instances, not the ASG.
+# you either provide ASG utilization metrics to decide when to spin up new instances, or you do this ecs capacity provider stuff.
 resource "aws_ecs_capacity_provider" "ecs_ec2_cluster_config" {
   name = "${local.ecs_cluster_name}-provider"
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.ecs_ec2_cluster_asg.arn
-    managed_termination_protection = "ENABLED"
+    managed_termination_protection = "ENABLED" # it wont shut instances down if tasks are being ran on that instance.
 
     managed_scaling {
       maximum_scaling_step_size = 1
       minimum_scaling_step_size = 1
       status                    = "ENABLED"
-      target_capacity           = 1
+      target_capacity           = 100 # only doing 100 bc 1 instance, if max instances was like 3 then make this like 75 or something
     }
   }
 }
 
 # had to manually delete this in the console in order to allow updates to happen
+# https://stackoverflow.com/questions/64021278/how-target-capacity-is-calculated-in-aws-ecs-capacity-provider
 resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_provider" {
   cluster_name       = aws_ecs_cluster.ecs_ec2_cluster.name
   capacity_providers = [aws_ecs_capacity_provider.ecs_ec2_cluster_config.name]

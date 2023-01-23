@@ -4,6 +4,7 @@ locals {
   module_ml_logs        = "jacobs_ecs_logs_ml"
   module_fake_logs      = "jacobs_ecs_logs_fake_ecs"
   module_airflow_logs   = "jacobs_ecs_logs_airflow"
+  module_dash_logs      = "jacobs_ecs_logs_dash"
 }
 
 resource "aws_ecr_repository" "jacobs_repo" {

@@ -366,7 +366,7 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
   aliases = ["api.${local.website_domain}"]
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = local.api_origin_id
 
@@ -387,7 +387,7 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
   # Cache behavior with precedence 0
   ordered_cache_behavior {
     path_pattern     = "/content/immutable/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.api_origin_id
 
@@ -410,7 +410,7 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
   # Cache behavior with precedence 1
   ordered_cache_behavior {
     path_pattern     = "/content/*"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = local.api_origin_id
 
