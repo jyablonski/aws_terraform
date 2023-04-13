@@ -7,7 +7,7 @@ resource "aws_iam_openid_connect_provider" "github_provider" {
 }
 
 # ℹ️Note: When GitHub inevitably rotates the certificate for this service, the thumbprint_list value will need to be updated.
-
+# rest of this below is outdated as of 2023-04-13 - use the fkn module 
 data "aws_iam_policy_document" "github_policy" {
   statement {
     effect  = "Allow"
