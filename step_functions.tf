@@ -259,7 +259,6 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
     },
     "SendEmailFail": {
       "Type": "Task",
-      "End": true,
       "Parameters": {
         "Destination": {
           "ToAddresses": [
@@ -284,7 +283,25 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
         },
         "Source": "jyablonski9@gmail.com"
       },
-      "Resource": "arn:aws:states:::aws-sdk:ses:sendEmail"
+      "Resource": "arn:aws:states:::aws-sdk:ses:sendEmail",
+      "Next": "ml_pipeline_dbt_fail"
+    },
+    "ml_pipeline_dbt_fail": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
+        "TaskDefinition": "${module.ml_ecs_module.ecs_task_definition_arn}",
+        "NetworkConfiguration": {
+            "AwsvpcConfiguration": {
+                "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
+                "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
+                "AssignPublicIp": "ENABLED"
+            }
+        }
+      },
+      "End": true
     },
     "ml_pipeline": {
       "Type": "Task",
