@@ -6,8 +6,12 @@ provider "aws" {
   default_tags {
     tags = {
       Owner = "jacob"
+      # environment = "prod"
       # last_modified_by = "jyablonski"
+      # last_modified_by_aws_id = "${data.aws_caller_identity.current.arn}"
       # updated_at = timestamp()
+      # project = "nba_pipeline"
+      # is_terraform = true
     }
   }
 }
