@@ -198,3 +198,8 @@ variable "ecs_pagerduty_endpoint" {
   type      = string
   sensitive = true
 }
+
+variable "slack_webhook_url" {
+  type      = string
+  sensitive = true
+}

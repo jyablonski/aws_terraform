@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 
 # from botocore.vendored import requests
 
+
 def send_ses_email(input):
     SENDER = "jyablonski9@gmail.com"
     RECIPIENT = "jyablonski9@gmail.com"
@@ -17,7 +18,7 @@ def send_ses_email(input):
 
     # The email body for recipients with non-HTML email clients.
     BODY_TEXT = f"{input} arrived in S3 Bucket"
-                
+
     # The HTML body of the email.
     BODY_HTML = f"""<html>
     <head></head>
@@ -31,67 +32,61 @@ def send_ses_email(input):
         {input} arrived in S3 Bucket
     </body>
     </html>
-                """            
+                """
 
     CHARSET = "UTF-8"
-    client = boto3.client('ses',region_name=AWS_REGION)
+    client = boto3.client("ses", region_name=AWS_REGION)
     try:
         response = client.send_email(
-            Destination={
-                'ToAddresses': [
-                    RECIPIENT,
-                ],
-            },
+            Destination={"ToAddresses": [RECIPIENT,],},
             Message={
-                'Body': {
-                    'Html': {
-                        'Charset': CHARSET,
-                        'Data': BODY_HTML,
-                    },
-                    'Text': {
-                        'Charset': CHARSET,
-                        'Data': BODY_TEXT,
-                    },
+                "Body": {
+                    "Html": {"Charset": CHARSET, "Data": BODY_HTML,},
+                    "Text": {"Charset": CHARSET, "Data": BODY_TEXT,},
                 },
-                'Subject': {
-                    'Charset': CHARSET,
-                    'Data': SUBJECT,
-                },
+                "Subject": {"Charset": CHARSET, "Data": SUBJECT,},
             },
             Source=SENDER,
             # ConfigurationSetName=CONFIGURATION_SET,
         )
     except ClientError as e:
-        print(e.response['Error']['Message'])
+        print(e.response["Error"]["Message"])
     else:
         print("Email sent! Message ID:"),
-        print(response['MessageId'])
+        print(response["MessageId"])
 
-print('Loading function')
 
-s3 = boto3.client('s3')
+print("Loading function")
+
+s3 = boto3.client("s3")
 
 
 def lambda_handler(event, context):
     """
     This function is used for direct S3 Bucket Event -> Lambda 
     """
-    #print("Received event: " + json.dumps(event, indent=2))
+    # print("Received event: " + json.dumps(event, indent=2))
 
     # Get the object from the event and show its content type
-    bucket = event['Records'][0]['s3']['bucket']['name']
-    key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
+    bucket = event["Records"][0]["s3"]["bucket"]["name"]
+    key = urllib.parse.unquote_plus(
+        event["Records"][0]["s3"]["object"]["key"], encoding="utf-8"
+    )
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
-        print("CONTENT TYPE: " + response['ContentType'])
+        print("CONTENT TYPE: " + response["ContentType"])
         send_ses_email(key)
         ###############################################
         # send curl request to trigger_dag('nba_elt_pipeline_qa') here
         ###############################################
-        return response['ContentType']
+        return response["ContentType"]
     except Exception as e:
         print(e)
-        print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
+        print(
+            "Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.".format(
+                key, bucket
+            )
+        )
         raise e
 
 
@@ -116,4 +111,3 @@ def lambda_handler(event, context):
 #     except Exception as e:
 #         print(f"An error occured: {e}")
 #         raise e
-
