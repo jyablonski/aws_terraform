@@ -49,3 +49,11 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   }
 
 }
+
+resource "aws_route53_record" "jacobs_rds_route53_record_api" {
+  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
+  name    = "rds.${local.website_domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["${aws_db_instance.jacobs_rds_tf.address}"]
+}
