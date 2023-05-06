@@ -1,4 +1,4 @@
-version: 1.10.13
+version: 1.10.14
 
 # Terraform Project 
 ### Includes all AWS Infrastructure for the NBA Project as well as various other projects
