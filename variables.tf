@@ -203,3 +203,8 @@ variable "slack_webhook_url" {
   type      = string
   sensitive = true
 }
+
+variable "rest_api_api_key" {
+  type      = string
+  sensitive = true
+}

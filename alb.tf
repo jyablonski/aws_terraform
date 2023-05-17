@@ -33,6 +33,19 @@ resource "aws_lb_listener_certificate" "graphql_alb_certificate_attachment" {
   certificate_arn = aws_acm_certificate.jacobs_website_cert.arn
 }
 
+resource "aws_lb_target_group" "shiny_alb_tg" {
+  name        = "jyablonski-rshiny-tg"
+  vpc_id      = aws_vpc.jacobs_vpc_tf.id
+  target_type = "instance"
+  port        = 8050
+  protocol    = "HTTPS"
+
+  health_check {
+    enabled = true
+    timeout = 29
+  }
+}
+
 resource "aws_lb_target_group" "graphql_alb_tg" {
   name        = "jyablonski-graphql-tg-dev"
   vpc_id      = aws_vpc.jacobs_vpc_tf.id
