@@ -58,6 +58,8 @@ resource "aws_lambda_function" "jacobs_rest_api_lambda_function" {
       OTEL_EXPORTER_OTLP_ENDPOINT = "${var.honeycomb_endpoint}"
       OTEL_EXPORTER_OTLP_HEADERS  = "${var.honeycomb_headers}"
       OTEL_SERVICE_NAME           = "${var.honeycomb_app_name}"
+      API_KEY                     = "${var.rest_api_api_key}"
+      ENV_TYPE                    = "prod"
     }
   }
 
