@@ -56,27 +56,27 @@ resource "aws_dms_replication_subnet_group" "jacobs_replication_subnet_group" {
 }
 
 ### my stuff
-resource "aws_dms_replication_instance" "jacobs_replication_instance" {
-  allocated_storage            = 50
-  apply_immediately            = true
-  auto_minor_version_upgrade   = true
-  availability_zone            = "us-east-1a"
-  engine_version               = "3.4.7"
-  multi_az                     = false
-  preferred_maintenance_window = "sat:01:30-sat:04:30"
-  publicly_accessible          = true
-  replication_instance_class   = "dms.t2.micro"
-  replication_instance_id      = "jacobs-replication-instance"
-  replication_subnet_group_id  = aws_dms_replication_subnet_group.jacobs_replication_subnet_group.id
-  vpc_security_group_ids       = [aws_security_group.jacobs_task_security_group_tf.id]
+# resource "aws_dms_replication_instance" "jacobs_replication_instance" {
+#   allocated_storage            = 50
+#   apply_immediately            = true
+#   auto_minor_version_upgrade   = true
+#   availability_zone            = "us-east-1a"
+#   engine_version               = "3.4.7"
+#   multi_az                     = false
+#   preferred_maintenance_window = "sat:01:30-sat:04:30"
+#   publicly_accessible          = true
+#   replication_instance_class   = "dms.t2.micro"
+#   replication_instance_id      = "jacobs-replication-instance"
+#   replication_subnet_group_id  = aws_dms_replication_subnet_group.jacobs_replication_subnet_group.id
+#   vpc_security_group_ids       = [aws_security_group.jacobs_task_security_group_tf.id]
 
-  tags = {
-    Terraform   = "true"
-    Environment = "dev"
-    Replication = "hellyah"
-  }
+#   tags = {
+#     Terraform   = "true"
+#     Environment = "dev"
+#     Replication = "hellyah"
+#   }
 
-}
+# }
 
 resource "aws_dms_endpoint" "jacobs_dms_postgres_source" {
   database_name               = "jacob_db"
