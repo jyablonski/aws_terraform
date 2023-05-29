@@ -45,7 +45,7 @@ resource "aws_ecs_cluster" "jacobs_ecs_cluster" {
 
   setting {
     name  = "containerInsights"
-    value = "enabled"
+    value = "disabled"
   }
 }
 
