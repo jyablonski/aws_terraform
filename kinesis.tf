@@ -88,10 +88,10 @@ resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream"
 
   # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
   extended_s3_configuration {
-    role_arn        = aws_iam_role.jacobs_firehose_role.arn
-    bucket_arn      = aws_s3_bucket.jacobs_kinesis_bucket.arn
-    buffer_size     = 20  # store every 20 mb
-    buffer_interval = 600 # or every 10 minutes
+    role_arn           = aws_iam_role.jacobs_firehose_role.arn
+    bucket_arn         = aws_s3_bucket.jacobs_kinesis_bucket.arn
+    buffering_size     = 20  # store every 20 mb
+    buffering_interval = 600 # or every 10 minutes
 
     prefix              = "kinesis-firehose/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
     error_output_prefix = "kinesis-firehose-errors/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}/"

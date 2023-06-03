@@ -365,6 +365,46 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
 
   aliases = ["api.${local.website_domain}"]
 
+
+  ordered_cache_behavior {
+    path_pattern             = "/bets"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"] # have to be here or it fails
+    target_origin_id         = local.api_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 0
+    max_ttl                  = 0
+  }
+
+  ordered_cache_behavior {
+    path_pattern             = "/login"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"] # have to be here or it fails
+    target_origin_id         = local.api_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 0
+    max_ttl                  = 0
+  }
+
+  ordered_cache_behavior {
+    path_pattern             = "/past_bets"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"] # have to be here or it fails
+    target_origin_id         = local.api_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 0
+    max_ttl                  = 0
+  }
+
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
@@ -456,5 +496,44 @@ resource "aws_route53_record" "jacobs_website_route53_record_api" {
     name                   = aws_cloudfront_distribution.jacobs_website_api_distribution.domain_name
     zone_id                = aws_cloudfront_distribution.jacobs_website_api_distribution.hosted_zone_id
     evaluate_target_health = false
+  }
+}
+
+resource "aws_cloudfront_cache_policy" "caching_disabled" {
+  name        = "jyablonski-caching-disabled-policy"
+  comment     = "Policy which mimics AWS CachingDisabled Policy"
+  default_ttl = 0
+  max_ttl     = 0
+  min_ttl     = 0
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    cookies_config {
+      cookie_behavior = "none"
+
+    }
+    headers_config {
+      header_behavior = "none"
+    }
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
+resource "aws_cloudfront_origin_request_policy" "origin_request_policy" {
+  name    = "jyablonski-caching-origin-request-policy"
+  comment = "Policy which mimics AWS Managed-AllViewerExceptHostHeader Policy"
+  cookies_config {
+    cookie_behavior = "all"
+
+  }
+  headers_config {
+    header_behavior = "allExcept"
+    headers {
+      items = ["host"]
+    }
+  }
+  query_strings_config {
+    query_string_behavior = "all"
   }
 }
