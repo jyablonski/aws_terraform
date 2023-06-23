@@ -75,3 +75,13 @@ variable "ecs_schedule" {
   type        = bool
   description = "Boolean which will additionally build Scheduling Resources if true, or only build the ECS Task Definition + Log Group if false"
 }
+
+variable "ecs_network_mode" {
+  type    = string
+  default = "awsvpc"
+}
+
+variable "ecs_compatability" {
+  type    = string
+  default = "FARGATE"
+}

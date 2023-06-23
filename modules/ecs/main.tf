@@ -5,8 +5,8 @@ resource "aws_ecs_task_definition" "ecs_task_module" {
   task_role_arn            = var.ecs_task_role_arn
   cpu                      = var.ecs_cpu
   memory                   = var.ecs_memory
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
+  network_mode             = var.ecs_network_mode
+  requires_compatibilities = [var.ecs_compatability]
 
   tags = {
     Name = var.ecs_id
