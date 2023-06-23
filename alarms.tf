@@ -34,6 +34,7 @@ module "ecs_task_alarm" {
     "lastStatus": [
       "STOPPED"
     ],
+    "clusterArn": ["${aws_ecs_cluster.jacobs_ecs_cluster.arn}"],
     "containers": {
       "exitCode": [
         {

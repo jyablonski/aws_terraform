@@ -153,13 +153,24 @@ resource "aws_route53_record" "jacobs_website_route53_record_www" {
   }
 }
 
-resource "aws_route53_record" "jacobs_website_route53_record_graphql" {
+# resource "aws_route53_record" "jacobs_website_route53_record_graphql" {
+#   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
+#   name    = "graphql.${local.website_domain}"
+#   type    = "A"
+#   alias {
+#     name                   = aws_lb.graphql_alb.dns_name
+#     zone_id                = aws_lb.graphql_alb.zone_id
+#     evaluate_target_health = false
+#   }
+# }
+
+resource "aws_route53_record" "jacobs_website_route53_record_shiny" {
   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-  name    = "graphql.${local.website_domain}"
+  name    = "nbadashboard.${local.website_domain}"
   type    = "A"
   alias {
-    name                   = aws_lb.graphql_alb.dns_name
-    zone_id                = aws_lb.graphql_alb.zone_id
+    name                   = aws_lb.shiny_alb.dns_name
+    zone_id                = aws_lb.shiny_alb.zone_id
     evaluate_target_health = false
   }
 }
@@ -431,6 +442,18 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
     max_ttl                  = 0
   }
 
+  ordered_cache_behavior {
+    path_pattern             = "/admin/feature_flags/create"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"] # have to be here or it fails
+    target_origin_id         = local.api_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 0
+    max_ttl                  = 0
+  }
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
