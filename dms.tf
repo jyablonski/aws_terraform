@@ -98,28 +98,28 @@ resource "aws_dms_endpoint" "jacobs_dms_postgres_source" {
 
 }
 
-resource "aws_dms_endpoint" "jacobs_dms_s3_target" {
-  endpoint_id                 = "jacobs-dms-s3-target"
-  endpoint_type               = "target"
-  engine_name                 = "s3"
-  extra_connection_attributes = "bucketFolder=dms;bucketName=jacobsbucket97-dev;compressionType=NONE;csvDelimiter=,;csvRowDelimiter=\n;datePartitionEnabled=true;"
+# resource "aws_dms_endpoint" "jacobs_dms_s3_target" {
+#   endpoint_id                 = "jacobs-dms-s3-target"
+#   endpoint_type               = "target"
+#   engine_name                 = "s3"
+#   extra_connection_attributes = "bucketFolder=dms;bucketName=jacobsbucket97-dev;compressionType=NONE;csvDelimiter=,;csvRowDelimiter=\n;datePartitionEnabled=true;"
 
-  s3_settings {
-    bucket_name              = aws_s3_bucket.jacobs_bucket_tf_dev.id
-    bucket_folder            = "dms"
-    add_column_name          = true
-    date_partition_delimiter = "UNDERSCORE"
-    date_partition_enabled   = true
-    service_access_role_arn  = aws_iam_role.jacobs_dms_role.arn
-  }
+#   s3_settings {
+#     bucket_name              = aws_s3_bucket.jacobs_bucket_tf_dev.id
+#     bucket_folder            = "dms"
+#     add_column_name          = true
+#     date_partition_delimiter = "UNDERSCORE"
+#     date_partition_enabled   = true
+#     service_access_role_arn  = aws_iam_role.jacobs_dms_role.arn
+#   }
 
-  tags = {
-    Terraform   = "true"
-    Environment = "dev"
-    Replication = "hellyah"
-  }
+#   tags = {
+#     Terraform   = "true"
+#     Environment = "dev"
+#     Replication = "hellyah"
+#   }
 
-}
+# }
 
 # disabling bc transaction log backups take up a ton of storage on rds
 # resource "aws_dms_replication_task" "jacobs_replication_task" {

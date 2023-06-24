@@ -342,8 +342,8 @@ module "shiny_ecs_module" {
 TASK_DEFINITION
   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
   ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
-  ecs_cpu                  = 256
-  ecs_memory               = 512
+  ecs_cpu                  = 524
+  ecs_memory               = 819
 
   ecs_logs_name      = local.module_shiny_logs
   ecs_logs_retention = 30
