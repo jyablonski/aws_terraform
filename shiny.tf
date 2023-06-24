@@ -44,7 +44,6 @@ EOF
 
 }
 
-
 resource "aws_iam_role" "shiny_restart_role" {
   name               = "${local.shiny_service_name}_lambda_role"
   description        = "Role created for Lambda to restart Shiny Dashboard"
