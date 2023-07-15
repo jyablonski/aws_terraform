@@ -1,3 +1,7 @@
+# Terraform Project 
+
+![Test Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/test.yml/badge.svg) ![Deploy Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/deploy.yml/badge.svg)
+
 version: 1.11.3
 
 # Terraform Project 
