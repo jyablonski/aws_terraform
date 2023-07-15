@@ -1,9 +1,8 @@
 locals {
-  env_type           = "Prod" # cant have an apostrophe in the tag name
-  env_name           = "Jacobs TF Project"
-  grafana_account_id = "008923505280"
-  env_terraform      = true
-  Terraform          = true
+  env_type      = "Prod" # cant have an apostrophe in the tag name
+  env_name      = "Jacobs TF Project"
+  env_terraform = true
+  Terraform     = true
 }
 
 resource "aws_iam_role" "jacobs_ecs_role" {
@@ -446,28 +445,6 @@ resource "aws_s3_bucket_acl" "jyablonski_tf_cicd_bucket_acl" {
   acl    = "private"
 }
 
-
-
-#########
-# resource "aws_lambda_permission" "allow_bucket_jacobsbucket97" {
-#   statement_id  = "AllowExecutionFromS3Bucketjacobsbucket97"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.jacobs_s3_lambda_function.arn
-#   principal     = "s3.amazonaws.com"
-#   source_arn    = aws_s3_bucket.jacobs_bucket_tf.arn
-# }
-
-# resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97" {
-#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
-
-#   lambda_function {
-#     lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
-#     events              = ["s3:ObjectCreated:*"]
-#     filter_prefix       = "boxscores/"
-#     filter_suffix       = ".parquet"
-#   }
-# }
-
 ## SQS - LAMBDA - S3 BUCKET TRANSACTIONS
 resource "aws_s3_bucket" "jacobs_sqs_sns_bucket" {
   bucket = "jacobs-sqs-bucket"
@@ -497,19 +474,6 @@ resource "aws_lambda_function" "jacobs_s3_sqs_lambda_function" {
   runtime       = "python3.8"
   depends_on    = [aws_iam_role_policy_attachment.lambda_logs]
 }
-
-# resource "aws_s3_bucket_notification" "bucket_notification_jacobsbucket97_sqs" {
-#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
-
-#   queue {
-#     id                  = "jacobs-sqs-lambda-trigger"
-#     queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
-#     events              = ["s3:ObjectCreated:*"]
-#     filter_prefix       = "transactions/"
-#     filter_suffix       = ".parquet"
-#   }
-
-# }
 
 ### SNS - LAMBDA - S3 BUCKET REDDIT DATA
 resource "aws_sns_topic" "jacobs_sns_topic" {
@@ -570,53 +534,6 @@ POLICY
   }
 }
 
-# resource "aws_lambda_permission" "allow_bucket_sqs" {
-#   statement_id  = "AllowExecutionFromS3Bucketsqs"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
-#   principal     = "sqs.amazonaws.com"
-#   source_arn    = aws_sqs_queue.jacobs_sqs_queue.arn
-# }
-
-# resource "aws_sns_topic_subscription" "enable_lambda_sns" {
-#   topic_arn = aws_sns_topic.jacobs_sns_topic.arn
-#   protocol  = "sqs"
-#   endpoint  = aws_sqs_queue.jacobs_sqs_queue.arn
-# }
-
-# resource "aws_lambda_event_source_mapping" "enable_lambda_sqs" {
-#   event_source_arn = aws_sqs_queue.jacobs_sqs_queue.arn
-#   function_name    = aws_lambda_function.jacobs_s3_sqs_lambda_function.arn
-# }
-
-# resource "aws_s3_bucket_notification" "bucket_notification_sqs_sns" {
-#   bucket = aws_s3_bucket.jacobs_sqs_sns_bucket.id
-
-#   topic {
-#     topic_arn     = aws_sns_topic.jacobs_sns_topic.arn
-#     events        = ["s3:ObjectCreated:*"]
-#     filter_prefix = "reddit_data/"
-#     filter_suffix = ".parquet"
-#   }
-
-#   # lambda_function {
-#   #   lambda_function_arn = aws_lambda_function.jacobs_s3_lambda_function.arn
-#   #   events              = ["s3:ObjectCreated:*"]
-#   #   filter_prefix       = "boxscores/"
-#   #   filter_suffix       = ".parquet"
-#   # }
-
-#   # queue {
-#   #   queue_arn           = aws_sqs_queue.jacobs_sqs_queue.arn
-#   #   events              = ["s3:ObjectCreated:*"]
-#   #   filter_prefix       = "transactions/"
-#   #   filter_suffix       = ".parquet"
-#   # }
-
-#   depends_on = [aws_lambda_permission.allow_bucket_sqs,
-#   ]
-# }
-
 resource "aws_iam_user" "jacobs_github_s3_user" {
   name = "jacobs_github_s3_user"
 
@@ -658,4 +575,9 @@ EOF
 resource "aws_iam_user_policy_attachment" "jacobs_github_s3_user_attachment" {
   user       = aws_iam_user.jacobs_github_s3_user.name
   policy_arn = aws_iam_policy.github_s3_policy.arn
+}
+
+resource "aws_key_pair" "airflow_ec2_key" {
+  key_name   = "airflow-ec2-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDASt11D8SVlSNJX1/fPdQjipLkfFZrIjbmBwnr4wUMXw+2TogUmJnMI3of8Gv297CE/Zz9VVJMO2Z2+R2Uy/XllhyuQNUYOzD6B7fBm0i/HXhJ1kZwh1DjB1vtOn3rwBVF2ZuXp5gBAdp6welZ2uWzDLB/34lKN89WPNS7f/H//eYLbCrM4e8a2qgbuHqUOMlxida1N6zWgV1Jt1962H3Dd09tEN0H2yGZIUGiGtvSvbvF+YJO6cz7XJ2fU9zJifLBJ6oyfj1DdlScOqTXhpF5KNbx6czJFgwx+oRhCariBt4q4RvRSGt4t73XyIczDYDzyMnQXKQgb7XSOVgTRmyQLwwys+l4fpyE9uOfHkL1RtTAVRbylxVBVsxYt8xYSNyRUNsHLJRBCqRPYCJHLKwJrjyFdvh3u1XBazCNOrYQycHwl6Te8JmfrdESfshzheBUCFw6ZXLGCI8saqQgFh83vj+HkiOVd64H3U2fsijABmLK/YsczTtX39iKyB9Z2rU= jacob@jacob-BigOtisLinux"
 }

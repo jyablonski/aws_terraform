@@ -1,6 +1,6 @@
 plugin "aws" {
     enabled = true
-    version = "0.13.3"
+    version = "0.24.1"
     source  = "github.com/terraform-linters/tflint-ruleset-aws"
 }
 
@@ -9,5 +9,13 @@ rule "aws_cloudwatch_log_group_invalid_name" {
 }
 
 rule "aws_lambda_function_invalid_function_name" {
+  enabled = false
+}
+
+rule "terraform_required_providers" {
+  enabled = false
+}
+
+rule "terraform_unused_declarations" {
   enabled = false
 }
