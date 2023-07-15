@@ -30,6 +30,10 @@ terraform {
       source  = "cyrilgdn/postgresql"
       version = "1.17.1"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.3.0"
+    }
     # snowflake = {
     #   source  = "Snowflake-Labs/snowflake"
     #   version = "0.51.0"

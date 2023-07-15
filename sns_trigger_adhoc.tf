@@ -10,7 +10,6 @@ locals {
   env_name_adhoc    = "Jacobs Practice ad hoc Lambda Trigger"
   env_type_adhoc    = "Test" # cant have an apostrophe in the tag name
   adhoc_sns_name    = "jacobs-adhoc-sns-topic"
-  adhoc_logs_name   = "jacobs-adhoc-logs"
   adhoc_lambda_name = "jacobs_adhoc_lambda_function"
 }
 
@@ -114,41 +113,6 @@ resource "aws_cloudwatch_log_group" "jacobs_adhoc_sns_lambda_logs" {
   retention_in_days = 7
 }
 
-# this is just to send a simple email
-# data "archive_file" "lambda_adhoc_sns_zip" {
-#   type        = "zip"
-#   source_dir  = "${path.module}/lambdas/lambda_adhoc_sns/"
-#   output_path = "${path.module}/myzip/lambda_adhoc_sns4.zip"
-# }
-
-# resource "aws_lambda_function" "jacobs_adhoc_sns_lambda_function" {
-#   filename      = "${path.module}/myzip/lambda_adhoc_sns4.zip"
-#   function_name = local.adhoc_lambda_name
-#   role          = aws_iam_role.jacobs_adhoc_sns_lambda_role.arn
-#   handler       = "main.lambda_handler"
-#   runtime       = "python3.9"
-#   memory_size   = 128
-#   timeout       = 3
-
-#   tags = {
-#     Name        = local.env_name_adhoc
-#     Environment = local.env_type_adhoc
-#   }
-# }
-
-# resource "aws_sns_topic_subscription" "enable_adhoc_lambda_sns" {
-#   topic_arn = aws_sns_topic.jacobs_adhoc_sns_topic.arn
-#   protocol  = "lambda"
-#   endpoint  = aws_lambda_function.jacobs_adhoc_sns_lambda_function.arn
-# }
-
-# resource "aws_lambda_permission" "allow_adhoc_sns_lambda_permission" {
-#   statement_id  = "AllowadhocLambdaExecutionFromSNS"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.jacobs_adhoc_sns_lambda_function.arn
-#   principal     = "sns.amazonaws.com"
-#   source_arn    = aws_sns_topic.jacobs_adhoc_sns_topic.arn
-# }
 
 # New format to trigger ECS tasks from Lambda
 resource "aws_cloudwatch_log_group" "jacobs_adhoc_sns_ecs_lambda_logs" {

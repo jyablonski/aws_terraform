@@ -1,10 +1,10 @@
-locals {
-  beanstalk_app_name        = "jacobs_beanstalk_crud_app"
-  beanstalk_app_description = "Crud App test"
-  beanstalk_logs_name       = "jacobs_beanstalk_logs"
-  beanstalk_stack_name      = "64bit Amazon Linux 2 v3.3.15 running Python 3.8"
-  beanstalk_env_name        = "jacobs_beanstalk_config"
-}
+# locals {
+#   beanstalk_app_name        = "jacobs_beanstalk_crud_app"
+#   beanstalk_app_description = "Crud App test"
+#   beanstalk_logs_name       = "jacobs_beanstalk_logs"
+#   beanstalk_stack_name      = "64bit Amazon Linux 2 v3.3.15 running Python 3.8"
+#   beanstalk_env_name        = "jacobs_beanstalk_config"
+# }
 
 # pain in the ass tbh sooooooooooo to be continued
 
