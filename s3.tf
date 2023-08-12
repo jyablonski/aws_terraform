@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "jacobs_bucket_tf" {
-  bucket = "nba-elt-prod"
+  bucket = "jyablonski-nba-elt-prod"
 
   tags = {
     Name        = local.env_name
@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "jacobs_bucket_tf" {
 }
 
 resource "aws_s3_bucket" "jacobs_bucket_tf_dev" {
-  bucket = "jacobsbucket97-dev"
+  bucket = "jyablonski97-dev"
 
   tags = {
     Name        = local.env_name
@@ -106,16 +106,30 @@ resource "aws_s3_bucket_lifecycle_configuration" "jacobs_bucket_lifecycle_policy
 
 }
 
-# 2022-03-21 fix this naming in the future
-resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
+resource "aws_s3_bucket_ownership_controls" "jacobs_bucket_ownership" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
-  acl    = "private"
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.jacobs_bucket_ownership]
+  bucket     = aws_s3_bucket.jacobs_bucket_tf.id
+  acl        = "private"
 }
 
-resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl_dev" {
+resource "aws_s3_bucket_ownership_controls" "jacobs_bucket_dev_ownership" {
   bucket = aws_s3_bucket.jacobs_bucket_tf_dev.id
-  acl    = "private"
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
+resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl_dev" {
+  depends_on = [aws_s3_bucket_ownership_controls.jacobs_bucket_dev_ownership]
+  bucket     = aws_s3_bucket.jacobs_bucket_tf_dev.id
+  acl        = "private"
+}
+
 
 resource "aws_s3_bucket_public_access_block" "jacobs_bucket_tf_access" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id

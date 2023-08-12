@@ -25,3 +25,8 @@ variable "is_versioning_enabled" {
   type    = string
   default = "Disabled"
 }
+
+variable "object_ownership" {
+  type    = string
+  default = "BucketOwnerPreferred"
+}

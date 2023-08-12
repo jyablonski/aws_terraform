@@ -1,6 +1,6 @@
 module "iceberg_lake" {
   source                   = "./modules/s3"
-  bucket_name              = "jyablonski-iceberg"
+  bucket_name              = "jyablonski2-iceberg"
   bucket_acl               = "private"
   is_versioning_enabled    = "Disabled"
   prefix_expiration_name   = "*"
@@ -10,7 +10,7 @@ module "iceberg_lake" {
 
 module "delta_lake" {
   source                   = "./modules/s3"
-  bucket_name              = "jyablonski-delta"
+  bucket_name              = "jyablonski2-delta"
   bucket_acl               = "private"
   is_versioning_enabled    = "Disabled"
   prefix_expiration_name   = "*"

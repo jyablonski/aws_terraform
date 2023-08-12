@@ -1,7 +1,7 @@
 plugin "aws" {
-    enabled = true
-    version = "0.24.1"
-    source  = "github.com/terraform-linters/tflint-ruleset-aws"
+  enabled = true
+  version = "0.25.0"
+  source  = "github.com/terraform-linters/tflint-ruleset-aws"
 }
 
 rule "aws_cloudwatch_log_group_invalid_name" {
@@ -17,5 +17,9 @@ rule "terraform_required_providers" {
 }
 
 rule "terraform_unused_declarations" {
+  enabled = false
+}
+
+rule "terraform_deprecated_interpolation" {
   enabled = false
 }
