@@ -59,7 +59,16 @@ resource "aws_s3_bucket" "jacobs_kinesis_bucket" {
   }
 }
 
+resource "aws_s3_bucket_ownership_controls" "jacobs_kinesis_bucket_ownership" {
+  bucket = aws_s3_bucket.jacobs_kinesis_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
 resource "aws_s3_bucket_acl" "kinesis_bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.jacobs_kinesis_bucket_ownership]
+
   bucket = aws_s3_bucket.jacobs_kinesis_bucket.id
   acl    = "private"
 }

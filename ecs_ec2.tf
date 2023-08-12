@@ -191,7 +191,7 @@ resource "aws_iam_role" "ecs_ec2_role_cs" {
             "Sid": "",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::494531898010:role/AirflowS3Logs-cl4cd06hj01900t0fhoszeaqm"
+                "AWS": "arn:aws:iam::700010564577:role/astro-physical-density-5241"
             },
             "Action": "sts:AssumeRole"
         }

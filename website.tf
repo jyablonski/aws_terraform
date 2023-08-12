@@ -50,7 +50,7 @@ resource "aws_iam_user_policy_attachment" "jacobs_github_s3_website_user_attachm
 
 
 resource "aws_s3_bucket" "jacobs_bucket_website" {
-  bucket = "www.jyablonski.dev"
+  bucket = "www.jyablonski2.dev"
 
   tags = {
     Name        = local.env_name
@@ -58,23 +58,61 @@ resource "aws_s3_bucket" "jacobs_bucket_website" {
   }
 }
 
-resource "aws_s3_bucket_acl" "jacobs_bucket_website_acl" {
+resource "aws_s3_bucket_public_access_block" "jacobs_domain_bucket_access_block" {
   bucket = aws_s3_bucket.jacobs_bucket_website.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_ownership_controls" "jacobs_domain_bucket_ownership" {
+  depends_on = [aws_s3_bucket_public_access_block.jacobs_domain_bucket_access_block]
+
+  bucket = aws_s3_bucket.jacobs_bucket_website.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+
+resource "aws_s3_bucket_acl" "jacobs_bucket_website_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.jacobs_domain_bucket_ownership]
+  bucket     = aws_s3_bucket.jacobs_bucket_website.id
 
   acl = "public-read"
 }
 
 resource "aws_s3_bucket" "jacobs_bucket_website_link" {
-  bucket = local.website_domain
-
+  bucket = "jyablonski2.dev"
   tags = {
     Name        = local.env_name
     Environment = local.env_type
   }
 }
 
-resource "aws_s3_bucket_acl" "jacobs_bucket_website_link_acl" {
+resource "aws_s3_bucket_public_access_block" "jacobs_domainless_bucket_access_block" {
   bucket = aws_s3_bucket.jacobs_bucket_website_link.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_ownership_controls" "jacobs_domainless_bucket_ownership" {
+  depends_on = [aws_s3_bucket_public_access_block.jacobs_domainless_bucket_access_block]
+
+  bucket = aws_s3_bucket.jacobs_bucket_website_link.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "jacobs_bucket_website_link_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.jacobs_domainless_bucket_ownership]
+  bucket     = aws_s3_bucket.jacobs_bucket_website_link.id
 
   acl = "public-read"
 }
@@ -251,7 +289,7 @@ resource "aws_cloudfront_distribution" "jacobs_website_s3_distribution" {
 
   logging_config {
     include_cookies = false
-    bucket          = "jacobsbucket97-dev.s3.amazonaws.com"
+    bucket          = "jyablonski97-dev.s3.amazonaws.com"
     prefix          = "website"
   }
 
@@ -418,6 +456,32 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
 
   ordered_cache_behavior {
     path_pattern             = "/admin"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"] # have to be here or it fails
+    target_origin_id         = local.api_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 0
+    max_ttl                  = 0
+  }
+
+  ordered_cache_behavior {
+    path_pattern             = "/admin/incidents"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"] # have to be here or it fails
+    target_origin_id         = local.api_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 0
+    max_ttl                  = 0
+  }
+
+  ordered_cache_behavior {
+    path_pattern             = "/admin/incidents/create"
     allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods           = ["GET", "HEAD"] # have to be here or it fails
     target_origin_id         = local.api_origin_id

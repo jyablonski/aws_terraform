@@ -87,11 +87,6 @@ resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachmen
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment2" {
-  role       = aws_iam_role.jacobs_adhoc_sns_lambda_role.name
-  policy_arn = aws_iam_policy.jacobs_lambda_logging.arn
-}
-
 resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment_3" {
   role       = aws_iam_role.jacobs_adhoc_sns_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"

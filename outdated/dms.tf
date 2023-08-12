@@ -90,3 +90,43 @@
 #   }
 
 # }
+
+# resource "aws_dms_replication_subnet_group" "jacobs_replication_subnet_group" {
+#   replication_subnet_group_description = "Subnet Group for DMS Resources"
+#   replication_subnet_group_id          = "jacobs-replication-subnet-group"
+
+#   subnet_ids = [
+#     aws_subnet.jacobs_public_subnet.id,
+#     aws_subnet.jacobs_public_subnet_2.id,
+#   ]
+
+#   depends_on = [
+#     aws_iam_role_policy_attachment.jacobs_dms_role_attachment2
+#   ]
+
+#   tags = {
+#     Terraform   = "true"
+#     Environment = "dev"
+#     Replication = "hellyah"
+#   }
+# }
+
+# resource "aws_dms_endpoint" "jacobs_dms_postgres_source" {
+#   database_name               = "jacob_db"
+#   endpoint_id                 = "jacobs-dms-postgres-source"
+#   endpoint_type               = "source"
+#   engine_name                 = "postgres"
+#   extra_connection_attributes = ""
+#   username                    = var.jacobs_rds_user
+#   password                    = var.jacobs_rds_pw
+#   port                        = 5432
+#   server_name                 = aws_db_instance.jacobs_rds_tf.address
+#   ssl_mode                    = "none"
+
+#   tags = {
+#     Terraform   = "true"
+#     Environment = "dev"
+#     Replication = "hellyah"
+#   }
+
+# }
