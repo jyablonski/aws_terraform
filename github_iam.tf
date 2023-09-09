@@ -84,6 +84,16 @@ module "dbt_github_cicd" {
             "Effect": "Allow",
             "Action": "ecr:GetAuthorizationToken",
             "Resource": "*"
+        },
+        {
+            "Action": [
+                "s3:*"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "${module.dbt_s3_ci_module.s3_bucket_arn}",
+                "${module.dbt_s3_ci_module.s3_bucket_arn}/*"
+            ]
         }
     ]
 }
