@@ -191,7 +191,7 @@ resource "aws_iam_role" "ecs_ec2_role_cs" {
             "Sid": "",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::700010564577:role/astro-physical-density-5241"
+                "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
             },
             "Action": "sts:AssumeRole"
         }
