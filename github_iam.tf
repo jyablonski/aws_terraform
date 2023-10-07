@@ -219,3 +219,28 @@ module "website_github_cicd" {
 EOF
 
 }
+
+module "kimball_github_cicd" {
+  source              = "./modules/iam_github"
+  iam_role_name       = "dbt_kimball"
+  github_provider_arn = aws_iam_openid_connect_provider.github_provider.arn
+  github_repo         = "jyablonski/jyablonski_kimball_example"
+  iam_role_policy     = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:*"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "${module.dbt_s3_ci_module.s3_bucket_arn}",
+                "${module.dbt_s3_ci_module.s3_bucket_arn}/*"
+            ]
+        }
+    ]
+}
+EOF
+
+}

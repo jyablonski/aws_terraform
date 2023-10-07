@@ -38,8 +38,8 @@ resource "aws_lambda_function" "jacobs_rest_api_lambda_function" {
   architectures = ["x86_64"]
   function_name = local.rest_api_lambda_name
   role          = aws_iam_role.jacobs_rest_api_lambda_role.arn
-  handler       = "src.main.handler"
-  runtime       = "python3.9"
+  handler       = "src.server.handler"
+  runtime       = "python3.11"
   memory_size   = 128
   timeout       = 20
 

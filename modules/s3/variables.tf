@@ -12,8 +12,8 @@ variable "prefix_expiration_name" {
   default = "*"
 }
 
-variable "account_id" {
-  type = any
+variable "s3_access_resources" {
+  type = list(string)
 }
 
 variable "bucket_acl" {

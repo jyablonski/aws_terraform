@@ -1,0 +1,8 @@
+modules:
+- modules/*
+
+dependencies:
+- providers.tf
+
+infra:
+- any: ['*.tf', 'lambdas/*']
