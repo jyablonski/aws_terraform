@@ -54,6 +54,7 @@ resource "aws_s3_bucket_public_access_block" "this" {
 
 resource "aws_s3_bucket_policy" "this" { # tflint-ignore: terraform_required_providers
   # tflint-ignore: terraform_required_providers
+  #         "AWS": ["${join(",", var.s3_access_resources)}"]
   bucket = aws_s3_bucket.this.id
   policy = <<EOF
 {
@@ -63,9 +64,7 @@ resource "aws_s3_bucket_policy" "this" { # tflint-ignore: terraform_required_pro
       "Sid": "",
       "Effect": "Allow",
       "Principal": {
-        "AWS": [
-        "${var.account_id}"
-        ]
+        "AWS": ${jsonencode(var.s3_access_resources)}
       },
       "Action": "s3:*",
       "Resource": [

@@ -5,5 +5,7 @@ module "s3_test_module" {
   is_versioning_enabled    = "Disabled"
   prefix_expiration_name   = "*"
   prefix_expiration_length = 14
-  account_id               = data.aws_caller_identity.current.account_id
+  s3_access_resources = [
+    "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+  ]
 }
