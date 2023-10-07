@@ -20,7 +20,7 @@ provider "aws" {
 # https://learn.hashicorp.com/tutorials/terraform/aws-default-tags
 # implement default tags when deploying infra next august pls
 terraform {
-  required_version = ">= 1.1.0"
+  required_version = "1.5.7"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
