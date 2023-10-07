@@ -7,7 +7,7 @@ variable "schema_name" {
 }
 
 variable "schema_comment" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -26,27 +26,12 @@ variable "schema_retention_days" {
   default = 1
 }
 
-variable "schema_usage_roles" {
-  type = list
-  default = []
-}
-
 variable "schema_all_roles" {
-  type = list
+  type    = list(any)
   default = []
 }
 
 variable "schema_read_roles" {
-  type = list
+  type    = list(any)
   default = []
-}
-
-variable "schema_all_access" {
-  type    = bool
-  default = false
-}
-
-variable "schema_read_access" {
-  type    = bool
-  default = false
 }

@@ -12,6 +12,6 @@ variable "role_warehouse_size" {
 }
 
 variable "role_warehouse_privilege" {
-  type = string
+  type    = string
   default = "OPERATE"
 }

@@ -1,3 +1,22 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "Snowflake-Labs/snowflake"
+      version = "~> 5.0"
+    }
+
+    snowflake = {
+      source  = "Snowflake-Labs/snowflake"
+      version = "~> 0.72"
+    }
+    snowsql = {
+      source  = "aidanmelen/snowsql"
+      version = "~> 1.0"
+    }
+
+  }
+}
+
 # query accel - snowflake enterprise edition feature used if you have unpredicatable workloads on a warehouse
 # it will offload parts of outlier queries to a set of snowflake-managed compute resources to help improve performance
 
@@ -9,7 +28,7 @@ resource "snowflake_warehouse" "this" {
   warehouse_size                      = var.warehouse_size
   enable_query_acceleration           = false
   query_acceleration_max_scale_factor = 0
-  
+
   statement_timeout_in_seconds = var.statement_timeout
   auto_resume                  = true
   auto_suspend                 = 180

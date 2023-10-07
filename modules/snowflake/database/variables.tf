@@ -3,7 +3,7 @@ variable "db_name" {
 }
 
 variable "db_comment" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -19,21 +19,21 @@ variable "db_is_transient" {
 }
 
 variable "db_ownership_access" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "db_ownership_roles" {
-  type = list
+  type    = list(any)
   default = []
 }
 
 variable "db_access" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "db_access_roles" {
-  type = list
+  type    = list(any)
   default = []
 }

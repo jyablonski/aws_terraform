@@ -19,5 +19,5 @@ variable "storage_integration_name" {
 }
 
 variable "stage_role" {
-  type = list
+  type = list(any)
 }

@@ -1,4 +1,19 @@
+terraform {
+  required_providers {
+    snowflake = {
+      source  = "Snowflake-Labs/snowflake"
+      version = "~> 0.72"
+    }
+    snowsql = {
+      source  = "aidanmelen/snowsql"
+      version = "~> 1.0"
+    }
+
+  }
+}
+
 resource "snowflake_schema" "this" {
+  # tflint-ignore: all
   database = var.db_name
   name     = var.schema_name
   comment  = var.schema_comment
@@ -40,6 +55,7 @@ resource "snowsql_exec" "this_select" {
 }
 
 resource "snowsql_exec" "this_all" {
+  # tflint-ignore: all
 
   for_each = toset(var.schema_all_roles)
 

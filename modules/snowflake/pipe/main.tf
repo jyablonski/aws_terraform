@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    snowflake = {
+      source  = "Snowflake-Labs/snowflake"
+      version = "~> 0.72"
+    }
+
+  }
+}
+
 resource "snowflake_pipe" "this" {
   database = var.pipe_db
   schema   = var.pipe_schema

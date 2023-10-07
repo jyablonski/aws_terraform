@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    snowflake = {
+      source  = "Snowflake-Labs/snowflake"
+      version = "~> 0.72"
+    }
+
+  }
+}
+
 resource "snowflake_stage" "this" {
   name                = var.stage_name
   url                 = var.stage_url
@@ -13,6 +23,5 @@ resource "snowflake_stage_grant" "this" {
   privilege     = "USAGE"
   stage_name    = snowflake_stage.this.name
 
-  # on_future         = true
   with_grant_option = false
 }

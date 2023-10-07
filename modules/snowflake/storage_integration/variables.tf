@@ -3,7 +3,7 @@ variable "storage_integration_name" {
 }
 
 variable "storage_integration_comment" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -30,11 +30,6 @@ variable "iam_role_name" {
 
 variable "snowflake_integration_user_roles" {
   type = list(string)
-}
-
-variable "file_suffix" {
-  type    = string
-  default = ".csv"
 }
 
 variable "aws_account_id" {

@@ -1,13 +1,23 @@
+terraform {
+  required_providers {
+    snowflake = {
+      source  = "Snowflake-Labs/snowflake"
+      version = "~> 0.72"
+    }
+
+  }
+}
+
 resource "snowflake_role" "module_role" {
   name    = var.role_name
   comment = var.role_comment
 }
 
 resource "snowflake_warehouse" "module_role_warehouse" {
-  name                      = "${var.role_name}_WAREHOUSE"
-  comment                   = "Warehouse for Role ${var.role_name}"
-  warehouse_size            = var.role_warehouse_size
-  enable_query_acceleration = false
+  name                                = "${var.role_name}_WAREHOUSE"
+  comment                             = "Warehouse for Role ${var.role_name}"
+  warehouse_size                      = var.role_warehouse_size
+  enable_query_acceleration           = false
   query_acceleration_max_scale_factor = 0
 
   auto_resume         = true

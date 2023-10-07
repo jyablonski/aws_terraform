@@ -41,6 +41,7 @@ terraform {
     # snowsql = {
     #   source  = "aidanmelen/snowsql"
     #   version = "1.0.1"
+    # }
 
   }
   cloud {

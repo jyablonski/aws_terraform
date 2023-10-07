@@ -1,26 +1,24 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    snowflake = {
+      source  = "Snowflake-Labs/snowflake"
+      version = "~> 0.72"
+    }
+    snowsql = {
+      source  = "aidanmelen/snowsql"
+      version = "~> 1.0"
+    }
+
+  }
+}
 # precalculating the IAM role ARN so storage integration can be created via this reference
 locals {
   role_arn = "arn:aws:iam::${var.aws_account_id}:role/${var.iam_role_name}"
 }
-
-# resource "aws_s3_bucket" "this" {
-#   bucket = var.bucket_name
-# }
-
-# resource "aws_s3_bucket_acl" "this" {
-#   bucket = aws_s3_bucket.this.id
-#   acl    = "private"
-# }
-
-# resource "aws_s3_bucket_notification" "module_bucket_notification" {
-#   bucket = aws_s3_bucket.module_bucket.id
-
-#   queue {
-#     queue_arn     = "xx"
-#     events        = ["s3:ObjectCreated:*"]
-#     filter_suffix = var.file_suffix
-#   }
-# }
 
 resource "snowflake_storage_integration" "this" {
   name    = var.storage_integration_name
@@ -32,9 +30,7 @@ resource "snowflake_storage_integration" "this" {
   storage_allowed_locations = [var.storage_allowed_locations]
   storage_blocked_locations = [var.storage_blocked_locations]
 
-  storage_provider = "S3"
-  # storage_aws_external_id  = var.aws_external_id
-  # storage_aws_iam_user_arn = var.aws_iam_user_arn
+  storage_provider     = "S3"
   storage_aws_role_arn = local.role_arn
 
 }
@@ -73,6 +69,7 @@ resource "aws_iam_role" "this" {
 EOF
 }
 
+# 2023-10-07 - this could be cleaned up a bit
 resource "aws_iam_policy" "this" {
   name = "${var.iam_role_name}_policy"
 

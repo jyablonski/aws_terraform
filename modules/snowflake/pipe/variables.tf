@@ -23,11 +23,6 @@ variable "is_auto_ingest" {
   default = true
 }
 
-variable "file_suffix" {
-  type    = string
-  default = ".csv"
-}
-
 variable "storage_integration" {
   type = string
 }

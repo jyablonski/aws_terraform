@@ -1,30 +1,30 @@
 variable "user_name" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "user_comment" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "user_password" {
-  type      = string
+  type    = string
   default = ""
 }
 
 variable "user_email" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "user_first_name" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "user_last_name" {
-  type = string
+  type    = string
   default = ""
 }
 
