@@ -262,8 +262,9 @@ resource "aws_cloudfront_origin_access_identity" "jacobs_website_origin_identity
 
 resource "aws_cloudfront_distribution" "jacobs_website_s3_distribution" {
   origin {
-    domain_name = aws_s3_bucket.jacobs_bucket_website.website_endpoint
-    origin_id   = local.s3_origin_id
+    domain_name = aws_s3_bucket_website_configuration.jacobs_bucket_website_config.website_endpoint
+    # domain_name = aws_s3_bucket.jacobs_bucket_website.website_endpoint
+    origin_id = local.s3_origin_id
 
     custom_origin_config {
       http_port                = "80"

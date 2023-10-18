@@ -218,7 +218,7 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
             }
         }
       },
-    "Next": "SendEmailSuccess",
+    "Next": "ml_pipeline",
           "Catch": [
             {
               "ErrorEquals": [
@@ -228,35 +228,6 @@ resource "aws_sfn_state_machine" "jacobs_state_machine" {
             }
           ]
         },
-    "SendEmailSuccess": {
-      "Type": "Task",
-      "Next": "ml_pipeline",
-      "Parameters": {
-        "Destination": {
-          "ToAddresses": [
-            "jyablonski9@gmail.com"
-          ]
-        },
-        "Message": {
-          "Body": {
-            "Html": {
-              "Charset": "UTF-8",
-              "Data": "dbt Job Succeeded"
-            },
-            "Text": {
-              "Charset": "UTF-8",
-              "Data": "dbt Job Succeeded"
-            }
-          },
-          "Subject": {
-            "Charset": "UTF-8",
-            "Data": "dbt Job Succeeded"
-          }
-        },
-        "Source": "jyablonski9@gmail.com"
-      },
-      "Resource": "arn:aws:states:::aws-sdk:ses:sendEmail"
-    },
     "SendEmailFail": {
       "Type": "Task",
       "Parameters": {
