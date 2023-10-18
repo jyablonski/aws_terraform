@@ -2,7 +2,7 @@
 
 ![Test Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/test.yml/badge.svg) ![Deploy Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/deploy.yml/badge.svg)
 
-version: 1.12.1
+version: 1.12.2
 
 # Terraform Project 
 ![NBA ELT Pipeline Data Flow 2](https://github.com/jyablonski/aws_terraform/assets/16946556/89d1f3b1-7d70-4aa9-8a08-40c4860f4897)
