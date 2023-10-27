@@ -58,14 +58,18 @@ resource "aws_lb_listener_certificate" "shiny_alb_certificate_attachment" {
 }
 
 resource "aws_lb_target_group" "shiny_alb_tg" {
-  name        = local.target_group_name
+  name        = "dash-target-group"
   vpc_id      = aws_vpc.jacobs_vpc_tf.id
   target_type = local.target_type
-  port        = 3838
+  port        = 9000
   protocol    = "HTTP"
 
   health_check {
     enabled = true
     timeout = 29
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
