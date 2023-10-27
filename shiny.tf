@@ -2,16 +2,16 @@ locals {
   shiny_service_name = "shiny_dashboard_prod"
 }
 
-resource "aws_ecs_service" "shiny_dashboard" {
-  name                               = local.shiny_service_name
-  cluster                            = aws_ecs_cluster.ecs_ec2_cluster.id
-  task_definition                    = module.shiny_ecs_module.ecs_task_definition_arn
-  desired_count                      = 1
-  deployment_minimum_healthy_percent = 1
-  deployment_maximum_percent         = 100
-  launch_type                        = "EC2"
+# resource "aws_ecs_service" "shiny_dashboard" {
+#   name                               = local.shiny_service_name
+#   cluster                            = aws_ecs_cluster.ecs_ec2_cluster.id
+#   task_definition                    = module.shiny_ecs_module.ecs_task_definition_arn
+#   desired_count                      = 1
+#   deployment_minimum_healthy_percent = 1
+#   deployment_maximum_percent         = 100
+#   launch_type                        = "EC2"
 
-}
+# }
 
 module "nba_dashboard_repo" {
   source              = "./modules/iam_github"

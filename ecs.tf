@@ -4,8 +4,8 @@ locals {
   module_ml_logs        = "jacobs_ecs_logs_ml"
   module_fake_logs      = "jacobs_ecs_logs_fake_ecs"
   module_airflow_logs   = "jacobs_ecs_logs_airflow"
-  module_dash_logs      = "jacobs_ecs_logs_dash"
   module_shiny_logs     = "jacobs_ecs_logs_shiny"
+  module_dash_logs      = "nba_elt_dashboard_logs"
 }
 
 resource "aws_ecr_repository" "jacobs_repo" {
@@ -355,6 +355,65 @@ TASK_DEFINITION
 
   ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
   ecs_target_id         = "shiny_target"
+  ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
+  ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
+  ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
+  ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
+}
+
+module "dash_ecs_module" {
+  source                   = "./modules/ecs"
+  ecs_network_mode         = "bridge"
+  ecs_compatability        = "EC2"
+  ecs_schedule             = false
+  ecs_id                   = "dash_nba_dashboard"
+  ecs_container_definition = <<TASK_DEFINITION
+[
+    {
+        "image": "${aws_ecr_repository.jacobs_repo.repository_url}:nba_elt_dashboard",
+        "name": "dash_container",
+        "environment": [
+          {"name": "IP", "value": "rds.jyablonski.dev"},
+          {"name": "RDS_USER", "value": "${var.jacobs_dashboard_user}"},
+          {"name": "RDS_PW", "value": "${var.jacobs_dashboard_password}"},
+          {"name": "RDS_DB", "value": "jacob_db"},
+          {"name": "RDS_SCHEMA", "value": "nba_prod"},
+          {"name": "ENV_TYPE", "value": "prod"}
+        ],
+        "portMappings": [
+          {
+            "name": "dash_app-9000-tcp",
+            "containerPort": 9000,
+            "hostPort": 9000,
+            "protocol": "tcp",
+            "appProtocol": "http"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "${local.module_dash_logs}",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+    } 
+]
+TASK_DEFINITION
+  ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
+  ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
+  ecs_cpu                  = 524
+  ecs_memory               = 819
+
+  ecs_logs_name      = local.module_dash_logs
+  ecs_logs_retention = 30
+
+  ecs_rule_name        = "shiny_rule"
+  ecs_rule_description = "First Module Test - run everyday at 3 AM"
+  ecs_rule_cron        = "cron(0 3 * * ? *)"
+
+  ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
+  ecs_target_id         = "dash_target"
   ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
   ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
   ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id

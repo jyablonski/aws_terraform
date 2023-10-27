@@ -213,3 +213,13 @@ variable "ingestion_webhook_url" {
   type      = string
   sensitive = true
 }
+
+variable "jacobs_dashboard_user" {
+  type      = string
+  sensitive = true
+}
+
+variable "jacobs_dashboard_password" {
+  type      = string
+  sensitive = true
+}
