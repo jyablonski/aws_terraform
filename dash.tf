@@ -37,6 +37,15 @@ module "nba_elt_dashboard_repo" {
             "Effect": "Allow",
             "Action": "ecr:GetAuthorizationToken",
             "Resource": "*"
+        },
+        {
+            "Action": [
+                "ecs:ListTasks",
+                "ecs:StopTask"
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Sid": "AllowECSListStopTasks"
         }
     ]
 }
