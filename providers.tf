@@ -55,10 +55,11 @@ terraform {
 
 provider "postgresql" {
   # alias    = "pg1" - this fucks shit up for some reason yo
-  host     = var.pg_host
-  username = var.pg_user
-  password = var.pg_pass
-  sslmode  = "disable"
+  host      = var.pg_host
+  username  = var.pg_user
+  password  = var.pg_pass
+  sslmode   = "disable"
+  superuser = false
 }
 
 # provider "snowflake" {
