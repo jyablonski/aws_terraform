@@ -23,7 +23,7 @@ resource "postgresql_schema" "this" {
 }
 
 resource "postgresql_grant" "read_only_access_grant" {
-  for_each = { for role in var.read_access_roles : role => role }
+  for_each = toset(var.read_access_roles)
 
   database    = var.database_name
   role        = each.value
@@ -33,7 +33,7 @@ resource "postgresql_grant" "read_only_access_grant" {
 }
 
 resource "postgresql_grant" "read_only_access_grant_usage" {
-  for_each = { for role in var.read_access_roles : role => role }
+  for_each = toset(var.read_access_roles)
 
   database    = var.database_name
   role        = each.value
@@ -43,7 +43,7 @@ resource "postgresql_grant" "read_only_access_grant_usage" {
 }
 
 resource "postgresql_default_privileges" "read_only_access_grant_future" {
-  for_each = { for role in var.read_access_roles : role => role }
+  for_each = toset(var.read_access_roles)
 
   role        = each.value
   database    = var.database_name
@@ -54,7 +54,7 @@ resource "postgresql_default_privileges" "read_only_access_grant_future" {
 }
 
 resource "postgresql_grant" "write_access_grant" {
-  for_each = { for role in var.write_access_roles : role => role }
+  for_each = toset(var.write_access_roles)
 
   database    = var.database_name
   role        = each.value
@@ -64,7 +64,7 @@ resource "postgresql_grant" "write_access_grant" {
 }
 
 resource "postgresql_grant" "write_access_grant_usage" {
-  for_each = { for role in var.write_access_roles : role => role }
+  for_each = toset(var.write_access_roles)
 
   database    = var.database_name
   role        = each.value
@@ -75,7 +75,7 @@ resource "postgresql_grant" "write_access_grant_usage" {
 
 
 resource "postgresql_default_privileges" "write_access_grant_future" {
-  for_each = { for role in var.write_access_roles : role => role }
+  for_each = toset(var.write_access_roles)
 
   role        = each.value
   database    = var.database_name
