@@ -42,7 +42,7 @@ resource "aws_iam_policy" "jacobs_rest_api_lambda_invoke_policy" {
                 "lambda:InvokeFunction"
             ],
             "Resource": [
-                "${aws_lambda_function.jacobs_rest_api_lambda_function.arn}"
+                "${aws_lambda_function.shiny_restart_lambda.arn}"
             ]
         }
     ]
