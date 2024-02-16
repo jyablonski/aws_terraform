@@ -559,6 +559,19 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
     max_ttl                  = 0
   }
 
+  ordered_cache_behavior {
+    path_pattern             = "/invoke_dashboard_restart*"
+    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods           = ["GET", "HEAD"] # have to be here or it fails
+    target_origin_id         = local.api_origin_id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
+    viewer_protocol_policy   = "redirect-to-https"
+    min_ttl                  = 0
+    default_ttl              = 0
+    max_ttl                  = 0
+  }
+
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
