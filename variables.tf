@@ -223,3 +223,18 @@ variable "jacobs_dashboard_password" {
   type      = string
   sensitive = true
 }
+
+variable "api_gmail_oauth_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "api_gmail_oauth_client_secret" {
+  type      = string
+  sensitive = true
+}
+
+variable "api_gmail_oauth_redirect_url" {
+  type      = string
+  sensitive = true
+}
