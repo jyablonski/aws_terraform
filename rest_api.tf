@@ -87,6 +87,9 @@ resource "aws_lambda_function" "jacobs_rest_api_lambda_function" {
       OTEL_SERVICE_NAME           = "${var.honeycomb_app_name}"
       API_KEY                     = "${var.rest_api_api_key}"
       ENV_TYPE                    = "prod"
+      GMAIL_OAUTH_ID              = "${var.api_gmail_oauth_id}"
+      GMAIL_OAUTH_CLIENT_SECRET   = "${var.api_gmail_oauth_client_secret}"
+      GMAIL_OAUTH_REDIRECT_URL    = "${var.api_gmail_oauth_redirect_url}"
     }
   }
 
