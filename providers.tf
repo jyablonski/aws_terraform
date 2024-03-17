@@ -28,7 +28,7 @@ terraform {
     }
     postgresql = {
       source  = "cyrilgdn/postgresql"
-      version = "1.17.1"
+      version = "~> 1.21.0"
     }
     archive = {
       source  = "hashicorp/archive"
@@ -68,4 +68,23 @@ provider "postgresql" {
 #   region      = var.snowflake_region
 #   private_key = var.private_key_path
 #   role        = var.snowflake_role
+# }
+
+# provider "kubernetes" {
+#   host                   = data.aws_eks_cluster.default.endpoint
+#   cluster_ca_certificate = base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
+#   token                  = data.aws_eks_cluster_auth.default.token
+# }
+
+# provider "kubernetes" {
+#   host                   = data.aws_eks_cluster.default.endpoint
+#   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+#   token                  = data.aws_eks_cluster_auth.default.token
+
+# exec {
+#   api_version = "client.authentication.k8s.io/v1beta1"
+#   command     = "aws"
+#   # This requires the awscli to be installed locally where Terraform is executed
+#   args = ["eks", "get-token", "--cluster-name", "jacobs-eks-cluster", "--region", "us-east-1"]
+# }
 # }

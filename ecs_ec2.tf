@@ -131,12 +131,12 @@ resource "aws_autoscaling_group" "ecs_ec2_cluster_asg" {
   name                  = "${local.ecs_cluster_name}-asg"
   min_size              = 0
   max_size              = 1
-  desired_capacity      = 1 # basically the intial capacity for the ASG.
+  desired_capacity      = 1 # basically the initial capacity for the ASG.
   protect_from_scale_in = true
 
   vpc_zone_identifier = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id]
 
-  target_group_arns = [aws_lb_target_group.shiny_alb_tg.arn]
+  target_group_arns = [aws_lb_target_group.alb_tg.arn]
 
   launch_template {
     id      = aws_launch_template.ecs_launch_template.id
@@ -151,7 +151,7 @@ resource "aws_ecs_capacity_provider" "ecs_ec2_cluster_config" {
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.ecs_ec2_cluster_asg.arn
-    managed_termination_protection = "ENABLED" # it wont shut instances down if tasks are being ran on that instance.
+    managed_termination_protection = "DISABLED" # disabling this - it was causing ecs to not spin up new tasks
 
     managed_scaling {
       maximum_scaling_step_size = 1
