@@ -29,11 +29,11 @@ EOF
 
 }
 
-module "python_docker" {
+module "ingestion_github_cicd" {
   source              = "./modules/iam_github"
-  iam_role_name       = "python-docker"
+  iam_role_name       = "ingestion_github"
   github_provider_arn = aws_iam_openid_connect_provider.github_provider.arn
-  github_repo         = "jyablonski/python_docker"
+  github_repo         = "jyablonski/nba_elt_ingestion"
   iam_role_policy     = <<EOF
 {
     "Version": "2012-10-17",
