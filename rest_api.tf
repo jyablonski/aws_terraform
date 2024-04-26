@@ -90,6 +90,7 @@ resource "aws_lambda_function" "jacobs_rest_api_lambda_function" {
       GMAIL_OAUTH_ID              = "${var.api_gmail_oauth_id}"
       GMAIL_OAUTH_CLIENT_SECRET   = "${var.api_gmail_oauth_client_secret}"
       GMAIL_OAUTH_REDIRECT_URL    = "${var.api_gmail_oauth_redirect_url}"
+      REDIS_URL                   = "${var.redis_url}"
     }
   }
 

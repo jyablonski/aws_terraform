@@ -238,3 +238,8 @@ variable "api_gmail_oauth_redirect_url" {
   type      = string
   sensitive = true
 }
+
+variable "redis_url" {
+  type      = string
+  sensitive = true
+}
