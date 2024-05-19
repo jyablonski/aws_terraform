@@ -49,7 +49,7 @@ data "archive_file" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  filename      = "${path.root}/myzip/${var.lambda_name}.zip"
+  filename      = data.archive_file.this.output_path
   function_name = var.lambda_name
   role          = aws_iam_role.this.arn
   handler       = var.lambda_handler
