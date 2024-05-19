@@ -1,10 +1,9 @@
 # https://github.com/keithrozario/Klayers
-module "lambda_app_health_checker" {
-  source               = "./modules/lambda"
-  lambda_name          = "lambda_app_health_checker"
-  is_lambda_schedule   = true
+module "lambda_app_health_checker_v2" {
+  source               = "./modules/lambda_v2"
+  lambda_source_dir    = "${path.root}/lambdas/lambda_app_health_checker/"
+  lambda_name          = "lambda_app_health_checker_v2"
   lambda_log_retention = 7
-  lambda_cron          = "cron(0 * * * ? *)"
   # cron runs every 1 hr indefinitely
   lambda_runtime = "python3.11"
   lambda_memory  = 128
@@ -14,6 +13,7 @@ module "lambda_app_health_checker" {
   lambda_env_vars = {
     WEBHOOK_URL = "${var.slack_webhook_url}",
   }
-  account_id = data.aws_caller_identity.current.account_id
-  region     = "us-east-1"
+
+  is_lambda_schedule = true
+  lambda_cron        = "cron(0 * * * ? *)"
 }

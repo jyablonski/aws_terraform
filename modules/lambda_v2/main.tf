@@ -22,6 +22,8 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_iam_policy" "this" {
+  count = var.create_lambda_role_policy ? 1 : 0
+
   name        = "${var.lambda_name}_policy"
   description = "IAM policy for ${var.lambda_name}"
 
@@ -29,8 +31,15 @@ resource "aws_iam_policy" "this" {
 }
 
 resource "aws_iam_role_policy_attachment" "this" {
+  count = var.create_lambda_role_policy ? 1 : 0
+
   role       = aws_iam_role.this.name
-  policy_arn = aws_iam_policy.this.arn
+  policy_arn = aws_iam_policy.this[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_execution" {
+  role       = aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 data "archive_file" "this" {
@@ -40,7 +49,7 @@ data "archive_file" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  filename      = "${path.root}/myzip/${var.lambda_name}.zip"
+  filename      = data.archive_file.this.output_path
   function_name = var.lambda_name
   role          = aws_iam_role.this.arn
   handler       = var.lambda_handler

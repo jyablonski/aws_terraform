@@ -25,6 +25,7 @@ variable "lambda_env_vars" {
 variable "is_lambda_schedule" {
   type        = bool
   description = "Boolean which will additionally build Scheduling Resources if true, or only build the lambda function if false"
+  default     = false
 }
 
 
@@ -45,7 +46,8 @@ variable "lambda_timeout" {
 }
 
 variable "lambda_role_policy" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "lambda_handler" {
@@ -56,4 +58,10 @@ variable "lambda_handler" {
 variable "lambda_source_dir" {
   type = string
   # default = "${path.root}/lambdas/${var.lambda_name}/"
+}
+
+variable "create_lambda_role_policy" {
+  description = "Flag to create and attach the Lambda role policy"
+  type        = bool
+  default     = false
 }
