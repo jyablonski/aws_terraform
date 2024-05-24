@@ -2,7 +2,7 @@
 
 ![Test Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/test.yml/badge.svg) ![Deploy Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/deploy.yml/badge.svg)
 
-version: 1.12.17
+version: 1.12.18
 
 # Terraform Project 
 ![nba_pipeline_diagram](https://github.com/jyablonski/aws_terraform/assets/16946556/1014c07a-1a32-48e2-a6d9-fc5cbce472ed)
