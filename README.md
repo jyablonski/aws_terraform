@@ -13,3 +13,6 @@ version: 1.12.18
     * [dbt](https://github.com/jyablonski/nba_elt_dbt)
     * [ML Pipeline](https://github.com/jyablonski/nba_elt_mlflow)
     * [REST API](https://github.com/jyablonski/nba_elt_rest_api)
+  
+### Infrastructure model
+![jyablonski_aws_terraform](https://github.com/jyablonski/aws_terraform/assets/173192552/74fe0a60-4b0c-4172-bf2b-0ac5f1bbb895)
