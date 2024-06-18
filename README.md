@@ -13,3 +13,7 @@ version: 1.12.18
     * [dbt](https://github.com/jyablonski/nba_elt_dbt)
     * [ML Pipeline](https://github.com/jyablonski/nba_elt_mlflow)
     * [REST API](https://github.com/jyablonski/nba_elt_rest_api)
+### Infrastructure model
+![Infrastructure main model](.infragenie/infrastructure_main_model.svg)
+
+---
