@@ -1,6 +1,6 @@
 locals {
   rds_engine     = "postgres"
-  rds_engine_ver = "14.3"
+  rds_engine_ver = "16.1"
 
 }
 
@@ -23,11 +23,30 @@ resource "aws_db_parameter_group" "jacobs_parameter_group" {
 
 }
 
+resource "aws_db_parameter_group" "jacobs_parameter_group_16" {
+  name   = "jacobs-rds-parameter-group-pg16"
+  family = "postgres16"
+
+  parameter {
+    name         = "rds.logical_replication"
+    value        = 0
+    apply_method = "pending-reboot"
+  }
+
+  # change to 15 below if you want to do CDC with DMS
+  parameter {
+    name         = "max_wal_senders"
+    value        = 10
+    apply_method = "pending-reboot"
+  }
+
+}
+
 resource "aws_db_instance" "jacobs_rds_tf" {
   allocated_storage       = 20
   max_allocated_storage   = 22
   engine                  = local.rds_engine
-  engine_version          = "14.10" # newest possible version that's in free tier eligiblity
+  engine_version          = local.rds_engine_ver
   instance_class          = "db.t3.micro"
   identifier              = "jacobs-rds-server"
   port                    = 5432
@@ -35,13 +54,13 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   username                = var.jacobs_rds_user
   password                = var.jacobs_rds_pw
   skip_final_snapshot     = true
-  publicly_accessible     = true
+  publicly_accessible     = false
   deletion_protection     = true
   backup_retention_period = 0
   storage_type            = "gp2" # general purpose ssd
   vpc_security_group_ids  = [aws_security_group.jacobs_rds_security_group_tf.id]
   db_subnet_group_name    = aws_db_subnet_group.jacobs_subnet_group.id
-  parameter_group_name    = aws_db_parameter_group.jacobs_parameter_group.name
+  parameter_group_name    = aws_db_parameter_group.jacobs_parameter_group_16.name
 
   tags = {
     Name        = local.env_name

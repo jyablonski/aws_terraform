@@ -92,7 +92,9 @@ module "dbt_github_cicd" {
             "Effect": "Allow",
             "Resource": [
                 "${module.dbt_s3_ci_module.s3_bucket_arn}",
-                "${module.dbt_s3_ci_module.s3_bucket_arn}/*"
+                "${module.dbt_s3_ci_module.s3_bucket_arn}/*",
+                "${module.dbt_s3_docs_module.s3_bucket_arn}",
+                "${module.dbt_s3_docs_module.s3_bucket_arn}/*"
             ]
         }
     ]

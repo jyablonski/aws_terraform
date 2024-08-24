@@ -202,16 +202,16 @@ resource "aws_route53_record" "jacobs_website_route53_record_www" {
 #   }
 # }
 
-resource "aws_route53_record" "jacobs_website_route53_record_shiny" {
-  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-  name    = "nbadashboard.${local.website_domain}"
-  type    = "A"
-  alias {
-    name                   = aws_lb.alb.dns_name
-    zone_id                = aws_lb.alb.zone_id
-    evaluate_target_health = false
-  }
-}
+# resource "aws_route53_record" "jacobs_website_route53_record_shiny" {
+#   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
+#   name    = "nbadashboard.${local.website_domain}"
+#   type    = "A"
+#   alias {
+#     name                   = aws_lb.alb.dns_name
+#     zone_id                = aws_lb.alb.zone_id
+#     evaluate_target_health = false
+#   }
+# }
 
 resource "aws_route53_record" "jacobs_website_route53_record_cert" {
   for_each = {

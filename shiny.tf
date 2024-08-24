@@ -103,13 +103,13 @@ resource "aws_lambda_function" "shiny_restart_lambda" {
   function_name = "${local.shiny_service_name}_lambda"
   role          = aws_iam_role.shiny_restart_role.arn
   handler       = "main.lambda_handler"
-  runtime       = "python3.9"
+  runtime       = "python3.11"
   memory_size   = 128
 
   source_code_hash = data.archive_file.lambda_shiny_restart_archive.output_base64sha256
 
   layers = [
-    "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p39-requests:11"
+    "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p311-requests-html:13"
   ]
 
   environment {
@@ -134,9 +134,9 @@ resource "aws_lambda_permission" "shiny_restart_lambda_permission" {
   source_arn    = aws_cloudwatch_event_rule.shiny_restart_rule.arn
 }
 
-resource "aws_cloudwatch_event_target" "shiny_restart_target" {
-  target_id = "shiny_restart_event_id"
-  arn       = aws_lambda_function.shiny_restart_lambda.arn
-  rule      = aws_cloudwatch_event_rule.shiny_restart_rule.name
+# resource "aws_cloudwatch_event_target" "shiny_restart_target" {
+#   target_id = "shiny_restart_event_id"
+#   arn       = aws_lambda_function.shiny_restart_lambda.arn
+#   rule      = aws_cloudwatch_event_rule.shiny_restart_rule.name
 
-}
+# }
