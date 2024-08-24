@@ -127,53 +127,53 @@ resource "aws_launch_template" "ecs_launch_template" {
   }
 }
 
-resource "aws_autoscaling_group" "ecs_ec2_cluster_asg" {
-  name                  = "${local.ecs_cluster_name}-asg"
-  min_size              = 0
-  max_size              = 1
-  desired_capacity      = 1 # basically the initial capacity for the ASG.
-  protect_from_scale_in = true
+# resource "aws_autoscaling_group" "ecs_ec2_cluster_asg" {
+#   name                  = "${local.ecs_cluster_name}-asg"
+#   min_size              = 0
+#   max_size              = 1
+#   desired_capacity      = 1 # basically the initial capacity for the ASG.
+#   protect_from_scale_in = true
 
-  vpc_zone_identifier = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id]
+#   vpc_zone_identifier = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id]
 
-  target_group_arns = [aws_lb_target_group.alb_tg.arn]
+#   target_group_arns = [aws_lb_target_group.alb_tg.arn]
 
-  launch_template {
-    id      = aws_launch_template.ecs_launch_template.id
-    version = "$Latest"
-  }
-}
+#   launch_template {
+#     id      = aws_launch_template.ecs_launch_template.id
+#     version = "$Latest"
+#   }
+# }
 
-# basically this is what actually determines when to spin up new instances, not the ASG.
-# you either provide ASG utilization metrics to decide when to spin up new instances, or you do this ecs capacity provider stuff.
-resource "aws_ecs_capacity_provider" "ecs_ec2_cluster_config" {
-  name = "${local.ecs_cluster_name}-provider"
+# # basically this is what actually determines when to spin up new instances, not the ASG.
+# # you either provide ASG utilization metrics to decide when to spin up new instances, or you do this ecs capacity provider stuff.
+# resource "aws_ecs_capacity_provider" "ecs_ec2_cluster_config" {
+#   name = "${local.ecs_cluster_name}-provider"
 
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_autoscaling_group.ecs_ec2_cluster_asg.arn
-    managed_termination_protection = "DISABLED" # disabling this - it was causing ecs to not spin up new tasks
+#   auto_scaling_group_provider {
+#     auto_scaling_group_arn         = aws_autoscaling_group.ecs_ec2_cluster_asg.arn
+#     managed_termination_protection = "DISABLED" # disabling this - it was causing ecs to not spin up new tasks
 
-    managed_scaling {
-      maximum_scaling_step_size = 1
-      minimum_scaling_step_size = 1
-      status                    = "ENABLED"
-      target_capacity           = 100 # only doing 100 bc 1 instance, if max instances was like 3 then make this like 75 or something
-    }
-  }
-}
+#     managed_scaling {
+#       maximum_scaling_step_size = 1
+#       minimum_scaling_step_size = 1
+#       status                    = "ENABLED"
+#       target_capacity           = 100 # only doing 100 bc 1 instance, if max instances was like 3 then make this like 75 or something
+#     }
+#   }
+# }
 
-# had to manually delete this in the console in order to allow updates to happen
-# https://stackoverflow.com/questions/64021278/how-target-capacity-is-calculated-in-aws-ecs-capacity-provider
-resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_provider" {
-  cluster_name       = aws_ecs_cluster.ecs_ec2_cluster.name
-  capacity_providers = [aws_ecs_capacity_provider.ecs_ec2_cluster_config.name]
+# # had to manually delete this in the console in order to allow updates to happen
+# # https://stackoverflow.com/questions/64021278/how-target-capacity-is-calculated-in-aws-ecs-capacity-provider
+# resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_provider" {
+#   cluster_name       = aws_ecs_cluster.ecs_ec2_cluster.name
+#   capacity_providers = [aws_ecs_capacity_provider.ecs_ec2_cluster_config.name]
 
-  default_capacity_provider_strategy {
-    base              = 1
-    weight            = 100
-    capacity_provider = aws_ecs_capacity_provider.ecs_ec2_cluster_config.name
-  }
-}
+#   default_capacity_provider_strategy {
+#     base              = 1
+#     weight            = 100
+#     capacity_provider = aws_ecs_capacity_provider.ecs_ec2_cluster_config.name
+#   }
+# }
 
 # have to have > memory in ec2 instance than is assigned in the ecs task definition, or task will be forever stuck in provisioning.
 

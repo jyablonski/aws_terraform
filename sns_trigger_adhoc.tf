@@ -136,6 +136,10 @@ resource "aws_lambda_function" "jacobs_adhoc_sns_ecs_lambda_function" {
     Name        = local.env_name_adhoc
     Environment = local.env_type_adhoc
   }
+
+  lifecycle {
+    ignore_changes = [source_code_hash]
+  }
 }
 
 resource "aws_sns_topic_subscription" "enable_adhoc_lambda_sns_ecs" {

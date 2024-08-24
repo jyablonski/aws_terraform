@@ -26,10 +26,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "5.11.0"
     }
-    postgresql = {
-      source  = "cyrilgdn/postgresql"
-      version = "~> 1.21.0"
-    }
+    # postgresql = {
+    #   source  = "cyrilgdn/postgresql"
+    #   version = "~> 1.21.0"
+    # }
     archive = {
       source  = "hashicorp/archive"
       version = "~> 2.3.0"
@@ -53,14 +53,16 @@ terraform {
 
 }
 
-provider "postgresql" {
-  # alias    = "pg1" - this fucks shit up for some reason yo
-  host      = var.pg_host
-  username  = var.pg_user
-  password  = var.pg_pass
-  sslmode   = "disable"
-  superuser = false
-}
+# provider "postgresql" {
+#   # alias    = "pg1" - this fucks shit up for some reason yo
+#   host             = var.pg_host
+#   username         = var.pg_user
+#   password         = var.pg_pass
+#   superuser        = false
+#   connect_timeout  = 15
+#   sslmode          = "disable"
+#   expected_version = "16.1"
+# }
 
 # provider "snowflake" {
 #   username    = var.snowflake_username
