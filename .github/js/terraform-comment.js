@@ -7,7 +7,7 @@ module.exports = async ({ github, context }) => {
         repo: context.repo.repo,
         issue_number: context.issue.number,
     })
-    const label = `## terraform \`${title}\``
+    const label = `## \`${title}\``
     const botComment = comments.find(comment => {
         return comment.user.type === 'Bot' && comment.body.includes(label)
     })
