@@ -45,7 +45,5 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const path = require('path');
-            const scriptPath = path.join(__dirname, '..', 'js', 'terraform-comment.js');
-            const script = require(scriptPath);
+            const script = require('./.github/js/terraform-comment.js');
             await script({github, context});
