@@ -11,11 +11,11 @@ env:
 
 jobs:
   terraform:
-    name: "Terraform"
+    name: "Terraform Deploy"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
