@@ -78,6 +78,10 @@ resource "aws_lambda_function" "jacobs_lambda_dynamodb_function" {
     Name        = local.env_name_dynamodb
     Environment = local.env_type_dynamodb
   }
+
+  lifecycle {
+    ignore_changes = [source_code_hash]
+  }
 }
 
 resource "aws_api_gateway_rest_api" "jacobs_api_gateway" {

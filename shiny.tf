@@ -118,6 +118,10 @@ resource "aws_lambda_function" "shiny_restart_lambda" {
       ECS_EC2_CLUSTER = "${aws_ecs_cluster.ecs_ec2_cluster.arn}"
     }
   }
+
+  lifecycle {
+    ignore_changes = [source_code_hash]
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "shiny_restart_rule" {
