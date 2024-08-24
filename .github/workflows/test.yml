@@ -9,6 +9,7 @@ env:
 permissions:
   id-token: write
   contents: write # Ensure that the workflow has permission to write to PR comments
+  pull-requests: write
 
 jobs:
   terraform:
