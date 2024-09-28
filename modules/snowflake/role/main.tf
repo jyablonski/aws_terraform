@@ -8,7 +8,7 @@ terraform {
   }
 }
 
-resource "snowflake_role" "module_role" {
+resource "snowflake_account_role" "module_role" {
   name    = var.role_name
   comment = var.role_comment
 }
@@ -18,35 +18,21 @@ resource "snowflake_warehouse" "module_role_warehouse" {
   comment                             = "Warehouse for Role ${var.role_name}"
   warehouse_size                      = var.role_warehouse_size
   enable_query_acceleration           = false
-  query_acceleration_max_scale_factor = 0
+  query_acceleration_max_scale_factor = null
 
   auto_resume         = true
   auto_suspend        = 180
   initially_suspended = true
 }
 
-resource "snowflake_warehouse_grant" "module_role_warehouse_grant_usage" {
-  warehouse_name         = snowflake_warehouse.module_role_warehouse.name
-  enable_multiple_grants = true
-  privilege              = "USAGE"
+resource "snowflake_grant_ownership" "module_role_warehouse_grant_usage" {
+  account_role_name = snowflake_account_role.module_role.name
 
-  roles = [
-    snowflake_role.module_role.name,
-  ]
+  on {
+    object_type = "WAREHOUSE"
+    object_name = snowflake_warehouse.module_role_warehouse.name
+  }
 
-  with_grant_option = false
-}
-
-resource "snowflake_warehouse_grant" "module_role_warehouse_grant" {
-  warehouse_name         = snowflake_warehouse.module_role_warehouse.name
-  enable_multiple_grants = true
-  privilege              = var.role_warehouse_privilege
-
-  roles = [
-    snowflake_role.module_role.name,
-  ]
-
-  with_grant_option = false
 }
 
 resource "snowflake_database" "module_role_db" {
@@ -56,12 +42,13 @@ resource "snowflake_database" "module_role_db" {
   is_transient                = false
 }
 
-resource "snowflake_database_grant" "module_role_grant_db_ownership" {
-  database_name          = snowflake_database.module_role_db.name
-  enable_multiple_grants = true
+resource "snowflake_grant_privileges_to_account_role" "module_role_grant_db_ownership" {
+  account_role_name = snowflake_account_role.module_role.name
 
-  privilege = "OWNERSHIP"
-  roles     = [var.role_name]
-
+  on_account_object {
+    object_type = "DATABASE"
+    object_name = snowflake_database.module_role_db.name
+  }
+  all_privileges    = true
   with_grant_option = false
 }

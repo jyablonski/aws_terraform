@@ -2,7 +2,7 @@ terraform {
   required_providers {
     snowflake = {
       source  = "Snowflake-Labs/snowflake"
-      version = "~> 0.72"
+      version = "0.96.0"
     }
 
   }
@@ -16,12 +16,12 @@ resource "snowflake_stage" "this" {
   storage_integration = var.storage_integration_name
 }
 
-resource "snowflake_stage_grant" "this" {
-  database_name = snowflake_stage.this.database
-  schema_name   = snowflake_stage.this.schema
-  roles         = var.stage_role
-  privilege     = "USAGE"
-  stage_name    = snowflake_stage.this.name
+# resource "snowflake_stage_grant" "this" {
+#   database_name = snowflake_stage.this.database
+#   schema_name   = snowflake_stage.this.schema
+#   roles         = var.stage_role
+#   privilege     = "USAGE"
+#   stage_name    = snowflake_stage.this.name
 
-  with_grant_option = false
-}
+#   with_grant_option = false
+# }

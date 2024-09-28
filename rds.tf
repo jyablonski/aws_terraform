@@ -1,6 +1,6 @@
 locals {
   rds_engine     = "postgres"
-  rds_engine_ver = "16.1"
+  rds_engine_ver = "16.3"
 
 }
 
@@ -54,7 +54,7 @@ resource "aws_db_instance" "jacobs_rds_tf" {
   username                = var.jacobs_rds_user
   password                = var.jacobs_rds_pw
   skip_final_snapshot     = true
-  publicly_accessible     = false
+  publicly_accessible     = true
   deletion_protection     = true
   backup_retention_period = 0
   storage_type            = "gp2" # general purpose ssd

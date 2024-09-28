@@ -5,27 +5,27 @@ variable "user_name" {
 
 variable "user_comment" {
   type    = string
-  default = ""
+  default = null
 }
 
-variable "user_password" {
-  type    = string
-  default = ""
-}
+# variable "user_password" {
+#   type    = string
+#   default = ""
+# }
 
 variable "user_email" {
   type    = string
-  default = ""
+  default = null
 }
 
 variable "user_first_name" {
   type    = string
-  default = ""
+  default = null
 }
 
 variable "user_last_name" {
   type    = string
-  default = ""
+  default = null
 }
 
 # variable "user_role" {
@@ -33,7 +33,8 @@ variable "user_last_name" {
 # }
 
 variable "user_rsa_key" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "roles" {
