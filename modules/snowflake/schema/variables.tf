@@ -26,7 +26,12 @@ variable "schema_retention_days" {
   default = 1
 }
 
-variable "schema_all_roles" {
+variable "schema_admin_roles" {
+  type    = list(any)
+  default = []
+}
+
+variable "schema_write_roles" {
   type    = list(any)
   default = []
 }

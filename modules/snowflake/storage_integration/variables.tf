@@ -28,14 +28,6 @@ variable "iam_role_name" {
   type = string
 }
 
-variable "snowflake_integration_user_roles" {
-  type = list(string)
-}
-
 variable "aws_account_id" {
-  type = string
-}
-
-variable "kms_key_arn" {
   type = string
 }

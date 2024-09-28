@@ -2,7 +2,7 @@ terraform {
   required_providers {
     snowflake = {
       source  = "Snowflake-Labs/snowflake"
-      version = "~> 0.72"
+      version = "0.96.0"
     }
 
   }
@@ -20,16 +20,4 @@ resource "snowflake_pipe" "this" {
   integration       = var.storage_integration
   error_integration = var.error_integration
 
-}
-
-resource "snowflake_pipe_grant" "this" {
-  database_name = var.pipe_db
-  schema_name   = var.pipe_schema
-  pipe_name     = snowflake_pipe.this.name
-
-  privilege = "OPERATE"
-  roles     = var.roles
-
-  on_future         = true
-  with_grant_option = false
 }

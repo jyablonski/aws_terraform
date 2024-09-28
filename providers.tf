@@ -20,7 +20,7 @@ provider "aws" {
 # https://learn.hashicorp.com/tutorials/terraform/aws-default-tags
 # implement default tags when deploying infra next august pls
 terraform {
-  required_version = "1.5.7"
+  required_version = "1.9.6"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -36,11 +36,7 @@ terraform {
     }
     # snowflake = {
     #   source  = "Snowflake-Labs/snowflake"
-    #   version = "0.51.0"
-    # }
-    # snowsql = {
-    #   source  = "aidanmelen/snowsql"
-    #   version = "1.0.1"
+    #   version = "~> 0.96.0"
     # }
 
   }
@@ -65,11 +61,10 @@ terraform {
 # }
 
 # provider "snowflake" {
-#   username    = var.snowflake_username
-#   account     = var.snowflake_account
-#   region      = var.snowflake_region
-#   private_key = var.private_key_path
-#   role        = var.snowflake_role
+#   account  = var.snowflake_account
+#   user     = var.snowflake_username
+#   password = var.snowflake_password
+#   role     = "ACCOUNTADMIN"
 # }
 
 # provider "kubernetes" {

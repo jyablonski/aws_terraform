@@ -279,7 +279,7 @@ resource "aws_cloudfront_distribution" "jacobs_website_s3_distribution" {
 
   enabled         = true
   is_ipv6_enabled = true
-  comment         = "Some comment"
+  comment         = "Website Distribution"
   # default_root_object = "index.html"
 
   # custom_error_response {

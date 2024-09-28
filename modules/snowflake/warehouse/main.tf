@@ -1,18 +1,10 @@
 terraform {
   required_providers {
-    aws = {
-      source  = "Snowflake-Labs/snowflake"
-      version = "~> 5.0"
-    }
-
     snowflake = {
       source  = "Snowflake-Labs/snowflake"
-      version = "~> 0.72"
+      version = "0.96.0"
     }
-    snowsql = {
-      source  = "aidanmelen/snowsql"
-      version = "~> 1.0"
-    }
+
 
   }
 }
@@ -27,34 +19,28 @@ resource "snowflake_warehouse" "this" {
   comment                             = var.warehouse_comment
   warehouse_size                      = var.warehouse_size
   enable_query_acceleration           = false
-  query_acceleration_max_scale_factor = 0
+  query_acceleration_max_scale_factor = null
 
   statement_timeout_in_seconds = var.statement_timeout
   auto_resume                  = true
   auto_suspend                 = 180
   initially_suspended          = true
 
-  min_cluster_count = var.min_cluster_count == 1 ? 1 : var.min_cluster_count
-  max_cluster_count = var.max_cluster_count == 1 ? 1 : var.max_cluster_count
-  scaling_policy    = var.warehouse_scaling_policy == "" ? "STANDARD" : var.warehouse_scaling_policy
+  # min_cluster_count = var.min_cluster_count == 1 ? 1 : var.min_cluster_count
+  # max_cluster_count = var.max_cluster_count == 1 ? 1 : var.max_cluster_count
+  # scaling_policy    = var.warehouse_scaling_policy == "" ? "STANDARD" : var.warehouse_scaling_policy
 }
 
-resource "snowsql_exec" "this_all" {
+resource "snowflake_grant_privileges_to_account_role" "this" {
   for_each = toset(var.role_names)
 
-  name = "${each.key}_warehouse_grant"
+  account_role_name = each.value
+  privileges        = ["USAGE"]
 
-  create {
-    statements = <<-EOT
-    GRANT USAGE ON WAREHOUSE ${snowflake_warehouse.this.name} TO ROLE ${each.key};
-    GRANT OPERATE ON WAREHOUSE ${snowflake_warehouse.this.name} TO ROLE ${each.key};
-    EOT
+  on_account_object {
+    object_type = "WAREHOUSE"
+    object_name = snowflake_warehouse.this.name
   }
 
-  delete {
-    statements = <<-EOT
-    REVOKE USAGE ON WAREHOUSE ${snowflake_warehouse.this.name} FROM ROLE ${each.key};
-    REVOKE OPERATE ON WAREHOUSE ${snowflake_warehouse.this.name} FROM ROLE ${each.key};
-    EOT
-  }
+  with_grant_option = false
 }

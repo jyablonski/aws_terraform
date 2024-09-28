@@ -17,7 +17,3 @@ variable "stage_schema" {
 variable "storage_integration_name" {
   type = string
 }
-
-variable "stage_role" {
-  type = list(any)
-}
