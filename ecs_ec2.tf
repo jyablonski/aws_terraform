@@ -95,14 +95,14 @@ resource "aws_iam_instance_profile" "ecs_ec2_instance_profile" {
   role = aws_iam_role.ecs_ec2_role.name
 }
 
-resource "aws_ecs_cluster" "ecs_ec2_cluster" {
-  name = local.ecs_cluster_name
+# resource "aws_ecs_cluster" "ecs_ec2_cluster" {
+#   name = local.ecs_cluster_name
 
-  setting {
-    name  = "containerInsights"
-    value = "disabled"
-  }
-}
+#   setting {
+#     name  = "containerInsights"
+#     value = "disabled"
+#   }
+# }
 
 resource "aws_key_pair" "ecs_cluster_key_pair" {
   key_name   = local.ecs_key_pair_name
