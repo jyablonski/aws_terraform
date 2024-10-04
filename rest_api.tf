@@ -28,32 +28,32 @@ resource "aws_iam_role_policy_attachment" "jacobs_rest_api_lambda_role_attachmen
   policy_arn = "arn:aws:iam::aws:policy/AWSLambdaExecute"
 }
 
-resource "aws_iam_policy" "jacobs_rest_api_lambda_invoke_policy" {
-  name        = "${local.rest_api_role_name}_lambda_execution_policy"
-  description = "IAM policy for ${local.rest_api_role_name} to execute other Lambdas"
+# resource "aws_iam_policy" "jacobs_rest_api_lambda_invoke_policy" {
+#   name        = "${local.rest_api_role_name}_lambda_execution_policy"
+#   description = "IAM policy for ${local.rest_api_role_name} to execute other Lambdas"
 
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "lambda:InvokeFunction"
-            ],
-            "Resource": [
-                "${aws_lambda_function.shiny_restart_lambda.arn}"
-            ]
-        }
-    ]
-}
-EOF
-}
+#   policy = <<EOF
+# {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#         {
+#             "Effect": "Allow",
+#             "Action": [
+#                 "lambda:InvokeFunction"
+#             ],
+#             "Resource": [
+#                 "${aws_lambda_function.shiny_restart_lambda.arn}"
+#             ]
+#         }
+#     ]
+# }
+# EOF
+# }
 
-resource "aws_iam_role_policy_attachment" "jacobs_rest_api_lambda_invoke_policy_attachment" {
-  role       = aws_iam_role.jacobs_rest_api_lambda_role.name
-  policy_arn = aws_iam_policy.jacobs_rest_api_lambda_invoke_policy.arn
-}
+# resource "aws_iam_role_policy_attachment" "jacobs_rest_api_lambda_invoke_policy_attachment" {
+#   role       = aws_iam_role.jacobs_rest_api_lambda_role.name
+#   policy_arn = aws_iam_policy.jacobs_rest_api_lambda_invoke_policy.arn
+# }
 
 # arn:aws:iam::aws:policy/AWSLambdaExecute
 resource "aws_cloudwatch_log_group" "jacobs_rest_api_lambda_logs" {
