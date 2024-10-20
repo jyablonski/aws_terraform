@@ -2,7 +2,7 @@ terraform {
   required_providers {
     postgresql = {
       source  = "cyrilgdn/postgresql"
-      version = "~> 1.21.0"
+      version = "~> 1.23.0"
     }
 
   }
@@ -18,7 +18,6 @@ terraform {
 resource "postgresql_schema" "this" {
   name     = var.schema_name
   database = var.database_name
-  owner    = var.schema_owner
 
 }
 
@@ -27,7 +26,7 @@ resource "postgresql_grant" "read_only_access_grant" {
 
   database    = var.database_name
   role        = each.value
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   object_type = "table"
   privileges  = ["SELECT"]
 }
@@ -37,7 +36,7 @@ resource "postgresql_grant" "read_only_access_grant_usage" {
 
   database    = var.database_name
   role        = each.value
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   object_type = "schema"
   privileges  = ["USAGE"]
 }
@@ -47,7 +46,7 @@ resource "postgresql_default_privileges" "read_only_access_grant_future" {
 
   role        = each.value
   database    = var.database_name
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   owner       = var.schema_owner
   object_type = "table"
   privileges  = ["SELECT"]
@@ -58,9 +57,9 @@ resource "postgresql_grant" "write_access_grant" {
 
   database    = var.database_name
   role        = each.value
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"]
 }
 
 resource "postgresql_grant" "write_access_grant_usage" {
@@ -68,9 +67,9 @@ resource "postgresql_grant" "write_access_grant_usage" {
 
   database    = var.database_name
   role        = each.value
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   object_type = "schema"
-  privileges  = ["USAGE"]
+  privileges  = ["USAGE", "CREATE"]
 }
 
 
@@ -79,10 +78,10 @@ resource "postgresql_default_privileges" "write_access_grant_future" {
 
   role        = each.value
   database    = var.database_name
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   owner       = var.schema_owner
   object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"]
 }
 
 resource "postgresql_grant" "admin_access_grant" {
@@ -90,7 +89,7 @@ resource "postgresql_grant" "admin_access_grant" {
 
   database    = var.database_name
   role        = each.value
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   object_type = "table"
   privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "TRIGGER", "REFERENCES"]
 }
@@ -100,9 +99,9 @@ resource "postgresql_grant" "admin_access_grant_usage" {
 
   database    = var.database_name
   role        = each.value
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   object_type = "schema"
-  privileges  = ["USAGE"]
+  privileges  = ["USAGE", "CREATE"]
 }
 
 resource "postgresql_default_privileges" "admin_access_grant_future" {
@@ -110,7 +109,7 @@ resource "postgresql_default_privileges" "admin_access_grant_future" {
 
   role        = each.value
   database    = var.database_name
-  schema      = var.schema_name
+  schema      = postgresql_schema.this.name
   owner       = var.schema_owner
   object_type = "table"
   privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "TRIGGER", "REFERENCES"]
