@@ -171,7 +171,7 @@ resource "aws_ssm_parameter" "jacobs_ssm_prac_secret" {
   name        = "jacobs_ssm_pg_user"
   description = "The parameter description"
   type        = "SecureString"
-  value       = var.pg_user
+  value       = var.postgres_username
 
 }
 
@@ -208,13 +208,13 @@ resource "aws_ssm_parameter" "jacobs_ssm_rds_db_name" {
 
 }
 
-resource "aws_ssm_parameter" "jacobs_ssm_rds_host" {
-  name        = "jacobs_ssm_rds_host"
-  description = "RDS Host IP"
-  type        = "SecureString"
-  value       = aws_db_instance.jacobs_rds_tf.address
+# resource "aws_ssm_parameter" "jacobs_ssm_rds_host" {
+#   name        = "jacobs_ssm_rds_host"
+#   description = "RDS Host IP"
+#   type        = "SecureString"
+#   value       = aws_db_instance.jacobs_rds_tf.address
 
-}
+# }
 
 resource "aws_ssm_parameter" "jacobs_ssm_rds_user" {
   name        = "jacobs_ssm_rds_user"

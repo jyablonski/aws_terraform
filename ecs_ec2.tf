@@ -144,8 +144,8 @@ resource "aws_launch_template" "ecs_launch_template" {
 #   }
 # }
 
-# # basically this is what actually determines when to spin up new instances, not the ASG.
-# # you either provide ASG utilization metrics to decide when to spin up new instances, or you do this ecs capacity provider stuff.
+# basically this is what actually determines when to spin up new instances, not the ASG.
+# you either provide ASG utilization metrics to decide when to spin up new instances, or you do this ecs capacity provider stuff.
 # resource "aws_ecs_capacity_provider" "ecs_ec2_cluster_config" {
 #   name = "${local.ecs_cluster_name}-provider"
 
@@ -162,8 +162,8 @@ resource "aws_launch_template" "ecs_launch_template" {
 #   }
 # }
 
-# # had to manually delete this in the console in order to allow updates to happen
-# # https://stackoverflow.com/questions/64021278/how-target-capacity-is-calculated-in-aws-ecs-capacity-provider
+# had to manually delete this in the console in order to allow updates to happen
+# https://stackoverflow.com/questions/64021278/how-target-capacity-is-calculated-in-aws-ecs-capacity-provider
 # resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_provider" {
 #   cluster_name       = aws_ecs_cluster.ecs_ec2_cluster.name
 #   capacity_providers = [aws_ecs_capacity_provider.ecs_ec2_cluster_config.name]
