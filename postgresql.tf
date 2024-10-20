@@ -69,7 +69,7 @@ module "marts_schema" {
   database_name = var.jacobs_rds_db
   schema_owner  = var.postgres_username
 
-  read_access_roles  = [module.dash_role_prod.role_name, module.ml_role_prod.role_name]
+  read_access_roles  = [module.dash_role_prod.role_name, module.ml_role_prod.role_name, module.ingestion_role_prod.role_name]
   write_access_roles = [module.rest_api_role_prod.role_name]
   admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
 }
