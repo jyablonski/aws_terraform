@@ -77,10 +77,10 @@ resource "aws_lambda_function" "jacobs_rest_api_lambda_function" {
 
   environment {
     variables = {
-      RDS_USER   = "${var.jacobs_rds_user}",
-      RDS_PW     = "${var.jacobs_rds_pw}",
-      RDS_SCHEMA = "nba_prod"
-      # IP                          = "${aws_db_instance.jacobs_rds_tf.address}",
+      RDS_USER                    = "${var.jacobs_rds_user}",
+      RDS_PW                      = "${var.jacobs_rds_pw}",
+      RDS_SCHEMA                  = "nba_prod"
+      IP                          = "${var.postgres_host}",
       RDS_DB                      = "${var.jacobs_rds_db}"
       OTEL_EXPORTER_OTLP_ENDPOINT = "${var.honeycomb_endpoint}"
       OTEL_EXPORTER_OTLP_HEADERS  = "${var.honeycomb_headers}"
