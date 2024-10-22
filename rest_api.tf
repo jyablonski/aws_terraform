@@ -66,8 +66,8 @@ resource "aws_lambda_function" "jacobs_rest_api_lambda_function" {
   function_name = local.rest_api_lambda_name
   role          = aws_iam_role.jacobs_rest_api_lambda_role.arn
   handler       = "src.server.handler"
-  runtime       = "python3.11"
-  memory_size   = 128
+  runtime       = "python3.12"
+  memory_size   = 256
   timeout       = 20
 
   # define s3 bucket + the key in that backup with the zip
@@ -77,8 +77,8 @@ resource "aws_lambda_function" "jacobs_rest_api_lambda_function" {
 
   environment {
     variables = {
-      RDS_USER                    = "${var.jacobs_rds_user}",
-      RDS_PW                      = "${var.jacobs_rds_pw}",
+      RDS_USER                    = "${var.postgres_username}",
+      RDS_PW                      = "${var.postgres_password}",
       RDS_SCHEMA                  = "marts"
       IP                          = "${var.postgres_host}",
       RDS_DB                      = "${var.jacobs_rds_db}"

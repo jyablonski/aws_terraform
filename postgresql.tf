@@ -133,3 +133,15 @@ module "ad_hoc_analytics_schema" {
   write_access_roles = []
   admin_access_roles = [module.dbt_role_prod.role_name]
 }
+
+module "operations_schema" {
+  source = "./modules/postgresql/schema"
+
+  schema_name   = "operations"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
+
+  read_access_roles  = []
+  write_access_roles = []
+  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
+}

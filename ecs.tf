@@ -62,8 +62,8 @@ module "webscrape_ecs_module" {
         "environment": [
           {"name": "IP", "value": "${var.postgres_host}"},
           {"name": "RDS_PORT", "value": "17841"},
-          {"name": "RDS_USER", "value": "${module.ingestion_role_prod.role_name}"},
-          {"name": "RDS_PW", "value": "${var.es_master_pw}ingestion"},
+          {"name": "RDS_USER", "value": "${var.postgres_username}"},
+          {"name": "RDS_PW", "value": "${var.postgres_password}"},
           {"name": "RDS_SCHEMA", "value": "${var.jacobs_rds_schema}"},
           {"name": "RDS_DB", "value": "jacob_db"},
           {"name": "reddit_user", "value": "${var.jacobs_reddit_user}"},
@@ -122,8 +122,8 @@ module "dbt_ecs_module" {
           {"name": "DBT_DBNAME", "value": "${var.jacobs_rds_db}"},
           {"name": "DBT_HOST", "value": "${var.postgres_host}"},
           {"name": "DBT_PORT", "value": "17841"},
-          {"name": "DBT_USER", "value": "${module.dbt_role_prod.role_name}"},
-          {"name": "DBT_PASS", "value": "${var.es_master_pw}dbt"},
+          {"name": "DBT_USER", "value": "${var.postgres_username}"},
+          {"name": "DBT_PASS", "value": "${var.postgres_password}"},
           {"name": "DBT_SCHEMA", "value": "${var.jacobs_rds_schema}"},
           {"name": "DBT_PRAC_KEY", "value": "dbt_docker_test"}
         ],
