@@ -170,148 +170,102 @@ resource "aws_cloudwatch_log_group" "aws_stepfunction_logs" {
 
 # this is what the code for state machine should look like
 # you wrap the ecs task definitions together.
-# resource "aws_sfn_state_machine" "jacobs_state_machine" {
-#   name     = "NBA_ELT_PIPELINE_STATE_MACHINE"
-#   role_arn = aws_iam_role.jacobs_stepfunctions_role.arn
-#   type     = "STANDARD"
+resource "aws_sfn_state_machine" "jacobs_state_machine" {
+  name     = "NBA_ELT_PIPELINE_STATE_MACHINE"
+  role_arn = aws_iam_role.jacobs_stepfunctions_role.arn
+  type     = "STANDARD"
 
-#   logging_configuration {
-#     include_execution_data = true
-#     level                  = "ERROR"
-#     log_destination        = "${aws_cloudwatch_log_group.aws_stepfunction_logs.arn}:*"
-#   }
+  logging_configuration {
+    include_execution_data = true
+    level                  = "ERROR"
+    log_destination        = "${aws_cloudwatch_log_group.aws_stepfunction_logs.arn}:*"
+  }
 
-#   definition = <<EOF
-# {
-#   "Comment": "NBA ELT PIPELINE - Step Functions Implementation",
-#   "StartAt": "web_scrape",
-#   "States": {
-#     "web_scrape": {
-#       "Type": "Task",
-#       "Resource": "arn:aws:states:::ecs:runTask.sync",
-#       "Parameters": {
-#         "LaunchType": "FARGATE",
-#         "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
-#         "TaskDefinition": "${module.webscrape_ecs_module.ecs_task_definition_arn}",
-#         "NetworkConfiguration": {
-#             "AwsvpcConfiguration": {
-#                 "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
-#                 "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
-#                 "AssignPublicIp": "ENABLED"
-#             }
-#         }
-#       },
-#       "Next": "dbt_job"
-#     },
-#     "dbt_job": {
-#       "Type": "Task",
-#       "Resource": "arn:aws:states:::ecs:runTask.sync",
-#       "Parameters": {
-#         "LaunchType": "FARGATE",
-#         "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
-#         "TaskDefinition": "${module.dbt_ecs_module.ecs_task_definition_arn}",
-#         "NetworkConfiguration": {
-#             "AwsvpcConfiguration": {
-#                 "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
-#                 "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
-#                 "AssignPublicIp": "ENABLED"
-#             }
-#         }
-#       },
-#     "Next": "ml_pipeline",
-#           "Catch": [
-#             {
-#               "ErrorEquals": [
-#                 "States.ALL"
-#               ],
-#               "Next": "SendEmailFail"
-#             }
-#           ]
-#         },
-#     "SendEmailFail": {
-#       "Type": "Task",
-#       "Parameters": {
-#         "Destination": {
-#           "ToAddresses": [
-#             "jyablonski9@gmail.com"
-#           ]
-#         },
-#         "Message": {
-#           "Body": {
-#             "Html": {
-#               "Charset": "UTF-8",
-#               "Data": "dbt Job Failed <br> <a href='https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/jacobs_ecs_logs_dbt'>Logs</a>"
-#             },
-#             "Text": {
-#               "Charset": "UTF-8",
-#               "Data": "dbt Job Failed"
-#             }
-#           },
-#           "Subject": {
-#             "Charset": "UTF-8",
-#             "Data": "dbt Job Failed"
-#           }
-#         },
-#         "Source": "jyablonski9@gmail.com"
-#       },
-#       "Resource": "arn:aws:states:::aws-sdk:ses:sendEmail",
-#       "Next": "ml_pipeline_dbt_fail"
-#     },
-#     "ml_pipeline_dbt_fail": {
-#       "Type": "Task",
-#       "Resource": "arn:aws:states:::ecs:runTask.sync",
-#       "Parameters": {
-#         "LaunchType": "FARGATE",
-#         "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
-#         "TaskDefinition": "${module.ml_ecs_module.ecs_task_definition_arn}",
-#         "NetworkConfiguration": {
-#             "AwsvpcConfiguration": {
-#                 "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
-#                 "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
-#                 "AssignPublicIp": "ENABLED"
-#             }
-#         }
-#       },
-#       "End": true
-#     },
-#     "ml_pipeline": {
-#       "Type": "Task",
-#       "Resource": "arn:aws:states:::ecs:runTask.sync",
-#       "Parameters": {
-#         "LaunchType": "FARGATE",
-#         "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
-#         "TaskDefinition": "${module.ml_ecs_module.ecs_task_definition_arn}",
-#         "NetworkConfiguration": {
-#             "AwsvpcConfiguration": {
-#                 "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
-#                 "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
-#                 "AssignPublicIp": "ENABLED"
-#             }
-#         }
-#       },
-#       "Retry": [{
-#           "ErrorEquals": ["States.TaskFailed"],
-#           "IntervalSeconds": 1200,
-#           "MaxAttempts": 2,
-#           "BackoffRate": 1.5
-#       }],
-#          "End":true
-#       }
-#    }
-# }
+  definition = <<EOF
+{
+  "Comment": "NBA ELT PIPELINE - Step Functions Implementation",
+  "StartAt": "web_scrape",
+  "States": {
+    "web_scrape": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
+        "TaskDefinition": "${module.webscrape_ecs_module.ecs_task_definition_arn}",
+        "NetworkConfiguration": {
+            "AwsvpcConfiguration": {
+                "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
+                "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
+                "AssignPublicIp": "ENABLED"
+            }
+        }
+      },
+      "Next": "dbt_job"
+    },
+    "dbt_job": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
+        "TaskDefinition": "${module.dbt_ecs_module.ecs_task_definition_arn}",
+        "NetworkConfiguration": {
+            "AwsvpcConfiguration": {
+                "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
+                "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
+                "AssignPublicIp": "ENABLED"
+            }
+        }
+      },
+    "Next": "ml_pipeline",
+          "Catch": [
+            {
+              "ErrorEquals": [
+                "States.ALL"
+              ],
+              "Next": "ml_pipeline"
+            }
+          ]
+        },
+    "ml_pipeline": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${aws_ecs_cluster.jacobs_ecs_cluster.arn}",
+        "TaskDefinition": "${module.ml_ecs_module.ecs_task_definition_arn}",
+        "NetworkConfiguration": {
+            "AwsvpcConfiguration": {
+                "SecurityGroups": ["${aws_security_group.jacobs_task_security_group_tf.id}"],
+                "Subnets": ["${aws_subnet.jacobs_public_subnet.id}", "${aws_subnet.jacobs_public_subnet_2.id}"],
+                "AssignPublicIp": "ENABLED"
+            }
+        }
+      },
+      "Retry": [{
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 1200,
+          "MaxAttempts": 2,
+          "BackoffRate": 1.5
+      }],
+         "End":true
+      }
+   }
+}
 
-# EOF
-# }
+EOF
+}
 
-# resource "aws_cloudwatch_event_rule" "step_functions_schedule" {
-#   name                = "jacobs_stepfunctions_schedule" # change this name
-#   description         = "Run every day at 12pm UTC"
-#   schedule_expression = "cron(0 12 * * ? *)"
-# }
+resource "aws_cloudwatch_event_rule" "step_functions_schedule" {
+  name                = "jacobs_stepfunctions_schedule" # change this name
+  description         = "Run every day at 12pm UTC"
+  schedule_expression = "cron(0 12 * * ? *)"
+}
 
-# resource "aws_cloudwatch_event_target" "step_function_event_target" {
-#   target_id = "jacobs_stepfunctions_target"
-#   rule      = aws_cloudwatch_event_rule.step_functions_schedule.name
-#   arn       = aws_sfn_state_machine.jacobs_state_machine.arn
-#   role_arn  = aws_iam_role.jacobs_stepfunctions_event_role.arn
-# }
+resource "aws_cloudwatch_event_target" "step_function_event_target" {
+  target_id = "jacobs_stepfunctions_target"
+  rule      = aws_cloudwatch_event_rule.step_functions_schedule.name
+  arn       = aws_sfn_state_machine.jacobs_state_machine.arn
+  role_arn  = aws_iam_role.jacobs_stepfunctions_event_role.arn
+}

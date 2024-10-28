@@ -32,6 +32,40 @@ resource "snowflake_grant_privileges_to_account_role" "ownership_privileges" {
   with_grant_option = false
 }
 
+resource "snowflake_grant_privileges_to_account_role" "ownership_privileges_future_tables" {
+  for_each = toset(var.schema_admin_roles)
+
+  account_role_name = each.value
+
+  on_schema_object {
+    future {
+      object_type_plural = "TABLES"
+      in_schema          = snowflake_schema.this.fully_qualified_name
+    }
+  }
+
+  all_privileges    = true
+  with_grant_option = false
+}
+
+resource "snowflake_grant_privileges_to_account_role" "ownership_privileges_future_views" {
+  for_each = toset(var.schema_admin_roles)
+
+  account_role_name = each.value
+
+  on_schema_object {
+    future {
+      object_type_plural = "VIEWS"
+      in_schema          = snowflake_schema.this.fully_qualified_name
+    }
+  }
+
+  all_privileges    = true
+  with_grant_option = false
+}
+
+
+
 # write user
 resource "snowflake_grant_privileges_to_account_role" "write_privileges_on_schema" {
   for_each = toset(var.schema_write_roles)

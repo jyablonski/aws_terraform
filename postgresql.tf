@@ -1,111 +1,147 @@
-# resource "postgresql_role" "jacob_admin" {
-#   name      = "jacob_admin"
-#   login     = true
-#   superuser = true
-#   password  = var.pg_pass
+# 2024-01-30 - got this mf working baby
+# swap to this during next aws account swap to setup all rds infra
+# module "postgres_db" {
+#   source = "./modules/postgresql/database"
+
+#   database_name  = "jacob_tester"
+#   database_owner = var.jacobs_rds_user
 # }
 
-### DEV
-# resource "postgresql_database" "nba_db_prod" {
-#   # provider = postgresql.pg1
-#   name = "nba_elt_pipeline_db"
-# }
+module "dbt_role_prod" {
+  source        = "./modules/postgresql/role"
+  role_name     = "dbt_role_prod"
+  role_password = "${var.es_master_pw}dbt"
+}
 
-# resource "postgresql_role" "dbt_role" {
-#   name     = "dbt_role"
-#   password = "${var.pg_role_pass}dbt"
-# }
+module "rest_api_role_prod" {
+  source        = "./modules/postgresql/role"
+  role_name     = "rest_api_role_prod"
+  role_password = "${var.es_master_pw}api"
+}
 
-# resource "postgresql_role" "python_scrape_role" {
-#   name     = "python_scrape_role"
-#   password = "${var.pg_role_pass}python"
-# }
+module "dash_role_prod" {
+  source        = "./modules/postgresql/role"
+  role_name     = "dash_role_prod"
+  role_password = "${var.es_master_pw}dash"
+}
 
-# resource "postgresql_role" "shiny_read_role" {
-#   name     = "shiny_read_role"
-#   password = "${var.pg_role_pass}shiny"
-# }
+module "ingestion_role_prod" {
+  source        = "./modules/postgresql/role"
+  role_name     = "ingestion_role_prod"
+  role_password = "${var.es_master_pw}ingestion"
+}
 
-# resource "postgresql_role" "rest_api_read_role" {
-#   name     = "rest_api_read_role"
-#   password = "${var.pg_role_pass}restapi"
-# }
+module "ml_role_prod" {
+  source        = "./modules/postgresql/role"
+  role_name     = "ml_role_prod"
+  role_password = "${var.es_master_pw}ml"
+}
 
-# resource "postgresql_schema" "nba_source" {
-#   name = "nba_source"
-#   # owner    = postgresql_role.jacob_admin.name
-#   database = postgresql_database.nba_db_prod.name
 
-# }
+module "reporting_schema" {
+  source = "./modules/postgresql/schema"
 
-# resource "postgresql_schema" "nba_prod" {
-#   name = "nba_prod"
-#   # owner    = postgresql_role.jacob_admin.name
-#   database = postgresql_database.nba_db_prod.name
+  schema_name   = "reporting"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
 
-# }
+  read_access_roles  = [module.rest_api_role_prod.role_name, module.dash_role_prod.role_name]
+  write_access_roles = [module.dbt_role_prod.role_name]
+  admin_access_roles = [var.postgres_username]
+}
 
-# resource "postgresql_grant" "rest_api_read_access" {
-#   database          = postgresql_database.nba_db_prod.name
-#   role              = postgresql_role.rest_api_read_role.name
-#   schema            = postgresql_schema.nba_prod.name
-#   object_type       = "table"
-#   objects           = [] # read access to everything in this schema.
-#   privileges        = ["SELECT"]
-#   with_grant_option = false
-# }
+module "source_schema" {
+  source = "./modules/postgresql/schema"
 
-# resource "postgresql_grant" "shiny_read_access" {
-#   database          = postgresql_database.nba_db_prod.name
-#   role              = postgresql_role.shiny_read_role.name
-#   schema            = postgresql_schema.nba_prod.name
-#   object_type       = "table"
-#   objects           = [] # read access to everything in this schema.
-#   privileges        = ["SELECT"]
-#   with_grant_option = false
-# }
+  schema_name   = "nba_source"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
 
-# resource "postgresql_schema" "ml_models" {
-#   name     = "ml_models"
-#   database = postgresql_database.nba_db_prod.name
-# }
+  read_access_roles  = [module.dbt_role_prod.role_name]
+  write_access_roles = [module.ingestion_role_prod.role_name]
+  admin_access_roles = [var.postgres_username]
+}
 
-# resource "postgresql_grant" "shiny_read_access_ml" {
-#   database          = postgresql_database.nba_db_prod.name
-#   role              = postgresql_role.shiny_read_role.name
-#   schema            = postgresql_schema.ml_models.name
-#   object_type       = "table"
-#   objects           = [] # read access to everything in this schema.
-#   privileges        = ["SELECT"]
-#   with_grant_option = false
-# }
+module "marts_schema" {
+  source = "./modules/postgresql/schema"
 
-# resource "postgresql_schema" "ad_hoc_analytics" {
-#   name     = "ad_hoc_analytics"
-#   database = postgresql_database.nba_db_prod.name
-# }
+  schema_name   = "marts"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
 
-# resource "postgresql_schema" "nba_prep" {
-#   name     = "nba_prep"
-#   database = postgresql_database.nba_db_prod.name
-# }
+  read_access_roles  = [module.dash_role_prod.role_name, module.ml_role_prod.role_name, module.ingestion_role_prod.role_name]
+  write_access_roles = [module.rest_api_role_prod.role_name]
+  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
+}
 
-# resource "postgresql_schema" "nba_prod_jy" {
-#   name     = "nba_prod_jy"
-#   database = postgresql_database.nba_db_prod.name
-# }
+module "ml_schema" {
+  source = "./modules/postgresql/schema"
 
-# resource "postgresql_schema" "nba_staging" {
-#   name     = "nba_staging"
-#   database = postgresql_database.nba_db_prod.name
-# }
+  schema_name   = "ml"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
 
-# resource "postgresql_schema" "operations" {
-#   name     = "operations"
-#   database = postgresql_database.nba_db_prod.name
-# }
+  read_access_roles  = [module.rest_api_role_prod.role_name, module.dash_role_prod.role_name]
+  write_access_roles = [module.ml_role_prod.role_name, module.dbt_role_prod.role_name]
+  admin_access_roles = [var.postgres_username]
+}
 
-# resource "postgresql_schema" "snapshots" {
-#   name     = "snapshots"
-#   database = postgresql_database.nba_db_prod.name
-# }
+module "prep_schema" {
+  source = "./modules/postgresql/schema"
+
+  schema_name   = "prep"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
+
+  read_access_roles  = []
+  write_access_roles = []
+  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
+}
+
+module "fact_schema" {
+  source = "./modules/postgresql/schema"
+
+  schema_name   = "fact"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
+
+  read_access_roles  = []
+  write_access_roles = []
+  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
+}
+
+module "dim_schema" {
+  source = "./modules/postgresql/schema"
+
+  schema_name   = "dim"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
+
+  read_access_roles  = []
+  write_access_roles = []
+  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
+}
+
+module "ad_hoc_analytics_schema" {
+  source = "./modules/postgresql/schema"
+
+  schema_name   = "ad_hoc_analytics"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
+
+  read_access_roles  = []
+  write_access_roles = []
+  admin_access_roles = [module.dbt_role_prod.role_name]
+}
+
+module "operations_schema" {
+  source = "./modules/postgresql/schema"
+
+  schema_name   = "operations"
+  database_name = var.jacobs_rds_db
+  schema_owner  = var.postgres_username
+
+  read_access_roles  = []
+  write_access_roles = []
+  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
+}

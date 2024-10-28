@@ -63,21 +63,6 @@ variable "jacobs_reddit_secretkey" {
   sensitive = true
 }
 
-variable "pg_host" {
-  type      = string
-  sensitive = true
-}
-
-variable "pg_user" {
-  type      = string
-  sensitive = true
-}
-
-variable "pg_pass" {
-  type      = string
-  sensitive = true
-}
-
 variable "jacobs_bucket" {
   type      = string
   sensitive = true
@@ -255,6 +240,21 @@ variable "snowflake_password" {
 }
 
 variable "snowflake_account" {
+  type      = string
+  sensitive = true
+}
+
+variable "postgres_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "postgres_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "postgres_host" {
   type      = string
   sensitive = true
 }

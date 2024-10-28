@@ -24,12 +24,12 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "5.11.0"
+      version = "5.72.1"
     }
-    # postgresql = {
-    #   source  = "cyrilgdn/postgresql"
-    #   version = "~> 1.21.0"
-    # }
+    postgresql = {
+      source  = "cyrilgdn/postgresql"
+      version = "~> 1.23.0"
+    }
     archive = {
       source  = "hashicorp/archive"
       version = "~> 2.3.0"
@@ -49,16 +49,17 @@ terraform {
 
 }
 
-# provider "postgresql" {
-#   # alias    = "pg1" - this fucks shit up for some reason yo
-#   host             = var.pg_host
-#   username         = var.pg_user
-#   password         = var.pg_pass
-#   superuser        = false
-#   connect_timeout  = 15
-#   sslmode          = "disable"
-#   expected_version = "16.1"
-# }
+provider "postgresql" {
+  # alias    = "pg1" - this fucks shit up for some reason yo
+  host            = var.postgres_host
+  username        = var.postgres_username
+  password        = var.postgres_password
+  port            = 17841
+  superuser       = false
+  connect_timeout = 15
+  sslmode         = "require"
+  database        = var.jacobs_rds_db
+}
 
 # provider "snowflake" {
 #   account  = var.snowflake_account
