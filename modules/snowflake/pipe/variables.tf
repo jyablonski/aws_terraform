@@ -14,7 +14,11 @@ variable "pipe_comment" {
   type = string
 }
 
-variable "pipe_copy_statement" {
+variable "pipe_destination_table" {
+  type = string
+}
+
+variable "pipe_stage" {
   type = string
 }
 
@@ -23,15 +27,16 @@ variable "is_auto_ingest" {
   default = true
 }
 
-variable "storage_integration" {
+variable "file_format" {
   type = string
 }
 
-variable "error_integration" {
-  type = string
-}
-
-variable "roles" {
+variable "usage_roles" {
   type    = list(any)
   default = ["ACCOUNTADMIN"]
+}
+
+variable "copy_options" {
+  type    = string
+  default = "" # Default to empty if no additional copy options are provided
 }
