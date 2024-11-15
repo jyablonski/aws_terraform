@@ -52,6 +52,21 @@ module "test_schema" {
 }
 
 
+module "pipe_test" {
+  source = "./modules/pipe"
+
+  pipe_name              = "TEST_PIPE"
+  pipe_comment           = "Test Pipe"
+  pipe_db                = module.prod_database.db_name
+  pipe_schema            = module.source_schema.schema_name
+  pipe_destination_table = "TEST_TABLE"
+  pipe_stage             = "${module.nba_elt_stage_prod.stage_qualified_name}/test_table/"
+  file_format            = snowflake_file_format.parquet_format.fully_qualified_name
+  is_auto_ingest         = true
+  usage_roles            = ["ACCOUNTADMIN"]
+}
+
+
 ```
 
 `terraform.tfvars` File
