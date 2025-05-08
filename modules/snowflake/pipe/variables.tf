@@ -31,6 +31,15 @@ variable "file_format" {
   type = string
 }
 
+# variable "storage_integration" {
+#   type = string
+# }
+
+# variable "error_integration" {
+#   type = string
+#   default = null
+# }
+
 variable "usage_roles" {
   type    = list(any)
   default = ["ACCOUNTADMIN"]

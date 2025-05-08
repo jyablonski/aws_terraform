@@ -5,7 +5,7 @@ variable "user_name" {
 
 variable "user_comment" {
   type    = string
-  default = null
+  default = ""
 }
 
 # variable "user_password" {
