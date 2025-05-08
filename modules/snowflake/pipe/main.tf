@@ -2,7 +2,7 @@ terraform {
   required_providers {
     snowflake = {
       source  = "Snowflake-Labs/snowflake"
-      version = "0.96.0"
+      version = "1.0.5"
     }
 
   }
@@ -24,6 +24,10 @@ resource "snowflake_pipe" "this" {
   EOF
 
   auto_ingest = var.is_auto_ingest
+  # integration       = var.storage_integration
+
+  # Only set error_integration if var.error_integration is not null
+  # error_integration = var.error_integration != "" ? var.error_integration : null
 
 }
 
