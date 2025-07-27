@@ -101,5 +101,3 @@ This is where CloudFront comes into play. CloudFront is an AWS CDN (Content Deli
 - Public/Private:
   - The CloudFront URL is public (accessible to users).
   - The S3 bucket is private, and access is restricted to CloudFront through an OAI.
-
-This setup ensures your site is secure, fast, and scalable! Let me know if you need any further clarification.

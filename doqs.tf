@@ -4,7 +4,8 @@ locals {
   doqs_origin_id = "jyablonski-doqs-origin"
 }
 
-
+# cant use Cloudfront OAC w/ private S3 Bucket, it requires a custom lambda edge function to run
+# on literally every request to turn files like `services/docs/dbt` into `services/docs/dbt/index.html`
 resource "aws_s3_bucket" "doqs_bucket" {
   bucket = local.doqs_bucket
 
