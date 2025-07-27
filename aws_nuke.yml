@@ -1,9 +1,12 @@
 regions:
-- us-east-1
-- global
+  - us-east-1
+  - global
 
-account-blocklist:
-- "999999999999" # production
+blocklist:
+  - "999999999999" # production
 
 accounts:
-  "717791819289": {} # jacobs_account
+  "509399594058": {} # jacobs_account
+
+bypass-alias-check-accounts:
+  - 509399594058

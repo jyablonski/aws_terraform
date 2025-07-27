@@ -73,30 +73,30 @@ resource "aws_s3_bucket_acl" "kinesis_bucket_acl" {
   acl    = "private"
 }
 
-resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream" {
-  name        = local.kinesis_firehose_name
-  destination = "extended_s3"
+# resource "aws_kinesis_firehose_delivery_stream" "jacobs_kinesis_firehose_stream" {
+#   name        = local.kinesis_firehose_name
+#   destination = "extended_s3"
 
-  # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
-  extended_s3_configuration {
-    role_arn           = aws_iam_role.jacobs_firehose_role.arn
-    bucket_arn         = aws_s3_bucket.jacobs_kinesis_bucket.arn
-    buffering_size     = 20  # store every 20 mb
-    buffering_interval = 600 # or every 10 minutes
+#   # data gets delivered to s3 in s3://jacobs-kinesis-bucket/2022/03/20/15/jacobs-kinesis-firehose-stream-1-2022-03-20-15-59-31-xxx
+#   extended_s3_configuration {
+#     role_arn           = aws_iam_role.jacobs_firehose_role.arn
+#     bucket_arn         = aws_s3_bucket.jacobs_kinesis_bucket.arn
+#     buffering_size     = 20  # store every 20 mb
+#     buffering_interval = 600 # or every 10 minutes
 
-    prefix              = "kinesis-firehose/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
-    error_output_prefix = "kinesis-firehose-errors/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}/"
-    # data_format_conversion_configuration {} # used to change format of the data from json into something like (compressed) parquet
-    cloudwatch_logging_options {
-      enabled         = true
-      log_group_name  = aws_cloudwatch_log_group.jacobs_kinesis_firehose_logs.name
-      log_stream_name = local.kinesis_logs_stream_name
-    }
-  }
+#     prefix              = "kinesis-firehose/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
+#     error_output_prefix = "kinesis-firehose-errors/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}/"
+#     # data_format_conversion_configuration {} # used to change format of the data from json into something like (compressed) parquet
+#     cloudwatch_logging_options {
+#       enabled         = true
+#       log_group_name  = aws_cloudwatch_log_group.jacobs_kinesis_firehose_logs.name
+#       log_stream_name = local.kinesis_logs_stream_name
+#     }
+#   }
 
-  tags = {
-    Environment = local.project_name
-    Terraform   = local.Terraform
-  }
-}
+#   tags = {
+#     Environment = local.project_name
+#     Terraform   = local.Terraform
+#   }
+# }
 
