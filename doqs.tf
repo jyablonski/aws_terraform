@@ -122,28 +122,6 @@ resource "aws_cloudfront_distribution" "doqs_distribution" {
 
 }
 
-# S3 Bucket Policy to allow CloudFront to serve the content
-resource "aws_s3_object" "doqs_policy" {
-  bucket = aws_s3_bucket.doqs_bucket.id
-  key    = "doqs-static-web-policy.json"
-  acl    = "private"
-  content = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = "s3:GetObject"
-        Resource  = "arn:aws:s3:::${local.doqs_bucket}/*"
-        Condition = {
-          IpAddress = {
-            "aws:SourceIp" = "CloudFront"
-          }
-        }
-      }
-    ]
-  })
-}
 
 # CloudFront Origin Access Identity (OAI) for secure S3 access
 resource "aws_s3_bucket_policy" "doqs_bucket_policy" {
