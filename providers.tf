@@ -39,6 +39,12 @@ terraform {
     #   version = "~> 0.96.0"
     # }
 
+    # you'd use this to store secrets using SOPS + KMS
+    # sops = {
+    #   source  = "carlpett/sops"
+    #   version = "~> 1.3"
+    # }
+
   }
   cloud {
     organization = "jyablonski_prac"
