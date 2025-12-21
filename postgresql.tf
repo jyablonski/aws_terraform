@@ -37,23 +37,10 @@ module "ml_role_prod" {
   role_password = "${var.es_master_pw}ml"
 }
 
-
-module "reporting_schema" {
+module "bronze_schema" {
   source = "./modules/postgresql/schema"
 
-  schema_name   = "reporting"
-  database_name = var.jacobs_rds_db
-  schema_owner  = var.postgres_username
-
-  read_access_roles  = [module.rest_api_role_prod.role_name, module.dash_role_prod.role_name]
-  write_access_roles = [module.dbt_role_prod.role_name]
-  admin_access_roles = [var.postgres_username]
-}
-
-module "source_schema" {
-  source = "./modules/postgresql/schema"
-
-  schema_name   = "nba_source"
+  schema_name   = "bronze"
   database_name = var.jacobs_rds_db
   schema_owner  = var.postgres_username
 
@@ -62,82 +49,38 @@ module "source_schema" {
   admin_access_roles = [var.postgres_username]
 }
 
-module "marts_schema" {
+module "silver_schema" {
   source = "./modules/postgresql/schema"
 
-  schema_name   = "marts"
+  schema_name   = "silver"
   database_name = var.jacobs_rds_db
   schema_owner  = var.postgres_username
 
-  read_access_roles  = [module.dash_role_prod.role_name, module.ml_role_prod.role_name, module.ingestion_role_prod.role_name]
-  write_access_roles = [module.rest_api_role_prod.role_name]
-  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
-}
-
-module "ml_schema" {
-  source = "./modules/postgresql/schema"
-
-  schema_name   = "ml"
-  database_name = var.jacobs_rds_db
-  schema_owner  = var.postgres_username
-
-  read_access_roles  = [module.rest_api_role_prod.role_name, module.dash_role_prod.role_name]
-  write_access_roles = [module.ml_role_prod.role_name, module.dbt_role_prod.role_name]
-  admin_access_roles = [var.postgres_username]
-}
-
-module "prep_schema" {
-  source = "./modules/postgresql/schema"
-
-  schema_name   = "prep"
-  database_name = var.jacobs_rds_db
-  schema_owner  = var.postgres_username
-
-  read_access_roles  = []
+  read_access_roles  = [module.ml_role_prod.role_name]
   write_access_roles = []
   admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
 }
 
-module "fact_schema" {
+module "gold_schema" {
   source = "./modules/postgresql/schema"
 
-  schema_name   = "fact"
+  schema_name   = "gold"
   database_name = var.jacobs_rds_db
   schema_owner  = var.postgres_username
 
-  read_access_roles  = []
-  write_access_roles = []
+  # ingestion role needs to query the feature flags table, which is currently in gold schema
+  read_access_roles = [module.dash_role_prod.role_name, module.ingestion_role_prod.role_name]
+
+  # the ml and rest api roles need write access to update model results and predictions for 
+  # models in the gold layer
+  write_access_roles = [module.rest_api_role_prod.role_name, module.ml_role_prod.role_name]
   admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
 }
 
-module "dim_schema" {
+module "scratch_schema" {
   source = "./modules/postgresql/schema"
 
-  schema_name   = "dim"
-  database_name = var.jacobs_rds_db
-  schema_owner  = var.postgres_username
-
-  read_access_roles  = []
-  write_access_roles = []
-  admin_access_roles = [var.postgres_username, module.dbt_role_prod.role_name]
-}
-
-module "ad_hoc_analytics_schema" {
-  source = "./modules/postgresql/schema"
-
-  schema_name   = "ad_hoc_analytics"
-  database_name = var.jacobs_rds_db
-  schema_owner  = var.postgres_username
-
-  read_access_roles  = []
-  write_access_roles = []
-  admin_access_roles = [module.dbt_role_prod.role_name]
-}
-
-module "operations_schema" {
-  source = "./modules/postgresql/schema"
-
-  schema_name   = "operations"
+  schema_name   = "scratch"
   database_name = var.jacobs_rds_db
   schema_owner  = var.postgres_username
 
