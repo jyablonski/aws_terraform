@@ -4,8 +4,7 @@ resource "aws_vpc" "jacobs_vpc_tf" {
   # assign_generated_ipv6_cidr_block = true
 
   tags = {
-    Name        = "Jacobs VPC"
-    Environment = local.env_type
+    Name = "Jacobs VPC"
   }
 }
 
@@ -14,14 +13,6 @@ resource "aws_security_group" "jacobs_task_security_group_tf" {
   name        = "jacobs_security_group for tasks"
   description = "Connect Tasks to RDS"
   vpc_id      = aws_vpc.jacobs_vpc_tf.id
-
-  ingress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
 
   egress {
     from_port        = 0
@@ -32,8 +23,7 @@ resource "aws_security_group" "jacobs_task_security_group_tf" {
   }
 
   tags = {
-    Name        = local.env_name
-    Environment = local.env_type
+    Name = local.env_name
   }
 }
 
@@ -49,14 +39,6 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
     protocol    = "tcp"
     cidr_blocks = var.jacobs_cidr_block
 
-  }
-
-  ingress {
-    description = "Open Access"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -78,8 +60,7 @@ resource "aws_security_group" "jacobs_rds_security_group_tf" {
   }
 
   tags = {
-    Name        = local.env_name
-    Environment = local.env_type
+    Name = local.env_name
   }
 }
 
@@ -90,8 +71,7 @@ resource "aws_subnet" "jacobs_public_subnet" {
   availability_zone       = "us-east-1a"
 
   tags = {
-    Name        = "Jacobs Public Subnet"
-    Environment = local.env_type
+    Name = "Jacobs Public Subnet"
   }
 }
 
@@ -102,8 +82,7 @@ resource "aws_subnet" "jacobs_public_subnet_2" {
   availability_zone       = "us-east-1b"
 
   tags = {
-    Name        = "Jacobs Public Subnet 2"
-    Environment = local.env_type
+    Name = "Jacobs Public Subnet 2"
   }
 }
 
@@ -112,8 +91,7 @@ resource "aws_db_subnet_group" "jacobs_subnet_group" {
   subnet_ids = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id]
 
   tags = {
-    Name        = local.env_name
-    Environment = local.env_type
+    Name = local.env_name
   }
 }
 
@@ -121,8 +99,7 @@ resource "aws_internet_gateway" "jacobs_gw" {
   vpc_id = aws_vpc.jacobs_vpc_tf.id
 
   tags = {
-    Name        = "Jacobs Gateway"
-    Environment = local.env_type
+    Name = "Jacobs Gateway"
   }
 }
 
@@ -146,8 +123,7 @@ resource "aws_route_table" "jacobs_public_route_table" {
   }
 
   tags = {
-    Name        = "Jacobs Public Route Table"
-    Environment = local.env_type
+    Name = "Jacobs Public Route Table"
   }
 }
 

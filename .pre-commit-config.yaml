@@ -1,9 +1,33 @@
 repos:
-  - repo: https://github.com/gruntwork-io/pre-commit
-    rev: v0.1.23
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
     hooks:
-      - id: terraform-fmt
-      - id: tflint
+      - id: check-added-large-files
         args:
-          - "--config=.tflint.hcl"
-      # - id: shellcheck
+          - "--maxkb=1024"
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+        args:
+          - "--hook-config=--retry-once-with-cleanup=true"
+          - "--tf-init-args=-backend=false"
+      - id: terraform_tflint
+        args:
+          - "--args=--config=__GIT_WORKING_DIR__/.tflint.hcl"
+
+  - repo: local
+    hooks:
+      - id: terraform_providers_lock
+        name: Lock terraform provider versions (root only)
+        entry: bash scripts/terraform_providers_lock_root.sh
+        language: system
+        pass_filenames: false
+        files: \.tf$

@@ -3,6 +3,15 @@ locals {
   env_name      = "Jacobs TF Project"
   env_terraform = true
   Terraform     = true
+  common_tags = merge(
+    {
+      Environment = local.env_type
+      ManagedBy   = "Terraform"
+      Owner       = "jacob"
+      Project     = "aws_terraform"
+    },
+    var.default_tags,
+  )
 }
 
 resource "aws_iam_role" "jacobs_ecs_role" {
@@ -33,12 +42,67 @@ resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment" {
 
 resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_ses" {
   role       = aws_iam_role.jacobs_ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+  policy_arn = aws_iam_policy.jacobs_ecs_role_ses_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_s3" {
   role       = aws_iam_role.jacobs_ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+  policy_arn = aws_iam_policy.jacobs_ecs_role_s3_policy.arn
+}
+
+resource "aws_iam_policy" "jacobs_ecs_role_ses_policy" {
+  name        = "jacobs_ecs_role_ses_policy"
+  description = "Least-privilege SES sending policy for ECS tasks"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail",
+          "ses:SendTemplatedEmail",
+        ]
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy" "jacobs_ecs_role_s3_policy" {
+  name        = "jacobs_ecs_role_s3_policy"
+  description = "Least-privilege S3 access for ECS tasks"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ListProjectBuckets"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+        ]
+        Resource = [
+          aws_s3_bucket.jacobs_bucket_tf.arn,
+          aws_s3_bucket.jacobs_bucket_tf_dev.arn,
+        ]
+      },
+      {
+        Sid    = "ReadWriteProjectBuckets"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+        ]
+        Resource = [
+          "${aws_s3_bucket.jacobs_bucket_tf.arn}/*",
+          "${aws_s3_bucket.jacobs_bucket_tf_dev.arn}/*",
+        ]
+      },
+    ]
+  })
 }
 
 resource "aws_iam_policy" "ecs_ec2_cs_role_policy_sts" {
@@ -66,7 +130,6 @@ resource "aws_iam_role_policy_attachment" "jacobs_ecs_role_attachment_cs_sts" {
   role       = aws_iam_role.jacobs_ecs_role.name
   policy_arn = aws_iam_policy.ecs_ec2_cs_role_policy_sts.arn
 }
-
 
 resource "aws_iam_role" "jacobs_ecs_ecr_role" {
   name               = "jacobs_ecs_ecr_role"
@@ -117,7 +180,41 @@ resource "aws_iam_group_membership" "jacobs_github_group_attach" {
 
 resource "aws_iam_group_policy_attachment" "jacobs_github_group_policy_attach" {
   group      = aws_iam_group.jacobs_github_group.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+  policy_arn = aws_iam_policy.jacobs_github_group_ecr_policy.arn
+}
+
+resource "aws_iam_policy" "jacobs_github_group_ecr_policy" {
+  name        = "jacobs_github_group_ecr_policy"
+  description = "Least-privilege ECR push/pull policy for GitHub CI"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "EcrAuthToken"
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "PushPullJacobsRepo"
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:CompleteLayerUpload",
+          "ecr:DescribeRepositories",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart",
+        ]
+        Resource = aws_ecr_repository.jacobs_repo.arn
+      },
+    ]
+  })
 }
 
 ##
@@ -128,27 +225,106 @@ resource "aws_iam_user" "jacobs_airflow_user" {
 
 resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment" {
   user       = aws_iam_user.jacobs_airflow_user.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
+  policy_arn = aws_iam_policy.jacobs_airflow_user_policy.arn
 }
 
-resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_execution" {
-  user       = aws_iam_user.jacobs_airflow_user.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
+resource "aws_iam_policy" "jacobs_airflow_user_policy" {
+  name        = "jacobs_airflow_user_policy"
+  description = "Least-privilege policy for the Airflow service user"
 
-resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ses" {
-  user       = aws_iam_user.jacobs_airflow_user.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
-}
-
-resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ecr" {
-  user       = aws_iam_user.jacobs_airflow_user.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
-}
-
-resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_s3" {
-  user       = aws_iam_user.jacobs_airflow_user.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "RunApprovedEcsTasks"
+        Effect = "Allow"
+        Action = [
+          "ecs:RunTask",
+        ]
+        Condition = {
+          ArnEquals = {
+            "ecs:cluster" = aws_ecs_cluster.jacobs_ecs_cluster.arn
+          }
+        }
+        Resource = [
+          module.webscrape_ecs_module.ecs_task_definition_arn,
+          module.dbt_ecs_module.ecs_task_definition_arn,
+          module.ml_ecs_module.ecs_task_definition_arn,
+          module.fake_ecs_module.ecs_task_definition_arn,
+          module.airflow_ecs_module.ecs_task_definition_arn,
+          module.dash_ecs_module.ecs_task_definition_arn,
+        ]
+      },
+      {
+        Sid    = "DescribeEcsWorkloads"
+        Effect = "Allow"
+        Action = [
+          "ecs:DescribeClusters",
+          "ecs:DescribeTaskDefinition",
+          "ecs:DescribeTasks",
+          "ecs:ListTasks",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "PassEcsTaskRole"
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole",
+        ]
+        Resource = [
+          aws_iam_role.jacobs_ecs_role.arn,
+        ]
+        Condition = {
+          StringLike = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
+      },
+      {
+        Sid    = "SendSesEmail"
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail",
+          "ses:SendTemplatedEmail",
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ListProjectBuckets"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+        ]
+        Resource = [
+          aws_s3_bucket.jacobs_bucket_tf.arn,
+          aws_s3_bucket.jacobs_bucket_tf_dev.arn,
+          module.dbt_s3_ci_module.s3_bucket_arn,
+          module.dbt_s3_docs_module.s3_bucket_arn,
+          module.iceberg_lake.s3_bucket_arn,
+          module.delta_lake.s3_bucket_arn,
+        ]
+      },
+      {
+        Sid    = "ReadWriteProjectObjects"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+        ]
+        Resource = [
+          "${aws_s3_bucket.jacobs_bucket_tf.arn}/*",
+          "${aws_s3_bucket.jacobs_bucket_tf_dev.arn}/*",
+          "${module.dbt_s3_ci_module.s3_bucket_arn}/*",
+          "${module.dbt_s3_docs_module.s3_bucket_arn}/*",
+          "${module.iceberg_lake.s3_bucket_arn}/*",
+          "${module.delta_lake.s3_bucket_arn}/*",
+        ]
+      },
+    ]
+  })
 }
 
 resource "aws_iam_user_policy_attachment" "jacobs_airflow_user_attachment_ssm" {
@@ -207,15 +383,6 @@ resource "aws_ssm_parameter" "jacobs_ssm_rds_db_name" {
   value       = var.jacobs_rds_db
 
 }
-
-# resource "aws_ssm_parameter" "jacobs_ssm_rds_host" {
-#   name        = "jacobs_ssm_rds_host"
-#   description = "RDS Host IP"
-#   type        = "SecureString"
-#   value       = aws_db_instance.jacobs_rds_tf.address
-
-# }
-
 resource "aws_ssm_parameter" "jacobs_ssm_rds_user" {
   name        = "jacobs_ssm_rds_user"
   description = "RDS Username"
@@ -247,7 +414,6 @@ resource "aws_ssm_parameter" "jacobs_ssm_dbt_prac_key" {
   value       = "dbt_docker_test"
 
 }
-
 
 # these aws resources assume these roles, so the assume_role_policy is saying WHICH aws service can assume this role
 # so ecs, ecr, in this case lambda
@@ -318,7 +484,6 @@ resource "aws_iam_role_policy_attachment" "jacobs_lambda_s3_attachment_6" {
   role       = aws_iam_role.jacobs_lambda_s3_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
 }
-
 
 # heads up u literally have to like rename the file (python2 -> python3 etc) for any changes in main.py to get reflected in tf.
 resource "aws_cloudwatch_log_group" "jacobs_lambda_logs" {

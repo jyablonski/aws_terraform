@@ -64,8 +64,6 @@ resource "snowflake_grant_privileges_to_account_role" "ownership_privileges_futu
   with_grant_option = false
 }
 
-
-
 # write user
 resource "snowflake_grant_privileges_to_account_role" "write_privileges_on_schema" {
   for_each = toset(var.schema_write_roles)
@@ -190,7 +188,6 @@ resource "snowflake_grant_privileges_to_account_role" "select_privileges_on_sche
   with_grant_option = false
 }
 
-
 # read user
 resource "snowflake_grant_privileges_to_account_role" "read_privileges_tables" {
   for_each = toset(var.schema_read_roles)
@@ -287,74 +284,3 @@ resource "snowflake_grant_privileges_to_account_role" "future_read_privileges_ma
 
   with_grant_option = false
 }
-
-
-
-# resource "snowsql_exec" "this_select" {
-
-#   for_each = toset(var.schema_read_roles)
-
-#   name = "${each.key}_select_grant"
-
-#   create {
-#     statements = <<-EOT
-#     GRANT USAGE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT SELECT ON ALL TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT SELECT ON ALL VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT SELECT ON ALL MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT SELECT ON FUTURE TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT SELECT ON FUTURE VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT SELECT ON FUTURE MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     EOT
-#   }
-
-#   delete {
-#     statements = <<-EOT
-#     REVOKE USAGE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE SELECT ON ALL TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE SELECT ON ALL VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE SELECT ON ALL MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE SELECT ON FUTURE TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE SELECT ON FUTURE VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE SELECT ON FUTURE MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     EOT
-#   }
-# }
-
-# resource "snowsql_exec" "this_all" {
-#   # tflint-ignore: all
-
-#   for_each = toset(var.schema_all_roles)
-
-#   name = "${each.key}_all_grant"
-
-#   create {
-#     statements = <<-EOT
-#     GRANT USAGE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT CREATE TABLE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT CREATE VIEW ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT CREATE PROCEDURE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT ALL ON ALL TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT ALL ON ALL VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT ALL ON ALL MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT ALL ON FUTURE TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT ALL ON FUTURE VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     GRANT ALL ON FUTURE MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} TO ROLE ${each.key};
-#     EOT
-#   }
-
-#   delete {
-#     statements = <<-EOT
-#     REVOKE USAGE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE CREATE TABLE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE CREATE VIEW ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE CREATE PROCEDURE ON SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE ALL ON ALL TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE ALL ON ALL VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE ALL ON ALL MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE ALL ON FUTURE TABLES IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE ALL ON FUTURE VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     REVOKE ALL ON FUTURE MATERIALIZED VIEWS IN SCHEMA ${var.db_name}.${snowflake_schema.this.name} FROM ROLE ${each.key};
-#     EOT
-#   }
-# }

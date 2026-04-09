@@ -8,11 +8,6 @@ locals {
 # on literally every request to turn files like `services/docs/dbt` into `services/docs/dbt/index.html`
 resource "aws_s3_bucket" "doqs_bucket" {
   bucket = local.doqs_bucket
-
-  tags = {
-    Environment = local.env_type
-  }
-
 }
 
 resource "aws_s3_bucket_website_configuration" "doqs_website_config" {
@@ -50,10 +45,19 @@ resource "aws_s3_bucket_ownership_controls" "doqs_ownership" {
 resource "aws_s3_bucket_public_access_block" "doqs_public_access_block" {
   bucket = aws_s3_bucket.doqs_bucket.id
 
-  block_public_acls   = false
-  block_public_policy = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
+resource "aws_cloudfront_origin_access_control" "doqs_origin_access_control" {
+  name                              = "doqs-origin-access-control"
+  description                       = "Origin access control for the Doqs CloudFront distribution"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
 
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "doqs_distribution" {
@@ -62,22 +66,31 @@ resource "aws_cloudfront_distribution" "doqs_distribution" {
 
 
   origin {
-    domain_name = aws_s3_bucket_website_configuration.doqs_website_config.website_endpoint
-    origin_id   = local.doqs_origin_id
+    domain_name              = aws_s3_bucket.doqs_bucket.bucket_regional_domain_name
+    origin_id                = local.doqs_origin_id
+    origin_access_control_id = aws_cloudfront_origin_access_control.doqs_origin_access_control.id
 
-    custom_origin_config {
-      http_port                = "80"
-      https_port               = "443"
-      origin_protocol_policy   = "http-only"
-      origin_ssl_protocols     = ["TLSv1.2"]
-      origin_keepalive_timeout = 60
-      origin_read_timeout      = 60
+    s3_origin_config {
+      origin_access_identity = ""
     }
   }
 
-  enabled         = true
-  is_ipv6_enabled = true
-  comment         = "Doqs Distribution"
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = "Doqs Distribution"
+  default_root_object = "index.html"
+
+  custom_error_response {
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  custom_error_response {
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
@@ -123,7 +136,6 @@ resource "aws_cloudfront_distribution" "doqs_distribution" {
 }
 
 
-# CloudFront Origin Access Identity (OAI) for secure S3 access
 resource "aws_s3_bucket_policy" "doqs_bucket_policy" {
   bucket = aws_s3_bucket.doqs_bucket.id
   policy = jsonencode({
@@ -154,12 +166,19 @@ resource "aws_s3_bucket_policy" "doqs_bucket_policy" {
         Resource = "arn:aws:s3:::${aws_s3_bucket.doqs_bucket.id}"
       },
       {
-        Sid       = "AllowReadAccess"
-        Effect    = "Allow"
-        Principal = "*"
+        Sid    = "AllowCloudFrontReadAccess"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
         Action = [
           "s3:GetObject"
         ],
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.doqs_distribution.arn
+          }
+        },
         Resource = "arn:aws:s3:::${aws_s3_bucket.doqs_bucket.id}/*"
       }
     ]

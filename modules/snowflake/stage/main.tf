@@ -16,7 +16,6 @@ resource "snowflake_stage" "this" {
   storage_integration = var.storage_integration_name
 }
 
-
 resource "snowflake_grant_privileges_to_account_role" "select_privileges_on_schema" {
   for_each = toset(var.stage_usage_roles)
 
@@ -30,13 +29,3 @@ resource "snowflake_grant_privileges_to_account_role" "select_privileges_on_sche
 
   with_grant_option = false
 }
-
-# resource "snowflake_stage_grant" "this" {
-#   database_name = snowflake_stage.this.database
-#   schema_name   = snowflake_stage.this.schema
-#   roles         = var.stage_role
-#   privilege     = "USAGE"
-#   stage_name    = snowflake_stage.this.name
-
-#   with_grant_option = false
-# }

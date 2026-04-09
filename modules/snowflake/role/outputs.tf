@@ -9,4 +9,3 @@ output "role_warehouse_name" {
 output "role_warehouse_size" {
   value = snowflake_warehouse.module_role_warehouse.warehouse_size
 }
-

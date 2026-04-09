@@ -94,21 +94,10 @@ resource "aws_iam_instance_profile" "ecs_ec2_instance_profile" {
   name = "${aws_iam_role.ecs_ec2_role.name}-profile"
   role = aws_iam_role.ecs_ec2_role.name
 }
-
-# resource "aws_ecs_cluster" "ecs_ec2_cluster" {
-#   name = local.ecs_cluster_name
-
-#   setting {
-#     name  = "containerInsights"
-#     value = "disabled"
-#   }
-# }
-
 resource "aws_key_pair" "ecs_cluster_key_pair" {
   key_name   = local.ecs_key_pair_name
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDOeyO5NJJjnK6h9vF8NHOaUGZcdyNcs7kES9mbIb84wLF1nDmbF/THTMn1MPO8xksQxxq9m4c/GuUMs/r7UymeBEXqXcjcOKh7B2CjkEtnuUzYGAQ2cAtAB6jDMMRBia7U38a77Ks6h+pXw5Ri/LvCnPxBYeXOx41T6F4vQ9dSK/NSyLD3kejTDZ6ZhFvDKxutxaPW2E7OZeRqdxCjJ/eZNi4kC9C8Ypfp4qMmePS4WHMrOaqJP3b0W2XpWgnDFd0DUVD5YHUTwQ9F9rEqHp92CQJ2HgZAV89qHoKdItxaik9o/GKpDA67cpH2ytM6JV87XHeQ9+w39VWeAmDfUOJFtsQdDfZJ83m6mkpA7C41ivpOk0nsXiLkNOKkyJvdD5vqeMq8XnzmNuTtbyjuBHi5ylBPtS60gCRRvkRsqrbhw29GU57D3C/5J8EU2QVTiiqeo3NmdLs81jRuQfyEfJop1CRnGMO75ZgdR/remo91jBzHwhxbXwC7RcKXHJb9y3c="
 }
-
 
 # this is needed for the ASG to boot up ec2 instances used in the ECS Cluster
 # image template, the size of the instance, iam profile that the instance assumes, and the bootstrap ecs stuff.
@@ -126,58 +115,6 @@ resource "aws_launch_template" "ecs_launch_template" {
     arn = aws_iam_instance_profile.ecs_ec2_instance_profile.arn
   }
 }
-
-# resource "aws_autoscaling_group" "ecs_ec2_cluster_asg" {
-#   name                  = "${local.ecs_cluster_name}-asg"
-#   min_size              = 0
-#   max_size              = 1
-#   desired_capacity      = 1 # basically the initial capacity for the ASG.
-#   protect_from_scale_in = true
-
-#   vpc_zone_identifier = [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id]
-
-#   target_group_arns = [aws_lb_target_group.alb_tg.arn]
-
-#   launch_template {
-#     id      = aws_launch_template.ecs_launch_template.id
-#     version = "$Latest"
-#   }
-# }
-
-# basically this is what actually determines when to spin up new instances, not the ASG.
-# you either provide ASG utilization metrics to decide when to spin up new instances, or you do this ecs capacity provider stuff.
-# resource "aws_ecs_capacity_provider" "ecs_ec2_cluster_config" {
-#   name = "${local.ecs_cluster_name}-provider"
-
-#   auto_scaling_group_provider {
-#     auto_scaling_group_arn         = aws_autoscaling_group.ecs_ec2_cluster_asg.arn
-#     managed_termination_protection = "DISABLED" # disabling this - it was causing ecs to not spin up new tasks
-
-#     managed_scaling {
-#       maximum_scaling_step_size = 1
-#       minimum_scaling_step_size = 1
-#       status                    = "ENABLED"
-#       target_capacity           = 100 # only doing 100 bc 1 instance, if max instances was like 3 then make this like 75 or something
-#     }
-#   }
-# }
-
-# had to manually delete this in the console in order to allow updates to happen
-# https://stackoverflow.com/questions/64021278/how-target-capacity-is-calculated-in-aws-ecs-capacity-provider
-# resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_provider" {
-#   cluster_name       = aws_ecs_cluster.ecs_ec2_cluster.name
-#   capacity_providers = [aws_ecs_capacity_provider.ecs_ec2_cluster_config.name]
-
-#   default_capacity_provider_strategy {
-#     base              = 1
-#     weight            = 100
-#     capacity_provider = aws_ecs_capacity_provider.ecs_ec2_cluster_config.name
-#   }
-# }
-
-# have to have > memory in ec2 instance than is assigned in the ecs task definition, or task will be forever stuck in provisioning.
-
-## test role for work
 resource "aws_iam_role" "ecs_ec2_role_cs" {
   name = "${local.ecs_cluster_name}-cs-role"
 
