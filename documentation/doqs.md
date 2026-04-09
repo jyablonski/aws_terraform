@@ -68,24 +68,24 @@ This is where CloudFront comes into play. CloudFront is an AWS CDN (Content Deli
 ### 3. Public vs Private Access
 
 - S3 Bucket: Your S3 bucket itself is private (i.e., users cannot access it directly). S3’s website hosting endpoint is public, but it only supports HTTP, which is why CloudFront is needed for secure access.
-  
+
 - CloudFront Distribution: The content served through CloudFront is publicly accessible (to anyone with the correct URL, like `https://doqs.yourdomain.com`). CloudFront provides secure HTTPS access and handles caching, improving both security and performance.
 
 - What's Public:
   - The CloudFront distribution endpoint (`https://doqs.yourdomain.com`) is public and serves your web app over HTTPS.
   - The S3 website endpoint (`http://doqs-bucket-name.s3-website-us-east-1.amazonaws.com`) is public but only supports HTTP. It’s used by CloudFront to retrieve files.
-  
+
 - What's Private:
   - The S3 bucket itself is private, and direct access to the files via the S3 bucket URL is restricted. CloudFront accesses the bucket using its Origin Access Identity (OAI), ensuring that only CloudFront can read from the bucket.
-  
+
 ### 4. Overall Flow of Content Delivery:
 
 1. User accesses the website:
    - They go to `https://doqs.yourdomain.com`, which is routed to CloudFront.
-   
+
 2. CloudFront fetches content:
    - If the content is cached, CloudFront serves it immediately. If not, it fetches the content from the S3 bucket (via the S3 website endpoint or HTTPS, depending on your CloudFront settings).
-   
+
 3. Content served over HTTPS:
    - CloudFront ensures that the connection is encrypted via HTTPS, even though the S3 bucket may be accessed over HTTP.
 

@@ -30,16 +30,6 @@ resource "snowflake_storage_integration" "this" {
   storage_aws_role_arn = local.role_arn
 
 }
-
-# resource "snowflake_integration_grant" "this" {
-#   integration_name = snowflake_storage_integration.this.name
-
-#   privilege = "USAGE"
-#   roles     = var.snowflake_integration_user_roles
-
-#   with_grant_option = false
-# }
-
 resource "aws_iam_role" "this" {
   name = var.iam_role_name
 

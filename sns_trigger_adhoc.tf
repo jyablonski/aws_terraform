@@ -3,7 +3,7 @@
 
 # sns = boto3.client('sns')
 # topic_arn = 'arn:aws:sns:us-east-1:xxx:jacobs-adhoc-sns-topic'
-# sns.publish(TopicArn=topic_arn, 
+# sns.publish(TopicArn=topic_arn,
 #             Message="Hello World!")
 
 locals {
@@ -42,59 +42,56 @@ resource "aws_iam_role" "jacobs_adhoc_sns_lambda_role" {
 EOF
 }
 
-# this policy allows any lambda function to trigger any ecs task definition in any cluster
+# this policy allows the ad hoc lambda to run the scheduled ECS task definitions in the main cluster
 resource "aws_iam_policy" "lambda_sns_ecs_policy" {
   name        = "lambda-sns-ecs_policy"
-  description = "A test policy for lambda function to trigger ecs task definitions"
+  description = "Least-privilege policy for the ad hoc lambda to trigger ECS task definitions"
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-        "Effect":"Allow",
-        "Action": [
-          "ecs:RunTask"
-        ],
-        "Condition": {
-          "ArnEquals": {
-            "ecs:cluster": "arn:aws:ecs:${var.region}:${local.account_id}:cluster/*"
-          }
-        },
-        "Resource": [
-          "arn:aws:ecs:${var.region}:${local.account_id}:task-definition/*"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "RunApprovedEcsTasks"
+        Effect = "Allow"
+        Action = [
+          "ecs:RunTask",
         ]
-    },
-    {
-        "Action": "iam:PassRole",
-        "Effect": "Allow",
-        "Resource": [
-            "*"
-        ],
-        "Condition": {
-            "StringLike": {
-                "iam:PassedToService": "ecs-tasks.amazonaws.com"
-            }
+        Condition = {
+          ArnEquals = {
+            "ecs:cluster" = aws_ecs_cluster.jacobs_ecs_cluster.arn
+          }
         }
-    }
+        Resource = [
+          module.webscrape_ecs_module.ecs_task_definition_arn,
+          module.dbt_ecs_module.ecs_task_definition_arn,
+          module.ml_ecs_module.ecs_task_definition_arn,
+          module.fake_ecs_module.ecs_task_definition_arn,
+          module.airflow_ecs_module.ecs_task_definition_arn,
+          module.dash_ecs_module.ecs_task_definition_arn,
+        ]
+      },
+      {
+        Sid    = "PassEcsTaskRole"
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole",
+        ]
+        Resource = [
+          aws_iam_role.jacobs_ecs_role.arn,
+        ]
+        Condition = {
+          StringLike = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
+      },
     ]
-}
-EOF
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment1" {
   role       = aws_iam_role.jacobs_adhoc_sns_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment_3" {
-  role       = aws_iam_role.jacobs_adhoc_sns_lambda_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment_4" {
-  role       = aws_iam_role.jacobs_adhoc_sns_lambda_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_adhoc_sns_lambda_log_attachment_5" {
@@ -131,6 +128,14 @@ resource "aws_lambda_function" "jacobs_adhoc_sns_ecs_lambda_function" {
   timeout       = 3
 
   source_code_hash = data.archive_file.lambda_adhoc_sns_fake_ecs_zip.output_base64sha256
+
+  environment {
+    variables = {
+      ECS_CLUSTER_NAME      = aws_ecs_cluster.jacobs_ecs_cluster.name
+      ECS_SECURITY_GROUP_ID = aws_security_group.jacobs_task_security_group_tf.id
+      ECS_SUBNET_IDS        = join(",", [aws_subnet.jacobs_public_subnet.id, aws_subnet.jacobs_public_subnet_2.id])
+    }
+  }
 
   tags = {
     Name        = local.env_name_adhoc

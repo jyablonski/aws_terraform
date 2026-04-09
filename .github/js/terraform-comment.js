@@ -34,11 +34,11 @@ module.exports = async ({ github, context }) => {
     }
 
     const output = `${label}
-  
+
   \`\`\`hcl
   ${body}
   \`\`\`
-  
+
   @${author}`;
 
     if (body != '') {

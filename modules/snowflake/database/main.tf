@@ -44,17 +44,3 @@ resource "snowflake_grant_privileges_to_account_role" "this" {
 
   with_grant_option = false
 }
-
-
-# resource "snowflake_database_grant" "module_grant_db_write_usage" {
-#   # tflint-ignore: terraform_required_providers
-#   count = var.db_access ? 1 : 0
-
-#   database_name          = snowflake_database.module_db.name
-#   enable_multiple_grants = true
-
-#   privilege = "USAGE"
-#   roles     = var.db_access_roles
-
-#   with_grant_option = false
-# }

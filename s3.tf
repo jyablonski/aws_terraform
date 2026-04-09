@@ -2,8 +2,7 @@ resource "aws_s3_bucket" "jacobs_bucket_tf" {
   bucket = "jyablonski-nba-elt-prod"
 
   tags = {
-    Name        = local.env_name
-    Environment = local.env_type
+    Name = local.env_name
   }
 }
 
@@ -11,8 +10,7 @@ resource "aws_s3_bucket" "jacobs_bucket_tf_dev" {
   bucket = "jyablonski97-dev"
 
   tags = {
-    Name        = local.env_name
-    Environment = local.env_type
+    Name = local.env_name
   }
 }
 
@@ -130,7 +128,6 @@ resource "aws_s3_bucket_acl" "jyablonski_bucket_tf_acl_dev" {
   acl        = "private"
 }
 
-
 resource "aws_s3_bucket_public_access_block" "jacobs_bucket_tf_access" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
 
@@ -148,7 +145,6 @@ resource "aws_s3_bucket_public_access_block" "jacobs_bucket_tf_access_dev" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-
 
 resource "aws_s3_bucket_policy" "allow_access_from_another_account" {
   bucket = aws_s3_bucket.jacobs_bucket_tf.id
@@ -201,14 +197,3 @@ resource "aws_s3_bucket_policy" "allow_access_from_another_account_dev" {
 EOF
 
 }
-
-# this is how you would add default server side encryption-at-rest
-# resource "aws_s3_bucket_server_side_encryption_configuration" "jacobs_bucket_encryption" {
-#   bucket = aws_s3_bucket.jacobs_bucket_tf.id
-
-#   rule {
-#     apply_server_side_encryption_by_default {
-#       sse_algorithm     = "AES256"
-#     }
-#   }
-# }

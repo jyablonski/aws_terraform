@@ -1,9 +1,12 @@
 from datetime import datetime
 
 import boto3
-import json
+import os
 
 client = boto3.client("ecs")
+ECS_CLUSTER_NAME = os.environ["ECS_CLUSTER_NAME"]
+ECS_SECURITY_GROUP_ID = os.environ["ECS_SECURITY_GROUP_ID"]
+ECS_SUBNET_IDS = os.environ["ECS_SUBNET_IDS"].split(",")
 
 
 def lambda_handler(event, context):
@@ -22,16 +25,13 @@ def lambda_handler(event, context):
             response = client.run_task(
                 taskDefinition=task_definition,
                 launchType="FARGATE",
-                cluster="jacobs_fargate_cluster",
+                cluster=ECS_CLUSTER_NAME,
                 platformVersion="LATEST",
                 count=1,
                 networkConfiguration={
                     "awsvpcConfiguration": {
-                        "securityGroups": ["sg-0e3e9289166404b84"],
-                        "subnets": [
-                            "subnet-0652b6b91d94ebcd0",
-                            "subnet-0047afa4a7e93ec89",
-                        ],
+                        "securityGroups": [ECS_SECURITY_GROUP_ID],
+                        "subnets": ECS_SUBNET_IDS,
                         "assignPublicIp": "ENABLED",
                     }
                 },

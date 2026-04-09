@@ -63,7 +63,7 @@ s3 = boto3.client("s3")
 
 def lambda_handler(event, context):
     """
-    This function is used for direct S3 Bucket Event -> Lambda 
+    This function is used for direct S3 Bucket Event -> Lambda
     """
     # print("Received event: " + json.dumps(event, indent=2))
 

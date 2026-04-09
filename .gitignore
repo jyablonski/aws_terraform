@@ -8,3 +8,5 @@ myzip
 jacobs_notes.md
 .jacobs-makefile
 secrets.yaml
+.codex
+modules/**/.terraform.lock.hcl

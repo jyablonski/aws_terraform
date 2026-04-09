@@ -4,7 +4,6 @@ locals {
   website_domain = "jyablonski.dev"
 }
 
-
 resource "aws_iam_user" "jacobs_github_s3_website_user" {
   name = "jacobs_github_s3_website_user"
 
@@ -48,13 +47,11 @@ resource "aws_iam_user_policy_attachment" "jacobs_github_s3_website_user_attachm
   policy_arn = aws_iam_policy.github_s3_website_policy.arn
 }
 
-
 resource "aws_s3_bucket" "jacobs_bucket_website" {
   bucket = "www.jyablonski2.dev"
 
   tags = {
-    Name        = local.env_name
-    Environment = local.env_type
+    Name = local.env_name
   }
 }
 
@@ -76,7 +73,6 @@ resource "aws_s3_bucket_ownership_controls" "jacobs_domain_bucket_ownership" {
   }
 }
 
-
 resource "aws_s3_bucket_acl" "jacobs_bucket_website_acl" {
   depends_on = [aws_s3_bucket_ownership_controls.jacobs_domain_bucket_ownership]
   bucket     = aws_s3_bucket.jacobs_bucket_website.id
@@ -87,8 +83,7 @@ resource "aws_s3_bucket_acl" "jacobs_bucket_website_acl" {
 resource "aws_s3_bucket" "jacobs_bucket_website_link" {
   bucket = "jyablonski2.dev"
   tags = {
-    Name        = local.env_name
-    Environment = local.env_type
+    Name = local.env_name
   }
 }
 
@@ -168,7 +163,6 @@ resource "aws_route53_zone" "jacobs_website_zone" {
   }
 }
 
-
 resource "aws_route53_record" "jacobs_website_route53_record" {
   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
   name    = ""
@@ -190,29 +184,6 @@ resource "aws_route53_record" "jacobs_website_route53_record_www" {
     evaluate_target_health = false
   }
 }
-
-# resource "aws_route53_record" "jacobs_website_route53_record_graphql" {
-#   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-#   name    = "graphql.${local.website_domain}"
-#   type    = "A"
-#   alias {
-#     name                   = aws_lb.graphql_alb.dns_name
-#     zone_id                = aws_lb.graphql_alb.zone_id
-#     evaluate_target_health = false
-#   }
-# }
-
-# resource "aws_route53_record" "jacobs_website_route53_record_shiny" {
-#   zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-#   name    = "nbadashboard.${local.website_domain}"
-#   type    = "A"
-#   alias {
-#     name                   = aws_lb.alb.dns_name
-#     zone_id                = aws_lb.alb.zone_id
-#     evaluate_target_health = false
-#   }
-# }
-
 resource "aws_route53_record" "jacobs_website_route53_record_cert" {
   for_each = {
     for dvo in aws_acm_certificate.jacobs_website_cert.domain_validation_options : dvo.domain_name => {
@@ -224,7 +195,6 @@ resource "aws_route53_record" "jacobs_website_route53_record_cert" {
     # Skips the validation record if the certificate contains a wildcard for the same domain. Needed because AWS returns the same validation records for the wildcard domain.
     if contains(concat([aws_acm_certificate.jacobs_website_cert.domain_name], tolist(aws_acm_certificate.jacobs_website_cert.subject_alternative_names)), "*.${dvo.domain_name}") == false
   }
-
 
   allow_overwrite = true
   name            = each.value.name

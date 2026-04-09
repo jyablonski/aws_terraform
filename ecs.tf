@@ -86,7 +86,7 @@ module "webscrape_ecs_module" {
             "awslogs-stream-prefix": "ecs"
           }
         }
-    } 
+    }
 ]
 TASK_DEFINITION
   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
@@ -135,7 +135,7 @@ module "dbt_ecs_module" {
             "awslogs-stream-prefix": "ecs"
           }
         }
-    } 
+    }
 ]
 TASK_DEFINITION
   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
@@ -183,7 +183,7 @@ module "ml_ecs_module" {
             "awslogs-stream-prefix": "ecs"
           }
         }
-    } 
+    }
 ]
 TASK_DEFINITION
   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
@@ -226,7 +226,7 @@ module "fake_ecs_module" {
             "awslogs-stream-prefix": "ecs"
           }
         }
-    } 
+    }
 ]
 TASK_DEFINITION
   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
@@ -280,7 +280,7 @@ module "airflow_ecs_module" {
             "awslogs-stream-prefix": "ecs"
           }
         }
-    } 
+    }
 ]
 TASK_DEFINITION
   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
@@ -302,66 +302,6 @@ TASK_DEFINITION
   ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
   ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
 }
-
-# # shiny
-# module "shiny_ecs_module" {
-#   source                   = "./modules/ecs"
-#   ecs_network_mode         = "bridge"
-#   ecs_compatability        = "EC2"
-#   ecs_schedule             = false
-#   ecs_id                   = "shiny_nba_dashboard"
-#   ecs_container_definition = <<TASK_DEFINITION
-# [
-#     {
-#         "image": "${aws_ecr_repository.jacobs_repo.repository_url}:shiny_app",
-#         "name": "shiny_container",
-#         "environment": [
-#           {"name": "AWS_HOST", "value": "${aws_db_instance.jacobs_rds_tf.address}"},
-#           {"name": "AWS_PORT", "value": "5432"},
-#           {"name": "AWS_USER", "value": "${var.jacobs_rds_user}"},
-#           {"name": "AWS_PW", "value": "${var.jacobs_rds_pw}"},
-#           {"name": "AWS_DB", "value": "jacob_db"}
-#         ],
-#         "portMappings": [
-#           {
-#             "name": "shiny_app-3838-tcp",
-#             "containerPort": 3838,
-#             "hostPort": 3838,
-#             "protocol": "tcp",
-#             "appProtocol": "http"
-#           }
-#         ],
-#         "logConfiguration": {
-#           "logDriver": "awslogs",
-#           "options": {
-#             "awslogs-group": "${local.module_shiny_logs}",
-#             "awslogs-region": "us-east-1",
-#             "awslogs-stream-prefix": "ecs"
-#           }
-#         }
-#     } 
-# ]
-# TASK_DEFINITION
-#   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn
-#   ecs_task_role_arn        = aws_iam_role.jacobs_ecs_role.arn
-#   ecs_cpu                  = 524
-#   ecs_memory               = 819
-
-#   ecs_logs_name      = local.module_shiny_logs
-#   ecs_logs_retention = 30
-
-#   ecs_rule_name        = "shiny_rule"
-#   ecs_rule_description = "First Module Test - run everyday at 3 AM"
-#   ecs_rule_cron        = "cron(0 3 * * ? *)"
-
-#   ecs_cluster_id        = aws_ecs_cluster.jacobs_ecs_cluster.arn
-#   ecs_target_id         = "shiny_target"
-#   ecs_ecr_role          = aws_iam_role.jacobs_ecs_ecr_role.arn
-#   ecs_subnet_1          = aws_subnet.jacobs_public_subnet.id
-#   ecs_subnet_2          = aws_subnet.jacobs_public_subnet_2.id
-#   ecs_security_group_id = aws_security_group.jacobs_task_security_group_tf.id
-# }
-
 module "dash_ecs_module" {
   source                   = "./modules/ecs"
   ecs_network_mode         = "bridge"
@@ -399,7 +339,7 @@ module "dash_ecs_module" {
             "awslogs-stream-prefix": "ecs"
           }
         }
-    } 
+    }
 ]
 TASK_DEFINITION
   ecs_execution_role_arn   = aws_iam_role.jacobs_ecs_role.arn

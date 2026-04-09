@@ -144,13 +144,8 @@ variable "jacobs_twitter_secret" {
 }
 
 variable "default_tags" {
-  default = {
-
-    Environment = "Dev"
-    Project     = "Test Project"
-
-  }
-  description = "Default Tags for AWS Resources"
+  default     = {}
+  description = "Additional default tags to merge into the provider-level AWS tagging policy."
   type        = map(string)
 }
 

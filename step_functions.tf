@@ -21,22 +21,20 @@ resource "aws_iam_policy" "jacobs_stepfunction_event_policy" {
   name        = "jacobs_stepfunctions_event_policy"
   description = "A policy for EventBridge to Trigger Step Functions Jobs"
 
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "states:StartExecution"
-            ],
-            "Resource": [
-                "arn:aws:states:us-east-1:${local.account_id}:stateMachine:*"
-            ]
-        }
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "states:StartExecution",
+        ]
+        Resource = [
+          aws_sfn_state_machine.jacobs_state_machine.arn,
+        ]
+      },
     ]
-}
-EOF
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_event_role_attachment" {
@@ -65,75 +63,106 @@ EOF
 
 resource "aws_iam_policy" "jacobs_stepfunction_policy" {
   name        = "jacobs_stepfunctions_policy"
-  description = "A policy for step functions to trigger ANY ecs task definitions"
+  description = "Least-privilege policy for Step Functions to run ECS tasks"
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-        "Effect":"Allow",
-        "Action": [
-          "ecs:RunTask"
-        ],
-        "Condition": {
-          "ArnEquals": {
-            "ecs:cluster": "arn:aws:ecs:${var.region}:${local.account_id}:cluster/*"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "RunSpecificEcsTasks"
+        Effect = "Allow"
+        Action = [
+          "ecs:RunTask",
+        ]
+        Condition = {
+          ArnEquals = {
+            "ecs:cluster" = aws_ecs_cluster.jacobs_ecs_cluster.arn
           }
-        },
-        "Resource": [
-          "arn:aws:ecs:${var.region}:${local.account_id}:task-definition/*"
-        ]
-    },
-    {
-        "Action": "iam:PassRole",
-        "Effect": "Allow",
-        "Resource": [
-            "*"
-        ],
-        "Condition": {
-            "StringLike": {
-                "iam:PassedToService": "ecs-tasks.amazonaws.com"
-            }
         }
-    }
-    ]
-}
-EOF
-}
-
-resource "aws_iam_policy" "jacobs_stepfunction_execution_policy" {
-  name        = "jacobs_stepfunctions_execution_policy"
-  description = "A policy for step functions to have execution rights (damn thats deep)"
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-        "Effect": "Allow",
-        "Action": [
-            "events:PutTargets",
-            "events:PutRule",
-            "events:DescribeRule",
-            "states:ListStateMachines",
-            "states:ListActivities",
-            "states:CreateStateMachine",
-            "states:CreateActivity",
-            "states:StartExecution"
-        ],
-        "Resource": [
-            "*"
+        Resource = [
+          module.webscrape_ecs_module.ecs_task_definition_arn,
+          module.dbt_ecs_module.ecs_task_definition_arn,
+          module.ml_ecs_module.ecs_task_definition_arn,
         ]
-    }
+      },
+      {
+        Sid    = "ManageStartedTasks"
+        Effect = "Allow"
+        Action = [
+          "ecs:DescribeTasks",
+          "ecs:StopTask",
+        ]
+        Resource = "*"
+        Condition = {
+          ArnEquals = {
+            "ecs:cluster" = aws_ecs_cluster.jacobs_ecs_cluster.arn
+          }
+        }
+      },
+      {
+        Sid    = "PassEcsTaskRole"
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole",
+        ]
+        Resource = [
+          aws_iam_role.jacobs_ecs_role.arn,
+        ]
+        Condition = {
+          StringLike = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
+      },
     ]
-}
-EOF
+  })
 }
 
-resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment1" {
-  role       = aws_iam_role.jacobs_stepfunctions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess"
+resource "aws_iam_policy" "jacobs_stepfunction_events_policy" {
+  name        = "jacobs_stepfunctions_events_policy"
+  description = "Permissions required for ECS sync integrations"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "events:PutTargets",
+          "events:PutRule",
+          "events:DescribeRule",
+        ]
+        Resource = [
+          "arn:aws:events:${var.region}:${local.account_id}:rule/StepFunctionsGetEventsForECSTaskRule",
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy" "jacobs_stepfunction_logs_policy" {
+  name        = "jacobs_stepfunctions_logs_policy"
+  description = "Permissions required for Step Functions log delivery"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogDelivery",
+          "logs:GetLogDelivery",
+          "logs:UpdateLogDelivery",
+          "logs:DeleteLogDelivery",
+          "logs:ListLogDeliveries",
+          "logs:PutResourcePolicy",
+          "logs:DescribeResourcePolicies",
+          "logs:DescribeLogGroups",
+        ]
+        Resource = "*"
+      },
+    ]
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment2" {
@@ -143,24 +172,13 @@ resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment2
 
 resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment_cloudwatch_logs" {
   role       = aws_iam_role.jacobs_stepfunctions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+  policy_arn = aws_iam_policy.jacobs_stepfunction_logs_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment_eventbridge" {
   role       = aws_iam_role.jacobs_stepfunctions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+  policy_arn = aws_iam_policy.jacobs_stepfunction_events_policy.arn
 }
-
-resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment_cloudwatch_events" {
-  role       = aws_iam_role.jacobs_stepfunctions_role.name
-  policy_arn = aws_iam_policy.jacobs_stepfunction_execution_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "jacobs_stepfunctions_role_attachment_ses" {
-  role       = aws_iam_role.jacobs_stepfunctions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
-}
-
 
 resource "aws_cloudwatch_log_group" "aws_stepfunction_logs" {
   name              = "jacobs_stepfuntion_logs"
