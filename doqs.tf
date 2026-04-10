@@ -59,6 +59,27 @@ resource "aws_cloudfront_origin_access_control" "doqs_origin_access_control" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_function" "doqs_uri_rewrite" {
+  name    = "doqs-uri-rewrite"
+  runtime = "cloudfront-js-1.0"
+  comment = "Rewrite extensionless Doqs paths to index.html objects"
+  publish = true
+  code    = <<EOF
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  if (uri.endsWith('/')) {
+    request.uri += 'index.html';
+  } else if (!uri.includes('.')) {
+    request.uri += '/index.html';
+  }
+
+  return request;
+}
+EOF
+}
+
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "doqs_distribution" {
   aliases     = ["doqs.${local.website_domain}"]
@@ -82,20 +103,25 @@ resource "aws_cloudfront_distribution" "doqs_distribution" {
 
   custom_error_response {
     error_code         = 403
-    response_code      = 200
-    response_page_path = "/index.html"
+    response_code      = 404
+    response_page_path = "/404.html"
   }
 
   custom_error_response {
     error_code         = 404
-    response_code      = 200
-    response_page_path = "/index.html"
+    response_code      = 404
+    response_page_path = "/404.html"
   }
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = local.doqs_origin_id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.doqs_uri_rewrite.arn
+    }
 
     forwarded_values {
       query_string = false
