@@ -168,8 +168,8 @@ resource "aws_route53_record" "jacobs_website_route53_record" {
   name    = ""
   type    = "A"
   alias {
-    name                   = aws_cloudfront_distribution.jacobs_website_s3_distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.jacobs_website_s3_distribution.hosted_zone_id
+    name                   = aws_cloudfront_distribution.website_v2.domain_name
+    zone_id                = aws_cloudfront_distribution.website_v2.hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -179,8 +179,8 @@ resource "aws_route53_record" "jacobs_website_route53_record_www" {
   name    = "www.${local.website_domain}"
   type    = "A"
   alias {
-    name                   = aws_cloudfront_distribution.jacobs_website_s3_distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.jacobs_website_s3_distribution.hosted_zone_id
+    name                   = aws_cloudfront_distribution.website_v2.domain_name
+    zone_id                = aws_cloudfront_distribution.website_v2.hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -264,7 +264,7 @@ resource "aws_cloudfront_distribution" "jacobs_website_s3_distribution" {
     prefix          = "website"
   }
 
-  aliases = [local.website_domain, "www.${local.website_domain}"]
+  aliases = []
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
