@@ -11,6 +11,12 @@ variable "github_repo" {
   description = "example format: jyablonski/kafka_faker_stream"
 }
 
+variable "github_sub" {
+  type        = string
+  default     = null
+  description = "Optional full GitHub OIDC sub claim. Defaults to repo:<github_repo>:*."
+}
+
 variable "iam_role_policy" {
   type = string
 }
