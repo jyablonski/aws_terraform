@@ -190,6 +190,12 @@ resource "aws_cloudfront_distribution" "website_v2" {
     Environment = "production"
   }
 
+  lifecycle {
+    ignore_changes = [
+      origin,
+    ]
+  }
+
   depends_on = [
     aws_cloudfront_distribution.jacobs_website_s3_distribution,
   ]

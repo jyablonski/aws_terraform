@@ -159,6 +159,12 @@ resource "aws_cloudfront_distribution" "doqs_distribution" {
     Environment = "production"
   }
 
+  lifecycle {
+    ignore_changes = [
+      origin,
+    ]
+  }
+
 }
 
 
