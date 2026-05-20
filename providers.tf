@@ -1,7 +1,5 @@
 provider "aws" {
-  region     = var.region
-  access_key = var.access_key
-  secret_key = var.secret_key
+  region = var.region
 
   default_tags {
     tags = local.common_tags
@@ -12,7 +10,7 @@ provider "aws" {
 # https://learn.hashicorp.com/tutorials/terraform/aws-default-tags
 # implement default tags when deploying infra next august pls
 terraform {
-  required_version = ">= 1.9.6, < 2.0.0"
+  required_version = ">= 1.15.2, < 2.0.0"
   required_providers {
     aws = {
       source = "hashicorp/aws"
@@ -27,25 +25,15 @@ terraform {
       source  = "hashicorp/archive"
       version = "~> 2.7.0"
     }
-    # snowflake = {
-    #   source  = "Snowflake-Labs/snowflake"
-    #   version = "~> 0.96.0"
-    # }
-
-    # you'd use this to store secrets using SOPS + KMS
-    # sops = {
-    #   source  = "carlpett/sops"
-    #   version = "~> 1.3"
-    # }
-
-  }
-  cloud {
-    organization = "jyablonski_prac"
-    workspaces {
-      name = "github-terraform-demo"
-    }
   }
 
+  backend "s3" {
+    bucket       = "jyablonski-aws-terraform-state-326614947945"
+    key          = "aws_terraform/terraform.tfstate"
+    region       = "us-east-1"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
 provider "postgresql" {

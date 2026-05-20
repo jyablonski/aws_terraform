@@ -8,5 +8,6 @@ myzip
 jacobs_notes.md
 .jacobs-makefile
 secrets.yaml
+.sops-age-key.txt
 .codex
 modules/**/.terraform.lock.hcl

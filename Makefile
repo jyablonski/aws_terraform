@@ -6,10 +6,9 @@ plan:
 apply:
 	@terraform apply --auto-approve
 
-# this is used to encrypt secrets.yaml (plaintext secrets) into secrets.enc.yaml
-# which can be stored in git and used in ci / cd to generate secrets. this works fine
-# for 1-developer use, but for teams you could probably set up a helper command and
-# store secrets.yaml in s3 or something
+# Encrypt local Terraform variables into the SOPS file used by CI/CD.
+# The age private key is read from SOPS_AGE_KEY_FILE, defaulting to the
+# ignored local key file generated for this repo.
 .PHONY: sops
 sops:
-	@sops -e secrets.yaml > secrets.enc.yaml
+	@SOPS_AGE_KEY_FILE=$${SOPS_AGE_KEY_FILE:-.sops-age-key.txt} sops --encrypt --input-type binary --output-type yaml --output secrets.enc.yaml terraform.tfvars

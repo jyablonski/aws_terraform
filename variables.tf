@@ -3,16 +3,6 @@ variable "region" {
   sensitive = true
 }
 
-variable "access_key" {
-  type      = string
-  sensitive = true
-}
-
-variable "secret_key" {
-  type      = string
-  sensitive = true
-}
-
 variable "jacobs_cidr_block" {
   type      = list(string)
   sensitive = true
@@ -83,37 +73,12 @@ variable "grafana_external_id" {
   }
 }
 
-variable "es_master_user" {
-  type      = string
-  sensitive = true
-}
-
 variable "es_master_pw" {
   type      = string
   sensitive = true
 }
 
-variable "jacobs_ip" {
-  type      = string
-  sensitive = true
-}
-
 variable "jacobs_rds_db" {
-  type      = string
-  sensitive = true
-}
-
-variable "jacobs_rds_schema_twitch" {
-  type      = string
-  sensitive = true
-}
-
-variable "jacobs_client_id_twitch" {
-  type      = string
-  sensitive = true
-}
-
-variable "jacobs_client_secret_twitch" {
   type      = string
   sensitive = true
 }
@@ -124,11 +89,6 @@ variable "jacobs_rds_schema_ml" {
 }
 
 variable "jacobs_sentry_token" {
-  type      = string
-  sensitive = true
-}
-
-variable "jacobs_discord_webhook" {
   type      = string
   sensitive = true
 }
@@ -164,42 +124,12 @@ variable "honeycomb_app_name" {
   sensitive = true
 }
 
-variable "pg_role_pass" {
-  type      = string
-  sensitive = true
-}
-
-variable "pagerduty_endpoint" {
-  type      = string
-  sensitive = true
-}
-
-variable "ecs_pagerduty_endpoint" {
-  type      = string
-  sensitive = true
-}
-
-variable "slack_webhook_url" {
-  type      = string
-  sensitive = true
-}
-
 variable "rest_api_api_key" {
   type      = string
   sensitive = true
 }
 
 variable "ingestion_webhook_url" {
-  type      = string
-  sensitive = true
-}
-
-variable "jacobs_dashboard_user" {
-  type      = string
-  sensitive = true
-}
-
-variable "jacobs_dashboard_password" {
   type      = string
   sensitive = true
 }
@@ -220,21 +150,6 @@ variable "api_gmail_oauth_redirect_url" {
 }
 
 variable "redis_url" {
-  type      = string
-  sensitive = true
-}
-
-variable "snowflake_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "snowflake_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "snowflake_account" {
   type      = string
   sensitive = true
 }
