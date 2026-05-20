@@ -1,6 +1,5 @@
 locals {
   terraform_state_bucket_name = "jyablonski-aws-terraform-state-${data.aws_caller_identity.current.account_id}"
-  terraform_state_lock_table  = "aws-terraform-state-lock"
 }
 
 resource "aws_s3_bucket" "terraform_state" {
@@ -65,34 +64,6 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
   restrict_public_buckets = true
 }
 
-resource "aws_dynamodb_table" "terraform_state_lock" {
-  name                        = local.terraform_state_lock_table
-  billing_mode                = "PAY_PER_REQUEST"
-  hash_key                    = "LockID"
-  deletion_protection_enabled = true
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-
-  point_in_time_recovery {
-    enabled = true
-  }
-
-  server_side_encryption {
-    enabled = true
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  tags = {
-    Name = local.terraform_state_lock_table
-  }
-}
-
 module "aws_terraform_github_role" {
   source              = "./modules/iam_github"
   iam_role_name       = "aws-terraform-github"
@@ -125,17 +96,6 @@ module "aws_terraform_github_role" {
         "s3:DeleteObject"
       ],
       "Resource": "${aws_s3_bucket.terraform_state.arn}/*"
-    },
-    {
-      "Sid": "AllowTerraformStateLocking",
-      "Effect": "Allow",
-      "Action": [
-        "dynamodb:DescribeTable",
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:DeleteItem"
-      ],
-      "Resource": "${aws_dynamodb_table.terraform_state_lock.arn}"
     }
   ]
 }
