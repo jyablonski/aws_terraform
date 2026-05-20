@@ -4,7 +4,11 @@ on:
   pull_request:
 
 env:
-  TERRAFORM_VERSION: "1.9.6"
+  TERRAFORM_VERSION: "1.15.2"
+  SOPS_VERSION: "3.13.1"
+  AWS_REGION: "us-east-1"
+  AWS_ROLE_ARN: "arn:aws:iam::326614947945:role/aws-terraform-github-role"
+  TF_IN_AUTOMATION: 1
 
 permissions:
   id-token: write
@@ -17,16 +21,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: Terraform Format
-        id: fmtmain
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+
+      - name: Install SOPS
+        run: |
+          curl -sSL -o /tmp/sops "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
+          sudo install -m 0755 /tmp/sops /usr/local/bin/sops
+
+      - name: Configure SOPS age key
+        run: |
+          umask 077
+          printf '%s\n' "$SOPS_AGE_KEY" > "$RUNNER_TEMP/sops-age-key.txt"
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+
+      - name: Terraform Init
+        id: init
         run: terraform init
 
       - name: Terraform Validate
@@ -36,8 +57,8 @@ jobs:
       - name: Terraform Plan
         id: plan
         env:
-          TF_IN_AUTOMATION: 1
-        run: terraform plan
+          SOPS_AGE_KEY_FILE: ${{ runner.temp }}/sops-age-key.txt
+        run: sops exec-file --output-type binary --filename terraform.tfvars secrets.enc.yaml 'terraform plan -no-color -input=false -var-file {}'
 
       - name: Submit PR Comment
         uses: actions/github-script@v7
