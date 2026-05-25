@@ -30,5 +30,7 @@ Other Makefile targets:
 
 - `make apply` runs `terraform apply --auto-approve`.
 - `make sops` encrypts `terraform.tfvars` into the age-backed `secrets.enc.yaml` file used by CI/CD. The age private key is kept out of git locally and stored in GitHub Actions as `SOPS_AGE_KEY`.
+- `make sops-verify` decrypts `secrets.enc.yaml` and checks that it matches local `terraform.tfvars`.
+- `make sops-view` prints the decrypted `terraform.tfvars` from `secrets.enc.yaml`.
 
 Secrets are managed with SOPS and age. `secrets.enc.yaml` stores the entire `terraform.tfvars` file as one encrypted payload, which keeps Terraform variable parsing identical locally and in CI. The tradeoff is less readable diffs, but the setup is simple and avoids a paid KMS key.
