@@ -173,7 +173,9 @@ module "ml_ecs_module" {
           {"name": "RDS_USER", "value": "${module.ml_role_prod.role_name}"},
           {"name": "RDS_PW", "value": "${var.es_master_pw}ml"},
           {"name": "RDS_SCHEMA", "value": "${var.jacobs_rds_schema_ml}"},
-          {"name": "RDS_DB", "value": "jacob_db"}
+          {"name": "RDS_DB", "value": "jacob_db"},
+          {"name": "DASHBOARD_REFRESH_URL", "value": "${var.dashboard_refresh_url}"},
+          {"name": "DATA_REFRESH_TOKEN", "value": "${var.data_refresh_token}"}
         ],
         "logConfiguration": {
           "logDriver": "awslogs",

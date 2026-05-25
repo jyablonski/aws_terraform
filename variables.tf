@@ -134,6 +134,16 @@ variable "ingestion_webhook_url" {
   sensitive = true
 }
 
+variable "dashboard_refresh_url" {
+  type      = string
+  sensitive = true
+}
+
+variable "data_refresh_token" {
+  type      = string
+  sensitive = true
+}
+
 variable "api_gmail_oauth_id" {
   type      = string
   sensitive = true
