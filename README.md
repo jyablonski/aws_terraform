@@ -1,6 +1,6 @@
 # Terraform Project
 
-![Test Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/test.yml/badge.svg) ![Deploy Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/deploy.yml/badge.svg)
+![Terraform Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/ci_cd.yaml/badge.svg)
 
 Terraform repo for personal infrastructure, experiments, and the AWS resources that support related application projects. It manages AWS account setup, Identity Center access, networking, ECS/ECR, Lambda, API Gateway, S3, RDS/PostgreSQL, Snowflake resources, observability integrations, and supporting IAM.
 
@@ -28,6 +28,7 @@ The `make plan` command runs `terraform plan` from the repository root. Use it b
 
 Other Makefile targets:
 
+- `make test` runs Terraform's native module tests under `modules/**/tests/*.tftest.hcl`. These tests are plan-level and use mocked providers; the test runner refuses `command = apply` tests by default so it does not create real resources. On a fresh machine or CI runner, use `TERRAFORM_TEST_INIT=1 make test` to initialize each tested module before running tests. Module tests run concurrently; set `TERRAFORM_TEST_JOBS=8` to change the worker count or `TERRAFORM_TEST_VERBOSE=1` to print every module log.
 - `make apply` runs `terraform apply --auto-approve`.
 - `make sops` encrypts `terraform.tfvars` into the age-backed `secrets.enc.yaml` file used by CI/CD. The age private key is kept out of git locally and stored in GitHub Actions as `SOPS_AGE_KEY`.
 - `make sops-verify` decrypts `secrets.enc.yaml` and checks that it matches local `terraform.tfvars`.

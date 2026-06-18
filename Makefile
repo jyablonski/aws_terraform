@@ -6,6 +6,10 @@ plan:
 apply:
 	@terraform apply --auto-approve
 
+.PHONY: test
+test:
+	@scripts/terraform_test_modules.sh
+
 # Encrypt local Terraform variables into the SOPS file used by CI/CD.
 # The age private key is read from SOPS_AGE_KEY_FILE, defaulting to the
 # ignored local key file generated for this repo.
