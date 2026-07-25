@@ -103,6 +103,32 @@ EOF
 
 }
 
+data "aws_iam_policy_document" "dashboard_github_cicd" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+    ]
+    resources = [
+      "${module.dbt_s3_ci_module.s3_bucket_arn}/prod/semantic_manifest.json",
+      "${module.dbt_s3_ci_module.s3_bucket_arn}/prod/history/*",
+    ]
+  }
+}
+
+module "dashboard_github_cicd" {
+  source              = "./modules/iam_github"
+  iam_role_name       = "dashboard_github"
+  github_provider_arn = aws_iam_openid_connect_provider.github_provider.arn
+  github_repo         = "jyablonski/nba_elt_dashboard"
+  github_sub          = "repo:jyablonski/nba_elt_dashboard:ref:refs/heads/main"
+  iam_role_policy     = data.aws_iam_policy_document.dashboard_github_cicd.json
+}
+
+output "dashboard_github_role_arn" {
+  value = module.dashboard_github_cicd.iam_role_arn
+}
+
 module "ml_pipeline_github_cicd" {
   source              = "./modules/iam_github"
   iam_role_name       = "ml_pipeline_github"
