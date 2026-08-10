@@ -25,6 +25,10 @@ terraform {
       source  = "hashicorp/archive"
       version = "~> 2.7.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5.0"
+    }
   }
 
   backend "s3" {
@@ -34,6 +38,10 @@ terraform {
     encrypt      = true
     use_lockfile = true
   }
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
 }
 
 provider "postgresql" {

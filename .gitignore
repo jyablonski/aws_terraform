@@ -11,3 +11,4 @@ secrets.yaml
 .sops-age-key.txt
 .codex
 modules/**/.terraform.lock.hcl
+docs/cloudflare_migration.md

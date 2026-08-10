@@ -154,56 +154,6 @@ resource "aws_s3_bucket_policy" "jacobs_bucket_website_policy" {
   })
 }
 
-# probably needs to just be jyablonski.dev in order to properly route www.jyablonski.dev and jyablonski.dev to www.
-resource "aws_route53_zone" "jacobs_website_zone" {
-  name = local.website_domain
-
-  tags = {
-    Environment = "dev"
-  }
-}
-
-resource "aws_route53_record" "jacobs_website_route53_record" {
-  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-  name    = ""
-  type    = "A"
-  alias {
-    name                   = aws_cloudfront_distribution.website_v2.domain_name
-    zone_id                = aws_cloudfront_distribution.website_v2.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-resource "aws_route53_record" "jacobs_website_route53_record_www" {
-  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-  name    = "www.${local.website_domain}"
-  type    = "A"
-  alias {
-    name                   = aws_cloudfront_distribution.website_v2.domain_name
-    zone_id                = aws_cloudfront_distribution.website_v2.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-resource "aws_route53_record" "jacobs_website_route53_record_cert" {
-  for_each = {
-    for dvo in aws_acm_certificate.jacobs_website_cert.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-    # https://github.com/hashicorp/terraform-provider-aws/issues/16913
-    # Skips the validation record if the certificate contains a wildcard for the same domain. Needed because AWS returns the same validation records for the wildcard domain.
-    if contains(concat([aws_acm_certificate.jacobs_website_cert.domain_name], tolist(aws_acm_certificate.jacobs_website_cert.subject_alternative_names)), "*.${dvo.domain_name}") == false
-  }
-
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
-  zone_id         = aws_route53_zone.jacobs_website_zone.zone_id
-}
-
 # change subject alt names to *. instead of www.
 #wildcard can protect *.example.com so like app.example.com and www.example.com, but not www.app.example.com
 
@@ -223,7 +173,7 @@ resource "aws_acm_certificate" "jacobs_website_cert" {
 
 resource "aws_acm_certificate_validation" "jacobs_website_cert_verifiy" {
   certificate_arn         = aws_acm_certificate.jacobs_website_cert.arn
-  validation_record_fqdns = [for record in aws_route53_record.jacobs_website_route53_record_cert : record.fqdn]
+  validation_record_fqdns = [for record in cloudflare_dns_record.website_cert_validation : record.name]
 }
 
 resource "aws_cloudfront_origin_access_identity" "jacobs_website_origin_identity" {
@@ -414,17 +364,6 @@ resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
   viewer_certificate {
     acm_certificate_arn = aws_acm_certificate.jacobs_website_cert.arn
     ssl_support_method  = "sni-only"
-  }
-}
-
-resource "aws_route53_record" "jacobs_website_route53_record_api" {
-  zone_id = aws_route53_zone.jacobs_website_zone.zone_id
-  name    = "api.${local.website_domain}"
-  type    = "A"
-  alias {
-    name                   = aws_cloudfront_distribution.jacobs_website_api_distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.jacobs_website_api_distribution.hosted_zone_id
-    evaluate_target_health = false
   }
 }
 
