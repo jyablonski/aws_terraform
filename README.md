@@ -2,7 +2,7 @@
 
 ![Terraform Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/ci_cd.yaml/badge.svg)
 
-Terraform repo for personal infrastructure, experiments, and the AWS resources that support related application projects. It manages AWS account setup, Identity Center access, networking, ECS/ECR, Lambda, API Gateway, S3, RDS/PostgreSQL, Snowflake resources, observability integrations, and supporting IAM.
+Terraform repo for personal infrastructure and experiments across AWS and Oracle Cloud Infrastructure. It manages AWS account setup, Identity Center access, networking, ECS/ECR, Lambda, API Gateway, S3, RDS/PostgreSQL, Snowflake resources, observability integrations, supporting IAM, and an OCI Always Free sandbox.
 
 Terraform state is stored in an S3 backend with S3-native lockfiles. AWS Organizations and AWS Identity Center are used to manage SSO access.
 
@@ -35,3 +35,9 @@ Other Makefile targets:
 - `make sops-view` prints the decrypted `terraform.tfvars` from `secrets.enc.yaml`.
 
 Secrets are managed with SOPS and age. `secrets.enc.yaml` stores the entire `terraform.tfvars` file as one encrypted payload, which keeps Terraform variable parsing identical locally and in CI. The tradeoff is less readable diffs, but the setup is simple and avoids a paid KMS key.
+
+## OCI authentication
+
+OCI resources are part of this same root configuration and state. Terraform reads OCI API-key credentials from the `DEFAULT` profile in `~/.oci/config`; no OCI API credential fields belong in Terraform variables. The only OCI inputs are `oci_tenancy_ocid`, `oci_compartment_ocid`, `oci_region`, and `oci_ssh_public_key`; their environment-variable equivalents use the `TF_VAR_` prefix.
+
+The CI plan and deploy jobs now discover the OCI resources because they run Terraform from the repository root. Those jobs still require an OCI `DEFAULT` profile and its referenced private key on the runner before OCI plans or applies can succeed. The Terraform IAM group also needs `manage usage-budgets in tenancy` for the $1 monthly budget.

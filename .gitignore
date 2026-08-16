@@ -3,6 +3,9 @@ terraform.state
 terraform.tfvars
 terraform.tfstate.backup
 terraform.tfstate
+tfplan
+*.tfplan
+*.auto.tfvars
 myzip
 *.ipynb
 jacobs_notes.md
@@ -11,4 +14,5 @@ secrets.yaml
 .sops-age-key.txt
 .codex
 modules/**/.terraform.lock.hcl
+gha-creds-*.json
 docs/cloudflare_migration.md

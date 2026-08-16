@@ -64,6 +64,14 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
 
+      # these are identifiers, not secrets
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: nba-dashboard-467120
+          workload_identity_provider: projects/96770708928/locations/global/workloadIdentityPools/github/providers/aws-terraform
+          service_account: terraform-plan@nba-dashboard-467120.iam.gserviceaccount.com
+
       - name: Install SOPS
         run: |
           curl -sSL -o /tmp/sops "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
@@ -124,6 +132,14 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
+
+      # these are identifiers, not secrets
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: nba-dashboard-467120
+          workload_identity_provider: projects/96770708928/locations/global/workloadIdentityPools/github/providers/aws-terraform
+          service_account: terraform-deploy@nba-dashboard-467120.iam.gserviceaccount.com
 
       - name: Install SOPS
         run: |
