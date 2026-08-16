@@ -2,7 +2,7 @@
 
 ![Terraform Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/ci_cd.yaml/badge.svg)
 
-Terraform repo for personal infrastructure and experiments across AWS and Oracle Cloud Infrastructure. It manages AWS account setup, Identity Center access, networking, ECS/ECR, Lambda, API Gateway, S3, RDS/PostgreSQL, Snowflake resources, observability integrations, supporting IAM, and an OCI Always Free sandbox.
+Terraform repo for personal infrastructure and experiments across AWS, GCP, and Oracle Cloud Infrastructure. It manages account setup, Identity Center access, networking, VM instances, PostgreSQL databases, and GitHub Actions CI/CD.
 
 Terraform state is stored in an S3 backend with S3-native lockfiles. AWS Organizations and AWS Identity Center are used to manage SSO access.
 
