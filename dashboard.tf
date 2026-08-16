@@ -1,4 +1,4 @@
 locals {
-  dashboard_vm_ip   = "34.83.137.138"
+  dashboard_vm_ip   = google_compute_address.dashboard.address
   dashboard_dns_ttl = 300
 }

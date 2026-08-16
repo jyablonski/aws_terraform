@@ -29,6 +29,14 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 5.0"
     }
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 7.0"
+    }
+    oci = {
+      source  = "oracle/oci"
+      version = "~> 8.0"
+    }
   }
 
   backend "s3" {
@@ -42,6 +50,24 @@ terraform {
 
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
+}
+
+provider "google" {
+  add_terraform_attribution_label = false
+  billing_project                 = "nba-dashboard-467120"
+  project                         = "nba-dashboard-467120"
+  region                          = "us-west1"
+  user_project_override           = true
+  zone                            = "us-west1-a"
+}
+
+provider "oci" {
+  auth         = "ApiKey"
+  fingerprint  = var.oci_fingerprint
+  private_key  = var.oci_private_key
+  region       = var.oci_region
+  tenancy_ocid = var.oci_tenancy_ocid
+  user_ocid    = var.oci_user_ocid
 }
 
 provider "postgresql" {

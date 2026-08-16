@@ -2,7 +2,7 @@
 
 ![Terraform Pipeline](https://github.com/jyablonski/aws_terraform/actions/workflows/ci_cd.yaml/badge.svg)
 
-Terraform repo for personal infrastructure, experiments, and the AWS resources that support related application projects. It manages AWS account setup, Identity Center access, networking, ECS/ECR, Lambda, API Gateway, S3, RDS/PostgreSQL, Snowflake resources, observability integrations, and supporting IAM.
+Terraform repo for personal infrastructure and experiments across AWS, GCP, and Oracle Cloud Infrastructure. It manages account setup, Identity Center access, networking, VM instances, PostgreSQL databases, and GitHub Actions CI/CD.
 
 Terraform state is stored in an S3 backend with S3-native lockfiles. AWS Organizations and AWS Identity Center are used to manage SSO access.
 
@@ -34,4 +34,4 @@ Other Makefile targets:
 - `make sops-verify` decrypts `secrets.enc.yaml` and checks that it matches local `terraform.tfvars`.
 - `make sops-view` prints the decrypted `terraform.tfvars` from `secrets.enc.yaml`.
 
-Secrets are managed with SOPS and age. `secrets.enc.yaml` stores the entire `terraform.tfvars` file as one encrypted payload, which keeps Terraform variable parsing identical locally and in CI. The tradeoff is less readable diffs, but the setup is simple and avoids a paid KMS key.
+Secrets are managed with SOPS and age. `secrets.enc.yaml` stores the entire `terraform.tfvars` file as one encrypted payload, which keeps Terraform variable parsing identical locally and in CI. This includes the inline OCI API signing credentials, so CI does not require a runner-local `~/.oci/config` file. The tradeoff is less readable diffs, but the setup is simple and avoids a paid KMS key.

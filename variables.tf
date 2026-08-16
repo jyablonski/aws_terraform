@@ -188,3 +188,67 @@ variable "cloudflare_account_id" {
   type      = string
   sensitive = true
 }
+
+variable "oci_tenancy_ocid" {
+  description = "OCID of the OCI tenancy (the root compartment)."
+  type        = string
+
+  validation {
+    condition     = startswith(var.oci_tenancy_ocid, "ocid1.tenancy.")
+    error_message = "oci_tenancy_ocid must be an OCI tenancy OCID."
+  }
+}
+
+variable "oci_user_ocid" {
+  description = "OCID of the OCI user whose API signing key Terraform uses."
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = startswith(var.oci_user_ocid, "ocid1.user.")
+    error_message = "oci_user_ocid must be an OCI user OCID."
+  }
+}
+
+variable "oci_fingerprint" {
+  description = "Fingerprint of the OCI API signing key Terraform uses."
+  type        = string
+  sensitive   = true
+}
+
+variable "oci_private_key" {
+  description = "PEM-formatted OCI API signing private key."
+  type        = string
+  sensitive   = true
+}
+
+variable "oci_compartment_ocid" {
+  description = "OCID of the OCI compartment in which to create resources."
+  type        = string
+
+  validation {
+    condition     = startswith(var.oci_compartment_ocid, "ocid1.compartment.")
+    error_message = "oci_compartment_ocid must be an OCI compartment OCID."
+  }
+}
+
+variable "oci_region" {
+  description = "OCI home region. Always Free resources must be created in the tenancy home region."
+  type        = string
+  default     = "us-phoenix-1"
+
+  validation {
+    condition     = var.oci_region == "us-phoenix-1"
+    error_message = "This configuration is cost-guarded for the tenancy home region, us-phoenix-1."
+  }
+}
+
+variable "oci_ssh_public_key" {
+  description = "SSH public key installed for the Ubuntu user."
+  type        = string
+
+  validation {
+    condition     = startswith(trimspace(var.oci_ssh_public_key), "ssh-") || startswith(trimspace(var.oci_ssh_public_key), "ecdsa-")
+    error_message = "oci_ssh_public_key must contain an OpenSSH-format public key."
+  }
+}
