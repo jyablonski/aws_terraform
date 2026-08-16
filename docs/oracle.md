@@ -77,10 +77,10 @@ ssh-keygen -t ed25519 -f ~/.ssh/oci_sandbox -C "oci-sandbox"
 
 ## 4. Two keypairs — don't conflate
 
-| Key                    | Path                     | Purpose                                                 |
-| ---------------------- | ------------------------ | ------------------------------------------------------- |
-| API signing (RSA)      | `~/.oci/oci_api_key.pem` | Authenticates to OCI control plane; Terraform uses this |
-| Instance SSH (ed25519) | `~/.ssh/oci_sandbox`     | Shell access *to* the VM once it exists                 |
+| Key                    | Local source              | Purpose                                                                 |
+| ---------------------- | ------------------------- | ----------------------------------------------------------------------- |
+| API signing (RSA)      | `~/.oci/oci_api_key.pem`  | Authenticates Terraform to the OCI control plane; encrypted with SOPS   |
+| Instance SSH (ed25519) | `~/.ssh/oci_sandbox`      | Shell access *to* the VM once it exists; only its public key is in SOPS |
 
 ---
 
@@ -91,6 +91,11 @@ oci_tenancy_ocid     = "ocid1.tenancy.oc1..aaaaaaaae3nzzf23igrfpmg6jhgdv2dmxuc6u
 oci_compartment_ocid = "ocid1.compartment.oc1..aaaaaaaaaj4m3eqzamk3h3zdc4z4ledxs5or6fnwigs6nconmbimba5lyoka"
 oci_region           = "us-phoenix-1"
 oci_ssh_public_key   = "<contents of ~/.ssh/oci_sandbox.pub>"
+oci_user_ocid        = "<OCI API user OCID>"
+oci_fingerprint      = "<OCI API signing key fingerprint>"
+oci_private_key      = <<EOT
+<contents of ~/.oci/oci_api_key.pem>
+EOT
 ```
 
 | Item                     | Value                                             |
@@ -100,14 +105,20 @@ oci_ssh_public_key   = "<contents of ~/.ssh/oci_sandbox.pub>"
 | Availability domains     | `oymf:PHX-AD-1`, `oymf:PHX-AD-2`, `oymf:PHX-AD-3` |
 | Object storage namespace | `axwilvlaq9no`                                    |
 
-**Never put `user_ocid`, `fingerprint`, or `private_key_path` in `.tf` files.** Use:
+Keep the API user OCID, fingerprint, and private key only in the gitignored `terraform.tfvars` and its SOPS-encrypted `secrets.enc.yaml` representation. Never put their literal values in `.tf` source files. The provider accepts the decrypted values directly:
 
 ```hcl
 provider "oci" {
-  config_file_profile = "DEFAULT"
-  region              = var.oci_region
+  auth         = "ApiKey"
+  fingerprint  = var.oci_fingerprint
+  private_key  = var.oci_private_key
+  region       = var.oci_region
+  tenancy_ocid = var.oci_tenancy_ocid
+  user_ocid    = var.oci_user_ocid
 }
 ```
+
+GitHub Actions already decrypts `secrets.enc.yaml` into a temporary `terraform.tfvars` for plan and apply. OCI therefore uses the same inputs locally and in CI, and the runner does not need `~/.oci/config` or a separate OCI GitHub secret. The existing `SOPS_AGE_KEY` GitHub secret is the only key needed to unlock the payload.
 
 ---
 
@@ -115,8 +126,8 @@ provider "oci" {
 
 | Manual / CLI                                    | Terraform                                                 |
 | ----------------------------------------------- | --------------------------------------------------------- |
-| API key + `~/.oci/config`                       | VCN, subnet, internet gateway, route table, security list |
-| Compartment (`sandbox`) — can't be hard-deleted | **Compute instance** + cloud-init                         |
+| OCI API key registration                        | VCN, subnet, internet gateway, route table, security list |
+| Compartment (`terraform`) — can't be hard-deleted | **Compute instance** + cloud-init                       |
 | SSH keypair                                     | Boot / block volumes                                      |
 | Quota policy — see below                        | Budget, load balancer, OKE cluster (later)                |
 
@@ -130,7 +141,6 @@ Provider is `oracle/oci` (~> 8.0). **Not** `hashicorp/oci` — that namespace is
 
 - [ ] Capacity probe across all three ADs (which offer A1 / E2.1.Micro)
 - [ ] Optional budget email alert rule + quota policy — **before first apply**
-- [ ] Optional: dedicated `terraform` IAM user + group + compartment-scoped policy
 - [x] Use the repository's existing S3 backend and shared root state
 - [ ] Write HCL, `terraform init && plan`
 - [ ] Plan review: shape correct, boot volume 47–50 GB, **no `oci_core_public_ip`** (reserved IPs bill when detached)

@@ -34,4 +34,4 @@ Other Makefile targets:
 - `make sops-verify` decrypts `secrets.enc.yaml` and checks that it matches local `terraform.tfvars`.
 - `make sops-view` prints the decrypted `terraform.tfvars` from `secrets.enc.yaml`.
 
-Secrets are managed with SOPS and age. `secrets.enc.yaml` stores the entire `terraform.tfvars` file as one encrypted payload, which keeps Terraform variable parsing identical locally and in CI. The tradeoff is less readable diffs, but the setup is simple and avoids a paid KMS key.
+Secrets are managed with SOPS and age. `secrets.enc.yaml` stores the entire `terraform.tfvars` file as one encrypted payload, which keeps Terraform variable parsing identical locally and in CI. This includes the inline OCI API signing credentials, so CI does not require a runner-local `~/.oci/config` file. The tradeoff is less readable diffs, but the setup is simple and avoids a paid KMS key.

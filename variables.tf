@@ -199,6 +199,29 @@ variable "oci_tenancy_ocid" {
   }
 }
 
+variable "oci_user_ocid" {
+  description = "OCID of the OCI user whose API signing key Terraform uses."
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = startswith(var.oci_user_ocid, "ocid1.user.")
+    error_message = "oci_user_ocid must be an OCI user OCID."
+  }
+}
+
+variable "oci_fingerprint" {
+  description = "Fingerprint of the OCI API signing key Terraform uses."
+  type        = string
+  sensitive   = true
+}
+
+variable "oci_private_key" {
+  description = "PEM-formatted OCI API signing private key."
+  type        = string
+  sensitive   = true
+}
+
 variable "oci_compartment_ocid" {
   description = "OCID of the OCI compartment in which to create resources."
   type        = string
