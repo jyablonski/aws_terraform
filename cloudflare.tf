@@ -58,12 +58,22 @@ resource "cloudflare_dns_record" "dashboard" {
   proxied = false
 }
 
+# DNS-only: the OCI instance's reserved address is stable across instance replacement and Caddy terminates TLS directly.
+resource "cloudflare_dns_record" "baseline" {
+  zone_id = cloudflare_zone.jacobs_website.id
+  name    = "baseline.${local.website_domain}"
+  type    = "A"
+  content = oci_core_public_ip.a1_flex.ip_address
+  ttl     = local.dashboard_dns_ttl
+  proxied = false
+}
+
 # DNS-only: Cloudflare's proxy buffers responses, which breaks SSE streaming used by MCP.
 resource "cloudflare_dns_record" "mcp" {
   zone_id = cloudflare_zone.jacobs_website.id
   name    = "mcp.${local.website_domain}"
   type    = "A"
-  content = local.dashboard_vm_ip
+  content = oci_core_public_ip.a1_flex.ip_address
   ttl     = local.dashboard_dns_ttl
   proxied = false
 }

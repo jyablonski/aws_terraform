@@ -3,6 +3,9 @@ package_update: true
 packages:
   - ca-certificates
   - curl
+  - fail2ban
+  - git
+  - iptables-persistent
   - unattended-upgrades
 
 write_files:
@@ -23,16 +26,72 @@ write_files:
     content: |
       APT::Periodic::Update-Package-Lists "1";
       APT::Periodic::Unattended-Upgrade "1";
+  - path: /etc/ssh/sshd_config.d/99-nba-hardening.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      PasswordAuthentication no
+      PermitRootLogin no
+      ChallengeResponseAuthentication no
+  - path: /etc/fail2ban/jail.d/sshd.local
+    owner: root:root
+    permissions: "0644"
+    content: |
+      [sshd]
+      enabled = true
+      backend = systemd
+  - path: /etc/sysctl.d/99-nba-vm.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      vm.swappiness = 10
 
 runcmd:
   - |
     if ! swapon --show=NAME --noheadings | grep -qx /swapfile; then
-      fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
-      chmod 600 /swapfile
-      mkswap /swapfile
+      if [ ! -e /swapfile ]; then
+        fallocate -l 4G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none
+        chmod 600 /swapfile
+        mkswap /swapfile
+      fi
       swapon /swapfile
     fi
   - grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  - sysctl --system
+  - |
+    # Oracle Ubuntu images commonly ship restrictive INPUT rules that drop web traffic despite an open OCI security list. This is the most common OCI go-live failure, so insert the Caddy ports before the default REJECT and persist the result.
+    iptables -C INPUT -p tcp --dport 80 -j ACCEPT 2>/dev/null || iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT
+    iptables -C INPUT -p tcp --dport 443 -j ACCEPT 2>/dev/null || iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT
+    iptables -C INPUT -p udp --dport 443 -j ACCEPT 2>/dev/null || iptables -I INPUT 1 -p udp --dport 443 -j ACCEPT
+    install -d -m 0755 /etc/iptables
+    iptables-save > /etc/iptables/rules.v4
+    systemctl enable netfilter-persistent.service
+  - |
+    volume_device=""
+    for _ in $(seq 1 60); do
+      if [ -b /dev/oracleoci/oraclevdb ]; then
+        volume_device=/dev/oracleoci/oraclevdb
+      elif [ -b /dev/sdb ]; then
+        volume_device=/dev/sdb
+      fi
+      if [ -n "$volume_device" ]; then
+        break
+      fi
+      sleep 2
+    done
+    if [ -z "$volume_device" ]; then
+      echo "The OCI Docker data volume was not attached in time." >&2
+      exit 1
+    fi
+    if ! blkid "$volume_device" >/dev/null 2>&1; then
+      mkfs.ext4 -F "$volume_device"
+    fi
+    volume_uuid=$(blkid -s UUID -o value "$volume_device")
+    install -d -m 0711 /var/lib/docker
+    if ! grep -q ' /var/lib/docker ' /etc/fstab; then
+      echo "UUID=$volume_uuid /var/lib/docker ext4 defaults,_netdev,nofail 0 2" >> /etc/fstab
+    fi
+    mountpoint -q /var/lib/docker || mount /var/lib/docker
   - install -m 0755 -d /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
   - chmod a+r /etc/apt/keyrings/docker.asc
@@ -40,9 +99,29 @@ runcmd:
     . /etc/os-release
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $VERSION_CODENAME stable" > /etc/apt/sources.list.d/docker.list
   - apt-get update
-  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   - usermod -aG docker ${default_user}
   - systemctl enable --now docker
+  - |
+    install -d -m 0755 /opt
+    if [ ! -d /opt/nba/.git ]; then
+      git clone ${repository_url} /opt/nba
+    fi
+  - |
+    # POSTGRES_PASSWORD lives in this file; keeping it on the boot volume would leave an intact database without its authentication secret after a rebuild.
+    install -d -o ${default_user} -g ${default_user} -m 0700 /var/lib/docker/nba-env
+    if [ -f /opt/nba/.env ] && [ ! -L /opt/nba/.env ] && [ ! -f /var/lib/docker/nba-env/.env ]; then
+      install -o ${default_user} -g ${default_user} -m 0600 /opt/nba/.env /var/lib/docker/nba-env/.env
+    fi
+    if [ ! -f /var/lib/docker/nba-env/.env ]; then
+      install -o ${default_user} -g ${default_user} -m 0600 /dev/null /var/lib/docker/nba-env/.env
+    fi
+    chown ${default_user}:${default_user} /var/lib/docker/nba-env/.env
+    ln -sfn /var/lib/docker/nba-env/.env /opt/nba/.env
+    chown -R ${default_user}:${default_user} /opt/nba
+  - sshd -t
+  - systemctl restart ssh.service
+  - systemctl enable --now fail2ban.service
   - dpkg-reconfigure -f noninteractive unattended-upgrades
 
 final_message: "OCI Always Free instance bootstrap complete after $UPTIME seconds"

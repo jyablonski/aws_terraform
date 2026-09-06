@@ -1,15 +1,20 @@
 output "oci_public_ip" {
-  description = "Ephemeral public IPv4 address assigned to the OCI A1.Flex instance."
-  value       = oci_core_instance.a1_flex.public_ip
+  description = "Reserved public IPv4 address for the Cloudflare baseline A record."
+  value       = oci_core_public_ip.a1_flex.ip_address
+}
+
+output "oci_ssh_username" {
+  description = "SSH username for the OCI A1.Flex instance and the OCI_USER CI secret."
+  value       = "ubuntu"
 }
 
 output "oci_ssh_connection" {
   description = "SSH command for connecting to the OCI instance as Ubuntu's default user."
-  value       = "ssh ubuntu@${oci_core_instance.a1_flex.public_ip}"
+  value       = "ssh ubuntu@${oci_core_public_ip.a1_flex.ip_address}"
 }
 
 output "oci_availability_domain" {
-  description = "Tenancy-specific OCI availability domain selected by the configured local AD index."
+  description = "Tenancy-specific OCI availability domain; the configured index falls back to the first AD in single-AD regions."
   value       = local.oci_availability_domain
 }
 
