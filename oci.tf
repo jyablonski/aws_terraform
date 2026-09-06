@@ -209,7 +209,6 @@ resource "oci_core_instance" "a1_flex" {
     assign_public_ip = false
     display_name     = "oci-always-free-a1-flex-vnic"
     freeform_tags    = local.oci_freeform_tags
-    hostname_label   = "a1flex"
     subnet_id        = oci_core_subnet.public.id
   }
 
