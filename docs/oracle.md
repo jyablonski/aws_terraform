@@ -16,11 +16,11 @@
 | Azure                | B1s is 12-month only                                    | Ruled out        |
 | Render / Koyeb / Fly | Sleeps, 512 MB, or gone                                 | Ruled out        |
 
-**Free-tier allowance as of June 2026** (halved from 4 OCPU / 24 GB on 2026-06-15, enforced 2026-08-18):
+**Current Always Free allowance** ([Oracle documentation](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)):
 
 - 2× `VM.Standard.E2.1.Micro` — x86_64, 1/8 OCPU, **1 GB RAM each**, fixed shape, single AD only
 - `VM.Standard.A1.Flex` — arm64, **2 OCPU + 12 GB RAM total**, splittable into 1–2 instances
-- 200 GB block storage, min 47 GB boot volume per instance
+- 200 GB combined boot and block storage, with a 50 GB minimum boot volume per instance
 - 10 TB/mo egress, 1 Flexible LB (10 Mbps), 1 Network LB
 
 **Kubernetes is viable for $0** — OKE Basic clusters have no control-plane fee; only worker nodes bill, and A1 nodes are free. Alternative: k3s on a single 12 GB A1 (more allocatable memory, no OKE lock-in).
@@ -143,7 +143,7 @@ Provider is `oracle/oci` (~> 8.0). **Not** `hashicorp/oci` — that namespace is
 - [ ] Optional budget email alert rule + quota policy — **before first apply**
 - [x] Use the repository's existing S3 backend and shared root state
 - [ ] Write HCL, `terraform init && plan`
-- [ ] Plan review: shape correct, boot volume 47–50 GB, **no `oci_core_public_ip`** (reserved IPs bill when detached)
+- [ ] Plan review: shape correct, 100 GB boot volume + 100 GB protected block volume, and the reserved `oci_core_public_ip` is attached to the instance's primary private IP
 - [ ] Migrate services, verify $0 in billing, delete old paid VM
 
 ---

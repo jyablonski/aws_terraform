@@ -15,19 +15,21 @@ data "oci_core_images" "ubuntu_2404" {
 locals {
   oci_availability_domain_index = 1
   oci_ssh_ingress_cidr          = "68.228.89.239/32"
+  oci_app_repository_url        = "https://github.com/jyablonski/nba.git"
   oci_freeform_tags = {
     managed-by = "terraform"
     cost-scope = "oci-always-free"
   }
 
-  oci_availability_domain = data.oci_identity_availability_domains.available.availability_domains[local.oci_availability_domain_index].name
+  oci_availability_domain = data.oci_identity_availability_domains.available.availability_domains[min(local.oci_availability_domain_index, length(data.oci_identity_availability_domains.available.availability_domains) - 1)].name
   oci_ubuntu_arm64_images = [
     for image in data.oci_core_images.ubuntu_2404.images : image
     if strcontains(lower(image.display_name), "aarch64")
   ]
   oci_ubuntu_image_id = local.oci_ubuntu_arm64_images[0].id
   oci_cloud_init = base64encode(templatefile("${path.module}/templates/oci-cloud-init.yaml.tftpl", {
-    default_user = "ubuntu"
+    default_user   = "ubuntu"
+    repository_url = local.oci_app_repository_url
   }))
 }
 
@@ -102,6 +104,19 @@ resource "oci_core_security_list" "public" {
     }
   }
 
+  # GitHub-hosted runners have dynamic source IPs; key-only public SSH is the deliberate tradeoff for CI reachability.
+  ingress_security_rules {
+    protocol    = "6"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = false
+
+    tcp_options {
+      max = 22
+      min = 22
+    }
+  }
+
   ingress_security_rules {
     protocol    = "6"
     source      = "0.0.0.0/0"
@@ -124,6 +139,29 @@ resource "oci_core_security_list" "public" {
       max = 443
       min = 443
     }
+  }
+
+  ingress_security_rules {
+    protocol    = "17"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = false
+
+    udp_options {
+      max = 443
+      min = 443
+    }
+  }
+
+  ingress_security_rules {
+    icmp_options {
+      code = 4
+      type = 3
+    }
+    protocol    = "1"
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
+    stateless   = false
   }
 }
 
@@ -149,9 +187,12 @@ moved {
   to   = oci_core_instance.a1_flex
 }
 
-# Always Free compute/storage/networking: consumes the full A1 allowance of 2 OCPUs and 12 GB RAM (0 A1 OCPUs/GB remain), 50 of 200 GB combined boot/block storage (150 GB remains), and 1 ephemeral public IPv4 address. An arm64 Ubuntu image is required. Provider 8.x documents 50 GB as the configurable boot-volume minimum.
+# Always Free compute/storage/networking: consumes the full A1 allowance of 2 OCPUs and 12 GB RAM (1,500 OCPU-hours + 9,000 GB-hours/month = 2/12 running continuously) and the full 200 GB combined boot/block-storage allowance (100 GB boot + 100 GB Docker data). The separate reserved public IPv4 keeps DNS stable across replacements; Oracle's Always Free page does not count it against these compute or storage allowances. An arm64 Ubuntu image is required. Do not add a third volume without reviewing the Always Free storage cap.
 # A 500 "Out of host capacity" error is not retried by the OCI provider, even with a retries_config_file. Change local.oci_availability_domain_index to another AD and apply again, or wait and retry later; retry tuning cannot create host capacity.
 # The first E2-to-A1 migration must be planned with -replace=oci_core_instance.a1_flex because the provider otherwise proposes an invalid in-place cross-architecture update.
+# Rebuilds are deliberate only: use `terraform apply -replace=oci_core_instance.a1_flex` after reviewing the plan. `ignore_changes` hides cloud-init template drift because runcmd executes only on first boot; new instances still receive the current template at creation time. This also covers `ssh_authorized_keys`, so rotate keys directly in `authorized_keys` on the box rather than re-applying Terraform.
+# The rebuild preserves `oci_core_volume.docker_data` because it is `prevent_destroy` and carries Docker data, the Postgres volume, and `/mnt/data/nba-env/.env`. The reserved public IP is retained, so DNS does not change. The 100 GB boot volume is destroyed, taking `/opt/nba` and host configuration; cloud-init recreates those on the replacement.
+# `create_before_destroy` is intentionally omitted: this VM consumes the full Always Free A1 allowance of 1,500 OCPU-hours and 9,000 GB-hours (2 OCPUs and 12 GB continuously), so a second instance would exceed the allowance, and the non-shareable data volume cannot attach to both instances. Rebuilds therefore destroy then create and have a few minutes of downtime.
 resource "oci_core_instance" "a1_flex" {
   availability_domain  = local.oci_availability_domain
   compartment_id       = var.oci_compartment_ocid
@@ -166,10 +207,10 @@ resource "oci_core_instance" "a1_flex" {
   }
 
   create_vnic_details {
-    assign_public_ip = true
+    # A reserved public IP cannot attach while this private IP has an ephemeral address.
+    assign_public_ip = false
     display_name     = "oci-always-free-a1-flex-vnic"
     freeform_tags    = local.oci_freeform_tags
-    hostname_label   = "a1flex"
     subnet_id        = oci_core_subnet.public.id
   }
 
@@ -179,13 +220,58 @@ resource "oci_core_instance" "a1_flex" {
   }
 
   source_details {
-    boot_volume_size_in_gbs = 50
+    boot_volume_size_in_gbs = 100
     boot_volume_vpus_per_gb = 10
     source_id               = local.oci_ubuntu_image_id
     source_type             = "image"
   }
 
   lifecycle {
-    create_before_destroy = true
+    # Upstream image publication and first-boot-only cloud-init values must not silently replace the VM; roll an image or template intentionally with -replace=oci_core_instance.a1_flex.
+    ignore_changes = [
+      source_details[0].source_id,
+      metadata,
+    ]
   }
+}
+
+# Always Free networking: discovers the A1 instance's primary VNIC so the reserved public IP can follow an intentional instance replacement.
+data "oci_core_vnic_attachments" "a1_flex" {
+  compartment_id = var.oci_compartment_ocid
+  instance_id    = oci_core_instance.a1_flex.id
+}
+
+# Always Free networking: discovers the primary private IP behind the A1 VNIC; this is a Terraform lookup and creates no OCI resource.
+data "oci_core_private_ips" "a1_flex" {
+  vnic_id = data.oci_core_vnic_attachments.a1_flex.vnic_attachments[0].vnic_id
+}
+
+# Always Free networking: reserves one public IPv4 address so the Cloudflare baseline A record survives instance replacement.
+resource "oci_core_public_ip" "a1_flex" {
+  compartment_id = var.oci_compartment_ocid
+  display_name   = "oci-always-free-a1-flex-reserved-ip"
+  freeform_tags  = local.oci_freeform_tags
+  lifetime       = "RESERVED"
+  private_ip_id  = data.oci_core_private_ips.a1_flex.private_ips[0].id
+}
+
+# Always Free storage: creates the 100 GB Docker/Postgres data volume; with the 100 GB boot volume this uses the full 200 GB allowance, so it must not be destroyed during routine instance replacement.
+resource "oci_core_volume" "docker_data" {
+  availability_domain = local.oci_availability_domain
+  compartment_id      = var.oci_compartment_ocid
+  display_name        = "oci-always-free-a1-flex-docker-data"
+  freeform_tags       = local.oci_freeform_tags
+  size_in_gbs         = 100
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# Always Free storage: attaches the protected 100 GB data volume without an iSCSI login sequence in cloud-init.
+resource "oci_core_volume_attachment" "docker_data" {
+  attachment_type = "paravirtualized"
+  device          = "/dev/oracleoci/oraclevdb"
+  instance_id     = oci_core_instance.a1_flex.id
+  volume_id       = oci_core_volume.docker_data.id
 }
