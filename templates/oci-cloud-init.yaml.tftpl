@@ -6,6 +6,7 @@ packages:
   - fail2ban
   - git
   - iptables-persistent
+  - make
   - unattended-upgrades
 
 write_files:
@@ -26,6 +27,12 @@ write_files:
     content: |
       APT::Periodic::Update-Package-Lists "1";
       APT::Periodic::Unattended-Upgrade "1";
+  - path: /etc/systemd/system/docker.service.d/10-wait-for-data.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      [Unit]
+      RequiresMountsFor=/var/lib/docker
   - path: /etc/ssh/sshd_config.d/99-nba-hardening.conf
     owner: root:root
     permissions: "0644"
@@ -87,10 +94,18 @@ runcmd:
       mkfs.ext4 -F "$volume_device"
     fi
     volume_uuid=$(blkid -s UUID -o value "$volume_device")
-    install -d -m 0711 /var/lib/docker
-    if ! grep -q ' /var/lib/docker ' /etc/fstab; then
-      echo "UUID=$volume_uuid /var/lib/docker ext4 defaults,_netdev,nofail 0 2" >> /etc/fstab
+    install -d -m 0755 /mnt/data
+    install -d -m 0710 /mnt/data/docker
+    install -d -m 0710 /var/lib/docker
+    if ! grep -qE '^[[:space:]]*UUID=[^[:space:]]+[[:space:]]+/mnt/data[[:space:]]' /etc/fstab; then
+      echo "UUID=$volume_uuid /mnt/data ext4 defaults,_netdev,nofail 0 2" >> /etc/fstab
     fi
+    if ! grep -qE '^[[:space:]]*/mnt/data/docker[[:space:]]+/var/lib/docker[[:space:]]+none[[:space:]]+bind' /etc/fstab; then
+      echo "/mnt/data/docker /var/lib/docker none bind,nofail 0 0" >> /etc/fstab
+    fi
+    mountpoint -q /mnt/data || mount /mnt/data
+    chmod 755 /mnt/data
+    install -d -m 0710 /mnt/data/docker
     mountpoint -q /var/lib/docker || mount /var/lib/docker
   - install -m 0755 -d /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -101,23 +116,30 @@ runcmd:
   - apt-get update
   - DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   - usermod -aG docker ${default_user}
-  - systemctl enable --now docker
   - |
-    install -d -m 0755 /opt
+    # Pair the nofail mounts with an explicit Docker dependency: otherwise a slow volume attach can let Docker initialize on the boot volume, hiding the real data behind the later mount.
+    systemctl daemon-reload
+    systemctl enable --now docker
+  - |
+    # Create the target first so a failed or skipped clone cannot prevent the persistent env setup and final ownership fix from running.
+    install -d -o ${default_user} -g ${default_user} -m 0755 /opt/nba
     if [ ! -d /opt/nba/.git ]; then
-      git clone ${repository_url} /opt/nba
+      if ! git clone "${repository_url}" /opt/nba; then
+        echo "Git clone failed for ${repository_url}; continuing bootstrap so persistent env setup still runs." >&2
+      fi
     fi
   - |
+    # Keep the env file outside /var/lib/docker: Docker owns that directory as 0710 root:root, so ubuntu cannot traverse it for docker compose to read .env.
     # POSTGRES_PASSWORD lives in this file; keeping it on the boot volume would leave an intact database without its authentication secret after a rebuild.
-    install -d -o ${default_user} -g ${default_user} -m 0700 /var/lib/docker/nba-env
-    if [ -f /opt/nba/.env ] && [ ! -L /opt/nba/.env ] && [ ! -f /var/lib/docker/nba-env/.env ]; then
-      install -o ${default_user} -g ${default_user} -m 0600 /opt/nba/.env /var/lib/docker/nba-env/.env
+    install -d -o ${default_user} -g ${default_user} -m 0700 /mnt/data/nba-env
+    if [ -f /opt/nba/.env ] && [ ! -L /opt/nba/.env ] && [ ! -f /mnt/data/nba-env/.env ]; then
+      install -o ${default_user} -g ${default_user} -m 0600 /opt/nba/.env /mnt/data/nba-env/.env
     fi
-    if [ ! -f /var/lib/docker/nba-env/.env ]; then
-      install -o ${default_user} -g ${default_user} -m 0600 /dev/null /var/lib/docker/nba-env/.env
+    if [ ! -f /mnt/data/nba-env/.env ]; then
+      install -o ${default_user} -g ${default_user} -m 0600 /dev/null /mnt/data/nba-env/.env
     fi
-    chown ${default_user}:${default_user} /var/lib/docker/nba-env/.env
-    ln -sfn /var/lib/docker/nba-env/.env /opt/nba/.env
+    chown ${default_user}:${default_user} /mnt/data/nba-env/.env
+    ln -sfn /mnt/data/nba-env/.env /opt/nba/.env
     chown -R ${default_user}:${default_user} /opt/nba
   - sshd -t
   - systemctl restart ssh.service
