@@ -75,19 +75,15 @@ runcmd:
     systemctl enable netfilter-persistent.service
   - |
     volume_device=""
-    for _ in $(seq 1 60); do
+    for _ in $(seq 1 120); do
       if [ -b /dev/oracleoci/oraclevdb ]; then
         volume_device=/dev/oracleoci/oraclevdb
-      elif [ -b /dev/sdb ]; then
-        volume_device=/dev/sdb
-      fi
-      if [ -n "$volume_device" ]; then
         break
       fi
       sleep 2
     done
     if [ -z "$volume_device" ]; then
-      echo "The OCI Docker data volume was not attached in time." >&2
+      echo "The OCI Docker data volume was not attached at /dev/oracleoci/oraclevdb after 240 seconds; refusing to guess a /dev/sd* device because it could be the boot volume." >&2
       exit 1
     fi
     if ! blkid "$volume_device" >/dev/null 2>&1; then

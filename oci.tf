@@ -190,7 +190,9 @@ moved {
 # Always Free compute/storage/networking: consumes the full A1 allowance of 2 OCPUs and 12 GB RAM (1,500 OCPU-hours + 9,000 GB-hours/month = 2/12 running continuously) and the full 200 GB combined boot/block-storage allowance (100 GB boot + 100 GB Docker data). The separate reserved public IPv4 keeps DNS stable across replacements; Oracle's Always Free page does not count it against these compute or storage allowances. An arm64 Ubuntu image is required. Do not add a third volume without reviewing the Always Free storage cap.
 # A 500 "Out of host capacity" error is not retried by the OCI provider, even with a retries_config_file. Change local.oci_availability_domain_index to another AD and apply again, or wait and retry later; retry tuning cannot create host capacity.
 # The first E2-to-A1 migration must be planned with -replace=oci_core_instance.a1_flex because the provider otherwise proposes an invalid in-place cross-architecture update.
-# create_before_destroy lets the reserved IP move to the replacement instance's new primary private IP before the old instance is removed. If OCI cannot sequence that handoff or the protected-volume attachment cleanly, use `terraform plan -replace=oci_core_instance.a1_flex` followed by the reviewed `terraform apply -replace=oci_core_instance.a1_flex` workflow.
+# Rebuilds are deliberate only: use `terraform apply -replace=oci_core_instance.a1_flex` after reviewing the plan. `ignore_changes` hides cloud-init template drift because runcmd executes only on first boot; new instances still receive the current template at creation time. This also covers `ssh_authorized_keys`, so rotate keys directly in `authorized_keys` on the box rather than re-applying Terraform.
+# The rebuild preserves `oci_core_volume.docker_data` because it is `prevent_destroy` and carries Docker data, the Postgres volume, and `/mnt/data/nba-env/.env`. The reserved public IP is retained, so DNS does not change. The 100 GB boot volume is destroyed, taking `/opt/nba` and host configuration; cloud-init recreates those on the replacement.
+# `create_before_destroy` is intentionally omitted: this VM consumes the full Always Free A1 allowance of 1,500 OCPU-hours and 9,000 GB-hours (2 OCPUs and 12 GB continuously), so a second instance would exceed the allowance, and the non-shareable data volume cannot attach to both instances. Rebuilds therefore destroy then create and have a few minutes of downtime.
 resource "oci_core_instance" "a1_flex" {
   availability_domain  = local.oci_availability_domain
   compartment_id       = var.oci_compartment_ocid
@@ -225,9 +227,11 @@ resource "oci_core_instance" "a1_flex" {
   }
 
   lifecycle {
-    create_before_destroy = true
-    # Upstream Canonical image publication must not silently replace the VM; roll an image intentionally with -replace=oci_core_instance.a1_flex.
-    ignore_changes = [source_details[0].source_id]
+    # Upstream image publication and first-boot-only cloud-init values must not silently replace the VM; roll an image or template intentionally with -replace=oci_core_instance.a1_flex.
+    ignore_changes = [
+      source_details[0].source_id,
+      metadata,
+    ]
   }
 }
 
