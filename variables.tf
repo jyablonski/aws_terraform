@@ -252,3 +252,9 @@ variable "oci_ssh_public_key" {
     error_message = "oci_ssh_public_key must contain an OpenSSH-format public key."
   }
 }
+
+variable "public_ingress_cidrs" {
+  type        = set(string)
+  description = "CIDR blocks allowed to reach public NBA service ports."
+  default     = ["0.0.0.0/0"]
+}

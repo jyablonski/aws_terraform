@@ -13,6 +13,16 @@ output "oci_ssh_connection" {
   value       = "ssh ubuntu@${oci_core_public_ip.a1_flex.ip_address}"
 }
 
+output "oci_postgres_endpoint" {
+  description = "Public IPv4 endpoint for the NBA Postgres service exposed on TCP 5432."
+  value       = "${oci_core_public_ip.a1_flex.ip_address}:5432"
+}
+
+output "oci_mcp_endpoint" {
+  description = "Public HTTP endpoint for the authenticated NBA MCP service."
+  value       = "http://${oci_core_public_ip.a1_flex.ip_address}:8001/mcp"
+}
+
 output "oci_availability_domain" {
   description = "Tenancy-specific OCI availability domain; the configured index falls back to the first AD in single-AD regions."
   value       = local.oci_availability_domain

@@ -15,7 +15,7 @@ data "oci_core_images" "ubuntu_2404" {
 locals {
   oci_availability_domain_index = 1
   oci_ssh_ingress_cidr          = "68.228.89.239/32"
-  oci_app_repository_url        = "https://github.com/jyablonski/nba.git"
+  oci_app_repository_url        = "https://github.com/jyablonski/baseline.git"
   oci_freeform_tags = {
     managed-by = "terraform"
     cost-scope = "oci-always-free"
@@ -138,6 +138,40 @@ resource "oci_core_security_list" "public" {
     tcp_options {
       max = 443
       min = 443
+    }
+  }
+
+  dynamic "ingress_security_rules" {
+    for_each = var.public_ingress_cidrs
+
+    content {
+      description = "NBA Postgres for DBeaver"
+      protocol    = "6"
+      source      = ingress_security_rules.value
+      source_type = "CIDR_BLOCK"
+      stateless   = false
+
+      tcp_options {
+        max = 5432
+        min = 5432
+      }
+    }
+  }
+
+  dynamic "ingress_security_rules" {
+    for_each = var.public_ingress_cidrs
+
+    content {
+      description = "NBA MCP Streamable HTTP"
+      protocol    = "6"
+      source      = ingress_security_rules.value
+      source_type = "CIDR_BLOCK"
+      stateless   = false
+
+      tcp_options {
+        max = 8001
+        min = 8001
+      }
     }
   }
 
