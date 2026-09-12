@@ -49,11 +49,12 @@ resource "cloudflare_dns_record" "doqs" {
   proxied = false
 }
 
+# Legacy hostname follows the OCI baseline host, where Caddy redirects it to the canonical URL.
 resource "cloudflare_dns_record" "dashboard" {
   zone_id = cloudflare_zone.jacobs_website.id
   name    = "nbadashboard.${local.website_domain}"
-  type    = "A"
-  content = local.dashboard_vm_ip
+  type    = "CNAME"
+  content = "baseline.${local.website_domain}"
   ttl     = local.dashboard_dns_ttl
   proxied = false
 }
