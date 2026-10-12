@@ -31,15 +31,6 @@ resource "cloudflare_dns_record" "website_www" {
   proxied = false
 }
 
-resource "cloudflare_dns_record" "website_api" {
-  zone_id = cloudflare_zone.jacobs_website.id
-  name    = "api.${local.website_domain}"
-  type    = "CNAME"
-  content = aws_cloudfront_distribution.jacobs_website_api_distribution.domain_name
-  ttl     = 1
-  proxied = false
-}
-
 resource "cloudflare_dns_record" "doqs" {
   zone_id = cloudflare_zone.jacobs_website.id
   name    = "doqs.${local.website_domain}"
@@ -77,6 +68,17 @@ resource "cloudflare_dns_record" "mcp" {
   content = oci_core_public_ip.a1_flex.ip_address
   ttl     = local.dashboard_dns_ttl
   proxied = false
+}
+
+# Proves ownership of the domain to Google, which GCP's OAuth brand verification requires.
+# The escaped inner quotes match how Cloudflare stores TXT content; without them the
+# provider reports a diff on every plan.
+resource "cloudflare_dns_record" "google_site_verification" {
+  zone_id = cloudflare_zone.jacobs_website.id
+  name    = local.website_domain
+  type    = "TXT"
+  content = "\"google-site-verification=UKbm1xcdfzkXraxuSQzsaV-R0D-p4-BOQ4QlRbIW1qk\""
+  ttl     = 1
 }
 
 # ACM auto-renewal depends on this validation CNAME staying resolvable.
