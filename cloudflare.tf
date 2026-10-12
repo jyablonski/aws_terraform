@@ -79,6 +79,17 @@ resource "cloudflare_dns_record" "mcp" {
   proxied = false
 }
 
+# Proves ownership of the domain to Google, which GCP's OAuth brand verification requires.
+# The escaped inner quotes match how Cloudflare stores TXT content; without them the
+# provider reports a diff on every plan.
+resource "cloudflare_dns_record" "google_site_verification" {
+  zone_id = cloudflare_zone.jacobs_website.id
+  name    = local.website_domain
+  type    = "TXT"
+  content = "\"google-site-verification=UKbm1xcdfzkXraxuSQzsaV-R0D-p4-BOQ4QlRbIW1qk\""
+  ttl     = 1
+}
+
 # ACM auto-renewal depends on this validation CNAME staying resolvable.
 # The filter skips the wildcard SAN's entry: AWS returns the same validation record
 # for jyablonski.dev and *.jyablonski.dev (hashicorp/terraform-provider-aws#16913).
