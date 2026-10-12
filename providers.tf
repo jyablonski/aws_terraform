@@ -17,10 +17,6 @@ terraform {
       # Hold on AWS provider v5 for now; v6 is a larger migration.
       version = ">= 5.72.1, < 6.0.0"
     }
-    postgresql = {
-      source  = "cyrilgdn/postgresql"
-      version = "~> 1.26.0"
-    }
     archive = {
       source  = "hashicorp/archive"
       version = "~> 2.7.0"
@@ -68,16 +64,4 @@ provider "oci" {
   region       = var.oci_region
   tenancy_ocid = var.oci_tenancy_ocid
   user_ocid    = var.oci_user_ocid
-}
-
-provider "postgresql" {
-  # alias    = "pg1" - this fucks shit up for some reason yo
-  host            = var.postgres_host
-  username        = var.postgres_username
-  password        = var.postgres_password
-  port            = 17841
-  superuser       = false
-  connect_timeout = 15
-  sslmode         = "require"
-  database        = var.jacobs_rds_db
 }

@@ -188,15 +188,6 @@ module "rest_api_github_cicd" {
             "Resource": [
                 "arn:aws:s3:::${aws_s3_bucket.jacobs_bucket_tf_dev.bucket}"
             ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "lambda:UpdateFunctionCode"
-            ],
-            "Resource": [
-                "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${aws_lambda_function.jacobs_rest_api_lambda_function.id}"
-            ]
         }
     ]
 }
@@ -231,15 +222,6 @@ module "website_github_cicd" {
             ],
             "Resource": [
                 "arn:aws:s3:::${aws_s3_bucket.jacobs_bucket_tf_dev.bucket}"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "lambda:UpdateFunctionCode"
-            ],
-            "Resource": [
-                "arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${aws_lambda_function.jacobs_rest_api_lambda_function.id}"
             ]
         }
     ]

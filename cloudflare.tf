@@ -31,15 +31,6 @@ resource "cloudflare_dns_record" "website_www" {
   proxied = false
 }
 
-resource "cloudflare_dns_record" "website_api" {
-  zone_id = cloudflare_zone.jacobs_website.id
-  name    = "api.${local.website_domain}"
-  type    = "CNAME"
-  content = aws_cloudfront_distribution.jacobs_website_api_distribution.domain_name
-  ttl     = 1
-  proxied = false
-}
-
 resource "cloudflare_dns_record" "doqs" {
   zone_id = cloudflare_zone.jacobs_website.id
   name    = "doqs.${local.website_domain}"

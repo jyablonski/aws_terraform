@@ -1,6 +1,5 @@
 locals {
   s3_origin_id   = "jacobs_s3_website_origin"
-  api_origin_id  = "jacobs_api_website_origin"
   website_domain = "jyablonski.dev"
 }
 
@@ -296,112 +295,5 @@ resource "aws_cloudfront_distribution" "jacobs_website_s3_distribution" {
   viewer_certificate {
     acm_certificate_arn = aws_acm_certificate.jacobs_website_cert.arn
     ssl_support_method  = "sni-only"
-  }
-}
-
-resource "aws_cloudfront_distribution" "jacobs_website_api_distribution" {
-  origin {
-    # can't have the https://
-    domain_name = "${aws_lambda_function_url.jacobs_rest_api_lambda_function_url.url_id}.lambda-url.us-east-1.on.aws"
-    origin_id   = local.api_origin_id
-
-    custom_origin_config {
-      http_port                = "80"
-      https_port               = "443"
-      origin_protocol_policy   = "https-only"
-      origin_ssl_protocols     = ["TLSv1.2"]
-      origin_keepalive_timeout = 60
-      origin_read_timeout      = 60
-    }
-
-  }
-
-  enabled         = true
-  is_ipv6_enabled = true
-  comment         = "API Distribution"
-  # default_root_object = "index.html"
-
-  # custom_error_response {
-  #   error_code         = 404
-  #   response_code      = 200
-  #   response_page_path = "/index.html"
-  # }
-
-  logging_config {
-    include_cookies = false
-    bucket          = aws_s3_bucket.jacobs_bucket_tf_dev.bucket_domain_name
-    prefix          = "website"
-  }
-
-  aliases = ["api.${local.website_domain}"]
-
-  default_cache_behavior {
-    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods           = ["GET", "HEAD"]
-    target_origin_id         = local.api_origin_id
-    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
-    origin_request_policy_id = aws_cloudfront_origin_request_policy.origin_request_policy.id
-
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 0
-  }
-
-  price_class = "PriceClass_200"
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["US", "CA", "GB", "DE"]
-    }
-  }
-
-  tags = {
-    Environment = "production"
-  }
-
-  viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.jacobs_website_cert.arn
-    ssl_support_method  = "sni-only"
-  }
-}
-
-resource "aws_cloudfront_cache_policy" "caching_disabled" {
-  name        = "jyablonski-caching-disabled-policy"
-  comment     = "Policy which mimics AWS CachingDisabled Policy"
-  default_ttl = 0
-  max_ttl     = 0
-  min_ttl     = 0
-
-  parameters_in_cache_key_and_forwarded_to_origin {
-    cookies_config {
-      cookie_behavior = "none"
-
-    }
-    headers_config {
-      header_behavior = "none"
-    }
-    query_strings_config {
-      query_string_behavior = "none"
-    }
-  }
-}
-
-resource "aws_cloudfront_origin_request_policy" "origin_request_policy" {
-  name    = "jyablonski-caching-origin-request-policy"
-  comment = "Policy which mimics AWS Managed-AllViewerExceptHostHeader Policy"
-  cookies_config {
-    cookie_behavior = "all"
-
-  }
-  headers_config {
-    header_behavior = "allExcept"
-    headers {
-      items = ["host"]
-    }
-  }
-  query_strings_config {
-    query_string_behavior = "all"
   }
 }

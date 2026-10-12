@@ -236,26 +236,6 @@ resource "aws_iam_policy" "jacobs_airflow_user_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "RunApprovedEcsTasks"
-        Effect = "Allow"
-        Action = [
-          "ecs:RunTask",
-        ]
-        Condition = {
-          ArnEquals = {
-            "ecs:cluster" = aws_ecs_cluster.jacobs_ecs_cluster.arn
-          }
-        }
-        Resource = [
-          module.webscrape_ecs_module.ecs_task_definition_arn,
-          module.dbt_ecs_module.ecs_task_definition_arn,
-          module.ml_ecs_module.ecs_task_definition_arn,
-          module.fake_ecs_module.ecs_task_definition_arn,
-          module.airflow_ecs_module.ecs_task_definition_arn,
-          module.dash_ecs_module.ecs_task_definition_arn,
-        ]
-      },
-      {
         Sid    = "DescribeEcsWorkloads"
         Effect = "Allow"
         Action = [
