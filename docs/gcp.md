@@ -91,7 +91,7 @@ It accepts assertions only when `assertion.repository == 'jyablonski/aws_terrafo
 | Workflow | Service account | Federation boundary | Project roles |
 | --- | --- | --- | --- |
 | Pull-request plan | `terraform-plan@nba-dashboard-467120.iam.gserviceaccount.com` | Any ref from `jyablonski/aws_terraform`; the workflow itself runs only for pull requests. | Compute Viewer, Service Usage Consumer, and the custom Terraform Budget Viewer role. |
-| Master deploy | `terraform-deploy@nba-dashboard-467120.iam.gserviceaccount.com` | `refs/heads/master` only. | Compute Instance Admin, Compute Network Admin, Service Usage Consumer, and the custom Terraform Budget Manager role. |
+| Main deploy | `terraform-deploy@nba-dashboard-467120.iam.gserviceaccount.com` | `refs/heads/main` only. | Compute Instance Admin, Compute Network Admin, Service Usage Consumer, and the custom Terraform Budget Manager role. |
 
 The custom budget roles keep budget access project-scoped instead of granting access across the entire billing account:
 
